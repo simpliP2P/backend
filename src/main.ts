@@ -7,6 +7,9 @@ import { ConfigService } from "@nestjs/config";
 import { DataSource } from "typeorm";
 import { ValidationPipe } from "@nestjs/common";
 import { ValidationExceptionFilter } from "./Shared/Filters/validation-exception.filter";
+import { AuthGuard } from "./Guards/auth.guard";
+import { Reflector } from "@nestjs/core";
+import { TokenHelper } from "./Shared/Helpers/token.helper";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -48,7 +51,11 @@ async function bootstrap() {
     allowedHeaders: "Content-Type, Accept",
     credentials: true,
   });
-
+  
+  const reflector = app.get(Reflector);
+  const tokenHelper = app.get(TokenHelper);
+  app.useGlobalGuards(new AuthGuard(reflector, tokenHelper));
+  
   app.useGlobalFilters(
     new AppExceptionFilter(),
     new ValidationExceptionFilter(),
@@ -59,8 +66,7 @@ async function bootstrap() {
       whitelist: true, // Removes properties that are not defined in the DTO
       forbidNonWhitelisted: true, // Throws an error if unknown properties are provided
       transform: true, // Automatically transforms payloads to match the DTO
-    }),
-  );
+    }))
 
   const port = configService.get<number>("port") || 3000;
   await app.listen(port);
