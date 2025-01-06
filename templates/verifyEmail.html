@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f9f9f9;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        padding: 10px 0;
+        background-color: #1764fe;
+        color: white;
+        border-radius: 8px 8px 0 0;
+      }
+      .content {
+        padding: 20px;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #333333;
+      }
+      .button {
+        display: inline-block;
+        padding: 12px 20px;
+        margin: 20px 0;
+        font-size: 16px;
+        font-weight: bold;
+        color: white;
+        text-decoration: none;
+        background-color: #1764fe;
+        border-radius: 4px;
+      }
+      .footer {
+        text-align: center;
+        font-size: 12px;
+        color: #888888;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Verify Your Email</h1>
+      </div>
+      <div class="content">
+        <p>Hello <%= firstName %></p>
+        <p>
+          Thank you for signing up! To complete your registration, please verify
+          your email address by clicking the button below:
+        </p>
+        <a href="<%= verificationLink %>">Verify Email</a>
+        <p>
+          If you didn't sign up for this account, you can ignore this email.
+        </p>
+        <p>Best regards, <br />SimpliP2P Team</p>
+      </div>
+      <div class="footer">
+        <p>&copy; 2025 SimpliP2P. All rights reserved.</p>
+      </div>
+    </div>
+  </body>
+</html>
