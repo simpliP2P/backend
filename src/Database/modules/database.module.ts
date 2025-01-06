@@ -18,7 +18,10 @@ import { Token } from "src/Modules/Token/Entities/token.entity";
           password: databaseConfig.password,
           database: databaseConfig.name,
           entities: [User, Token],
-          synchronize: configService.get("env") !== "production", // Dynamically set based on env
+          synchronize: configService.get("isAppInProduction"), 
+          ssl: {
+            rejectUnauthorized: configService.get("isAppInProduction"),
+          },
         };
       },
     }),
