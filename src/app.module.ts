@@ -8,7 +8,8 @@ import { DatabaseModule } from "./Database/modules/database.module";
 import { MiddlewareConsumer } from "@nestjs/common/interfaces";
 import { RequestLoggerMiddleware } from "./Middleware/request-logger.middleware";
 import { AppLogger } from "./Logger/logger.service";
-import { GoogleOAuthModule } from "./Modules/Oauth/googleOauth.module";
+import { OAuthModule } from "./Modules/Oauth/oauth.module";
+import { CloudinaryConfig } from "./Config/cloudinaryClient.config";
 
 @Module({
   // Declares external modules that this module depends on
@@ -20,12 +21,12 @@ import { GoogleOAuthModule } from "./Modules/Oauth/googleOauth.module";
     }),
     DatabaseModule,
     AuthModule,
-    GoogleOAuthModule,
+    OAuthModule,
   ],
   // Defines the controllers for this module.
   controllers: [AppController],
   // Declares the services that are available in this module
-  providers: [AppService, AppLogger],
+  providers: [AppService, AppLogger, CloudinaryConfig],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

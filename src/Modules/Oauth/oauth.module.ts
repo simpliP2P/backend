@@ -11,4 +11,4 @@ import { JwtModule } from "@nestjs/jwt";
   controllers: [GoogleOAuthController],
   providers: [GoogleOAuthServices, GoogleClientConfig, TokenHelper],
 })
-export class GoogleOAuthModule {}
+export class OAuthModule {}
