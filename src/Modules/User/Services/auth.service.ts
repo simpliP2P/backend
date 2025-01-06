@@ -117,12 +117,11 @@ export class AuthService {
     const currentClientHost = this.clientHelper.getCurrentClient().landingPage;
     const resetLink = `${currentClientHost}/auth/reset-password?token=${resetToken}`;
 
-    console.log(resetLink);
-    // await this.emailService.sendResetPasswordEmail(
-    //   user.firstName,
-    //   user.email,
-    //   resetLink,
-    // );
+    await this.emailService.sendResetPasswordEmail(
+      user.firstName,
+      user.email,
+      resetLink,
+    );
   }
 
   async resetPassword(token: string, newPassword: string): Promise<void> {

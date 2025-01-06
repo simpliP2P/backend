@@ -17,13 +17,13 @@ export const winstonConfig = {
       datePattern: "YYYY-MM-DD",
       level: "error",
       maxSize: "20m",
-      maxFiles: "14d",
+      maxFiles: "3d",
     }),
     new DailyRotateFile({
       filename: "logs/combined-%DATE%.log",
       datePattern: "YYYY-MM-DD",
       maxSize: "20m",
-      maxFiles: "14d",
+      maxFiles: "3d",
     }),
   ],
 };
