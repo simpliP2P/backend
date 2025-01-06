@@ -46,9 +46,15 @@ export default () => ({
       clientId: process.env.GOOGLE_OAUTH_CLIENT_ID,
       clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET,
       redirectUrl: {
-        staggingLink: "https://farmily-staging.fly.dev/auth/google/callback",
-        productionLink: "https://farmily.africa/auth/google/callback",
+        staggingLink: "http://localhost:3000/auth/google/callback",
+        productionLink: "http://localhost:3000/auth/google/callback",
       },
     },
+  },
+  cloudinary: {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+    apiKey: process.env.CLOUDINARY_API_KEY,
+    apiSecret: process.env.CLOUDINARY_API_SECRET,
+    secure: true,
   },
 });
