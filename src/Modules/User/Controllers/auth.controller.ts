@@ -14,6 +14,7 @@ import {
   ApiBody,
   ApiResponse as SwaggerApiResponse,
 } from "@nestjs/swagger";
+import { Public } from "src/Shared/Decorators/custom.decorator";
 
 @ApiTags("auth")
 @Controller("auth")
@@ -21,6 +22,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post("signup")
+  @Public()
   @ApiBody({ type: SignUpDto })
   @SwaggerApiResponse({
     status: 201,
@@ -41,6 +43,7 @@ export class AuthController {
   }
 
   @Post("login")
+  @Public()
   @ApiBody({ type: loginDto })
   async login(@Body() loginDto: loginDto, @Res() res: Response): Promise<void> {
     try {
@@ -57,7 +60,7 @@ export class AuthController {
         .json({
           status: "success",
           message: "Login successful",
-          data: { user },
+          data: { user, access_token: token },
         });
     } catch (error) {
       throw error;
@@ -65,6 +68,7 @@ export class AuthController {
   }
 
   @Post("verify-email")
+  @Public()
   @ApiBody({ type: verifyEmailDto })
   async verifyEmail(@Body() body: verifyEmailDto): Promise<ApiResponse<{}>> {
     try {
@@ -81,6 +85,7 @@ export class AuthController {
   }
 
   @Post("forgot-password")
+  @Public()
   @ApiBody({ type: forgotPasswordDto })
   async forgotPassword(
     @Body() body: forgotPasswordDto,
@@ -99,6 +104,7 @@ export class AuthController {
   }
 
   @Post("reset-password")
+  @Public()
   @ApiBody({ type: resetPasswordDto })
   async resetPassword(
     @Body() body: resetPasswordDto,

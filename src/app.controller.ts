@@ -1,11 +1,13 @@
 import { Controller, Get } from "@nestjs/common";
 import { AppService } from "./app.service";
 import { ApiResponse } from "./Shared/Interfaces/api-response.interface";
+import { Public } from "./Shared/Decorators/custom.decorator";
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
+  @Public()
   @Get()
   getRoot(): ApiResponse<{}> {
     return {
