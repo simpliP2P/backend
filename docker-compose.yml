@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - "8080:8080"
+    environment:
+      # Pass these environment variables to the app
+      PG_HOST: ${PG_HOST}
+      PG_PORT: ${PG_PORT}
+      PG_USERNAME: ${PG_USERNAME}
+      PG_PASSWORD: ${PG_PASSWORD}
+      PG_DBNAME: ${PG_DBNAME}
+    depends_on:
+      - db
+
+  db:
+    image: postgres:17
+    restart: always
+    env_file:
+      - .env # Load environment variables for the database
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:
