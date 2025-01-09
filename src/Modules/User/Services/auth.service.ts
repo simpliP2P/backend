@@ -58,14 +58,12 @@ export class AuthService {
 
     const currentClientHost = this.clientHelper.getCurrentClient().landingPage;
     const verificationLink = `${currentClientHost}/auth/verify-account/${verificationToken}`;
-
-    console.log("Verification link:", verificationLink);
-    // Send email verification mail
-    // await this.emailService.sendVerificationEmail(
-    //   signUpDto.first_name,
-    //   signUpDto.email,
-    //   verificationLink,
-    // );
+    
+    await this.emailService.sendVerificationEmail(
+      signUpDto.first_name,
+      signUpDto.email,
+      verificationLink,
+    );
   }
 
   public async login(
