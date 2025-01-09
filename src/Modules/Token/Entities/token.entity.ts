@@ -21,15 +21,15 @@ export class Token {
   type: TokenType;
 
   @Column()
-  expiresAt: Date;
+  expires_at: Date;
 
   @ManyToOne(() => User, { onDelete: "CASCADE" })
-  @JoinColumn({ name: "userId" })
+  @JoinColumn({ name: "user_id" })
   user: User;
 
   @Column()
-  userId: string;
+  user_id: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
 }

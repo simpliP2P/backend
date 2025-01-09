@@ -5,7 +5,6 @@ import { Token } from "../Entities/token.entity";
 import { TokenData, TokenType } from "../Enums/token.enum";
 import {
   InvalidTokenException,
-  TokenExpiredException,
 } from "src/Shared/Exceptions/app.exceptions";
 import * as bcrypt from "bcrypt";
 import * as crypto from "crypto";
@@ -27,8 +26,8 @@ export class TokenService {
     const tokenData = {
       token,
       type,
-      expiresAt: new Date(Date.now() + (mins || 15) * 60 * 1000), // 15 minutes
-      userId,
+      expires_at: new Date(Date.now() + (mins || 15) * 60 * 1000), // 15 minutes
+      user_id: userId,
     };
 
     await this.save(tokenData);
@@ -41,7 +40,7 @@ export class TokenService {
       where: {
         token,
         type,
-        expiresAt: MoreThanOrEqual(new Date()),
+        expires_at: MoreThanOrEqual(new Date()),
       },
       relations: ["user"],
     });
@@ -53,7 +52,7 @@ export class TokenService {
     // Fire and forget cleanup
     this.tokenRepository
       .delete({
-        expiresAt: LessThan(new Date()),
+        expires_at: LessThan(new Date()),
       })
       .catch((err) => {
         console.error("Token cleanup failed:", err);

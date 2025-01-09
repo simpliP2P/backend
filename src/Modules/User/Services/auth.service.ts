@@ -84,7 +84,7 @@ export class AuthService {
     const verifiedToken = await this.tokenService.verifyToken(token, TokenType.EMAIL_VERIFICATION)
 
     const user = await this.userService.findAccount({
-      where: { id: verifiedToken.userId },
+      where: { id: verifiedToken.user_id },
     });
 
     if (!user) {
@@ -142,7 +142,7 @@ export class AuthService {
     }
 
     // Update user's password
-    await this.userRepository.update(verifiedToken.userId, {
+    await this.userRepository.update(verifiedToken.user_id, {
       password_hash: hashedPassword,
     });
 

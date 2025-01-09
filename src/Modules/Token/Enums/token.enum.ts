@@ -1,8 +1,8 @@
 export interface TokenData {
   token: string;
-  expiresAt: Date;
+  expires_at: Date;
   type: TokenType;
-  userId: string;
+  user_id: string;
 }
 
 export enum TokenType {
