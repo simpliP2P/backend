@@ -16,9 +16,9 @@ export const AppDataSource = new DataSource({
   password: dbConfig.password,
   database: dbConfig.name,
   entities: [entityPath],
-  migrations: ["dist/src/Database/migrations/*.js"],
-  synchronize: !inProd,
+  migrations: ["dist/src/Database/migrations/*.js"],()
+  synchronize: true, // set to false when in production
   ssl: {
     rejectUnauthorized: inProd,
-  },
+  },                   
 });
