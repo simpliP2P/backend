@@ -37,8 +37,8 @@ export class GoogleOAuthServices {
       // Step 3: Get user data from Google
       const {
         email,
-        given_name: firstName,
-        family_name: lastName,
+        given_name: first_name,
+        family_name: last_name,
         email_verified: isVerified,
       } = await this.getGoogleUserPayload(tokens);
 
@@ -47,13 +47,13 @@ export class GoogleOAuthServices {
         where: { email },
       });
 
-      if (!email || !firstName || !lastName || isVerified === undefined) {
+      if (!email || !first_name || !last_name || isVerified === undefined) {
         throw new Error("Invalid Google user data");
       }
       // Step 5: Handle account login or creation
       return foundAccount
         ? this.assignSessionToExistingAccount(foundAccount)
-        : this.createNewCustomerAccount(firstName, lastName, email, isVerified);
+        : this.createNewCustomerAccount(first_name, last_name, email, isVerified);
     } catch (error) {
       throw new Error(
         `Error handling Google sign-up or login callback: ${error.message}`,
@@ -79,18 +79,18 @@ export class GoogleOAuthServices {
    * Creates a new customer account.
    */
   private async createNewCustomerAccount(
-    firstName: string,
-    lastName: string,
+    first_name: string,
+    last_name: string,
     email: string,
-    isVerified: boolean,
+    is_verified: boolean,
   ): Promise<{ token: string }> {
     const accountPayload: CreateGoogleAccountInput = {
-      firstName,
-      lastName,
+      first_name,
+      last_name,
       email,
-      isVerified,
+      is_verified,
       provider: "google" as ProviderType,
-      verifiedAt: new Date(),
+      verified_at: new Date(),
     };
 
     const createdAccount =

@@ -10,11 +10,11 @@ import { ProviderType } from "../Enums/user.enum";
 export class CreateGoogleAccountInput {
   @IsString()
   @MinLength(3)
-  firstName: string;
+  first_name: string;
 
   @IsString()
   @MinLength(3)
-  lastName: string;
+  last_name: string;
 
   @IsEmail()
   email: string;
@@ -22,10 +22,10 @@ export class CreateGoogleAccountInput {
   provider: ProviderType;
 
   @IsBoolean()
-  isVerified: boolean;
+  is_verified: boolean;
 
   @IsDate()
-  verifiedAt: Date;
+  verified_at: Date;
 }
 
 export interface ForgetCustomerPasswordInput {
