@@ -2,7 +2,7 @@ export interface TokenData {
   token: string;
   expiresAt: Date;
   type: TokenType;
-  userId: number;
+  userId: string;
 }
 
 export enum TokenType {

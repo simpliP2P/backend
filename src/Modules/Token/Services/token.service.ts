@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { LessThan, MoreThan, MoreThanOrEqual, Repository } from "typeorm";
 import { Token } from "../Entities/token.entity";
-import { TokenType } from "../Enums/token.enum";
+import { TokenData, TokenType } from "../Enums/token.enum";
 import {
   InvalidTokenException,
   TokenExpiredException,
@@ -23,34 +23,47 @@ export class TokenService {
     mins?: number,
   ): Promise<string> {
     const token = crypto.randomBytes(32).toString("hex");
-    const hashedToken = await bcrypt.hash(token, 10);
 
-    await this.tokenRepository.save({
-      hashedToken,
+    const tokenData = {
+      token,
       type,
       expiresAt: new Date(Date.now() + (mins || 15) * 60 * 1000), // 15 minutes
       userId,
-    });
+    };
+
+    await this.save(tokenData);
 
     return token;
   }
 
   async verifyToken(token: string, type: TokenType): Promise<Token> {
-    const tokens = await this.tokenRepository.find({
-      where: { type },
+    const storedToken = await this.tokenRepository.findOne({
+      where: {
+        token,
+        type,
+        expiresAt: MoreThanOrEqual(new Date()),
+      },
       relations: ["user"],
     });
 
-    for (const storedToken of tokens) {
-      const isValid = await bcrypt.compare(token, storedToken.hashedToken);
-      if (isValid) {
-        if (new Date() > storedToken.expiresAt) {
-          throw new TokenExpiredException();
-        }
-        return storedToken;
-      }
+    if (!storedToken) {
+      throw new InvalidTokenException();
     }
-    throw new InvalidTokenException();
+
+    // Fire and forget cleanup
+    this.tokenRepository
+      .delete({
+        expiresAt: LessThan(new Date()),
+      })
+      .catch((err) => {
+        console.error("Token cleanup failed:", err);
+      });
+
+    return storedToken;
+  }
+
+  async save(tokenData: TokenData): Promise<any> {
+    return await this.tokenRepository.save(tokenData);
   }
 
   async delete(tokenId: number): Promise<void> {

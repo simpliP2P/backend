@@ -31,7 +31,7 @@ export class UserService {
 
     const user = this.userRepository.create({
       ...data,
-      password: null,
+      password_hash: null,
     });
 
     return await this.userRepository.save(user);
@@ -50,12 +50,12 @@ export class UserService {
     }
 
     // remove existing img from cloud
-    if (user.companyLogo) {
+    if (user.profile_picture) {
       this.uploadService.removeImage(imageUrl);
     }
 
     // Save the profile picture URL to the user entity in DB
-    user.companyLogo = imageUrl;
+    user.profile_picture = imageUrl;
     await this.userRepository.save(user);
     
     return imageUrl;

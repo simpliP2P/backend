@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Res, HttpStatus } from "@nestjs/common";
+import { Controller, Post, Body, Res, HttpStatus, UnauthorizedException } from "@nestjs/common";
 import { AuthService } from "../Services/auth.service";
 import {
   SignUpDto,
@@ -47,6 +47,7 @@ export class AuthController {
   @ApiBody({ type: loginDto })
   async login(@Body() loginDto: loginDto, @Res() res: Response): Promise<void> {
     try {
+      this.validateLoginInput(loginDto);
       const { token, user } = await this.authService.login(loginDto);
 
       res
@@ -110,7 +111,7 @@ export class AuthController {
     @Body() body: resetPasswordDto,
   ): Promise<ApiResponse<{}>> {
     try {
-      await this.authService.resetPassword(body.token, body.newPassword);
+      await this.authService.resetPassword(body.token, body.new_password);
 
       return {
         status: "success",
@@ -119,6 +120,12 @@ export class AuthController {
       };
     } catch (error) {
       throw error;
+    }
+  }
+
+  private validateLoginInput(loginDto: loginDto): void {
+    if (!loginDto.email || !loginDto.password) {
+      throw new UnauthorizedException("Email and password are required");
     }
   }
 }

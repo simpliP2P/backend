@@ -14,8 +14,8 @@ export class Token {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  hashedToken: string;
+  @Column({ unique: true })
+  token: string;
 
   @Column({ type: "enum", enum: TokenType })
   type: TokenType;
@@ -23,7 +23,7 @@ export class Token {
   @Column()
   expiresAt: Date;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: "CASCADE" })
   @JoinColumn({ name: "userId" })
   user: User;
 

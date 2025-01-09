@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
   UnprocessableEntityException,
 } from "@nestjs/common";
@@ -9,7 +10,10 @@ import { Repository } from "typeorm";
 import { hash, compare } from "bcrypt";
 import { User } from "../Entities/user.entity";
 import { SignUpDto, loginDto } from "../Dtos/auth.dto";
-import { EmailExistsException } from "src/Shared/Exceptions/app.exceptions";
+import {
+  EmailExistsException,
+  InvalidCredentialsException,
+} from "src/Shared/Exceptions/app.exceptions";
 import { UserService } from "./user.service";
 import { TokenHelper } from "src/Shared/Helpers/token.helper";
 import { EmailServices } from "src/Modules/Mail/Services/mail.service";
@@ -41,67 +45,54 @@ export class AuthService {
 
     const user = this.userRepository.create({
       ...signUpDto,
-      password: hashedPassword,
+      password_hash: hashedPassword,
     });
-    user.tokenGeneratedAt = new Date();
     user.provider = ProviderType.LOCAL;
 
     const createdAccount = await this.userRepository.save(user);
 
-    // generate verification token
-    const verificationToken = this.tokenHelper.generateVerificationToken({
-      id: createdAccount.id,
-      purpose: "verify-account",
-    });
+    const verificationToken = await this.tokenService.createToken(
+      createdAccount.id,
+      TokenType.EMAIL_VERIFICATION,
+    );
 
     const currentClientHost = this.clientHelper.getCurrentClient().landingPage;
     const verificationLink = `${currentClientHost}/auth/verify-account/${verificationToken}`;
 
+    console.log("Verification link:", verificationLink);
     // Send email verification mail
-    await this.emailService.sendVerificationEmail(
-      signUpDto.firstName,
-      signUpDto.email,
-      verificationLink,
-    );
+    // await this.emailService.sendVerificationEmail(
+    //   signUpDto.first_name,
+    //   signUpDto.email,
+    //   verificationLink,
+    // );
   }
 
-  public async login(signInDto: loginDto) {
-    const user = await this.findAccountByEmail(signInDto.email);
+  public async login(
+    loginDto: loginDto,
+  ): Promise<{ token: string; user: Partial<User> }> {
+    // Find and validate user
+    const user = await this.findAccountByEmail(loginDto.email);
+    const validatedUser = await this.validateUserStatus(user);
 
-    if (!user?.isVerified) {
-      throw new UnprocessableEntityException("Account not verified");
-    }
+    await this.verifyPassword(loginDto.password, validatedUser.password_hash);
 
-    if (
-      !user ||
-      !user.password ||
-      !(await compare(signInDto.password, user.password))
-    ) {
-      throw new UnauthorizedException("Invalid credentials");
-    }
-
-    const payload = { sub: user.id };
-    return {
-      // access token
-      token: this.tokenHelper.generateAccessToken(payload),
-      user: { ...user, password: undefined },
-    };
+    return this.generateLoginResponse(validatedUser);
   }
 
   public async verifyEmail(token: string): Promise<void> {
-    const { id } = this.tokenHelper.verifyVerificationToken(token);
+    const verifiedToken = await this.tokenService.verifyToken(token, TokenType.EMAIL_VERIFICATION)
 
     const user = await this.userService.findAccount({
-      where: { id },
+      where: { id: verifiedToken.userId },
     });
 
     if (!user) {
       throw new UnauthorizedException("Invalid verification token");
     }
 
-    user.isVerified = true;
-    user.verifiedAt = new Date();
-    user.tokenGeneratedAt = null;
+    user.is_verified = true;
+    user.verified_at = new Date();
     await this.userRepository.save(user);
   }
 
@@ -118,7 +109,7 @@ export class AuthService {
     const resetLink = `${currentClientHost}/auth/reset-password?token=${resetToken}`;
 
     await this.emailService.sendResetPasswordEmail(
-      user.firstName,
+      user.first_name,
       user.email,
       resetLink,
     );
@@ -138,7 +129,7 @@ export class AuthService {
       );
     }
 
-    const oldPasswordHash = verifiedToken.user.password;
+    const oldPasswordHash = verifiedToken.user.password_hash;
     if (!oldPasswordHash) {
       throw new UnprocessableEntityException("");
     }
@@ -152,7 +143,7 @@ export class AuthService {
 
     // Update user's password
     await this.userRepository.update(verifiedToken.userId, {
-      password: hashedPassword,
+      password_hash: hashedPassword,
     });
 
     // Delete used token
@@ -163,5 +154,50 @@ export class AuthService {
     return await this.userService.findAccount({
       where: { email },
     });
+  }
+
+  private sanitizeUser(user: User): Partial<User> {
+    const { password_hash, created_at, updated_at, ...sanitizedUser } = user;
+    return sanitizedUser;
+  }
+
+  private async validateUserStatus(user: User | null): Promise<User> {
+    if (!user) {
+      // same error message as invalid password to prevent user enumeration
+      throw new InvalidCredentialsException();
+    }
+
+    if (!user.is_verified) {
+      throw new UnprocessableEntityException("Account not verified");
+    }
+
+    if (user.provider !== ProviderType.LOCAL) {
+      throw new UnauthorizedException(`Please login using ${user.provider}`);
+    }
+
+    return user;
+  }
+
+  private async verifyPassword(
+    password: string,
+    passwordHash: string | null,
+  ): Promise<void> {
+    if (!passwordHash || !(await compare(password, passwordHash))) {
+      throw new InvalidCredentialsException();
+    }
+  }
+
+  private generateLoginResponse(user: User): {
+    token: string;
+    user: Partial<User>;
+  } {
+    const payload = {
+      sub: user.id,
+    };
+
+    return {
+      token: this.tokenHelper.generateAccessToken(payload),
+      user: this.sanitizeUser(user),
+    };
   }
 }

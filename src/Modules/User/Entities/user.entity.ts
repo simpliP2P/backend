@@ -23,31 +23,34 @@ export class User {
 
   @MinLength(2)
   @Column({ type: "varchar" })
-  firstName: string;
+  first_name: string;
 
   @MinLength(2)
   @Column({ type: "varchar" })
-  lastName: string;
+  last_name: string;
 
   @IsEmail()
   @Column({ type: "varchar", unique: true })
   email: string;
 
+  @Column({ type: "varchar", nullable: true, length: 15 })
+  phone: string;
+
   @IsStrongPassword()
   @Column({ type: "varchar", nullable: true })
-  password: string | null;
+  password_hash: string | null;
 
   @Column({ type: "varchar", nullable: true })
-  companyName: string | null;
+  company_name: string | null;
 
   @Column({ type: "varchar", nullable: true })
-  companyRole: string | null;
+  company_role: string | null;
 
   @Column({ type: "varchar", nullable: true })
-  companyAddress: string | null;
+  company_address: string | null;
 
   @Column({ type: "varchar", nullable: true })
-  companyLogo: string;
+  profile_picture: string;
 
   @Column({
     type: "enum",
@@ -64,29 +67,18 @@ export class User {
   provider: ProviderType;
 
   @Column({ default: false })
-  isVerified: boolean;
+  is_verified: boolean;
 
   @IsOptional()
   @IsDate()
   @Column({ type: "timestamp", nullable: true })
-  verifiedAt: Date | null;
-
-  @Column({ nullable: true })
-  token: string;
-
-  @Column({ nullable: true, type: "timestamp" })
-  tokenExpires: Date;
-
-  @IsOptional()
-  @IsDate()
-  @Column({ type: "timestamp", nullable: true })
-  tokenGeneratedAt: Date | null;
+  verified_at: Date | null;
 
   @CreateDateColumn()
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updated_at: Date;
 
   @BeforeInsert()
   validateBeforeInsert() {
@@ -98,10 +90,10 @@ export class User {
   }
 
   private validateLocalProvider() {
-    if (!this.password) {
+    if (!this.password_hash) {
       throw new Error("Password is required for local provider accounts.");
     }
-    if (!this.companyName || !this.companyAddress || !this.companyRole) {
+    if (!this.company_name || !this.company_address || !this.company_role) {
       throw new Error(
         "company name, address and role are required for local provider accounts.",
       );
@@ -109,9 +101,9 @@ export class User {
   }
 
   private setDefaultsForExternalProvider() {
-    this.password = null;
-    this.companyName = this.companyName || null;
-    this.companyAddress = this.companyAddress || null;
-    this.companyRole = this.companyRole || null;
+    this.password_hash = null;
+    this.company_name = this.company_name || null;
+    this.company_address = this.company_address || null;
+    this.company_role = this.company_role || null;
   }
 }

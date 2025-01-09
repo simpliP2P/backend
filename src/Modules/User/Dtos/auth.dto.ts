@@ -16,7 +16,7 @@ export class SignUpDto {
   })
   @IsString()
   @MinLength(3)
-  firstName: string;
+  first_name: string;
 
   @ApiProperty({
     description: "The last name of the user",
@@ -25,28 +25,28 @@ export class SignUpDto {
   })
   @IsString()
   @MinLength(3)
-  lastName: string;
+  last_name: string;
 
   @ApiProperty({
     description: "The company name",
     type: String,
   })
   @IsString()
-  companyName: string;
+  company_name: string;
 
   @ApiProperty({
     description: "The role of the user in the company",
     type: String,
   })
   @IsString()
-  companyRole: string;
+  company_role: string;
 
   @ApiProperty({
     description: "The address of the company",
     type: String,
   })
   @IsString()
-  companyAddress: string;
+  company_address: string;
 
   @ApiProperty({
     description: "The email address of the user",
@@ -77,7 +77,7 @@ export class SignUpDto {
   })
   @IsString()
   @IsOptional()
-  companyLogo: string;
+  profile_picture: string;
 
   @ApiProperty({
     description: "The phone number of the user",
@@ -86,7 +86,7 @@ export class SignUpDto {
   })
   @IsString()
   @IsOptional()
-  phoneNumber: string;
+  phone: string;
 
   @ApiProperty({
     description: "Indicates whether the user is verified or not",
@@ -95,7 +95,7 @@ export class SignUpDto {
   })
   @IsBoolean()
   @IsOptional()
-  isVerified: boolean;
+  is_verified: boolean;
 }
 
 export class loginDto {
@@ -137,5 +137,5 @@ export class resetPasswordDto extends verifyEmailDto {
     type: String,
   })
   @IsString()
-  newPassword: string;
+  new_password: string;
 }
