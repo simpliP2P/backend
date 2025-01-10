@@ -38,7 +38,7 @@ export default () => ({
       landingPage: "http://localhost:3000",
     },
     production: {
-      landingPage: "",
+      landingPage: "http://localhost:3000",
     },
   },
   oauth: {
