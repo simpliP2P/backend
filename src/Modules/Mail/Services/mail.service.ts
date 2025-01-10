@@ -40,6 +40,7 @@ export class EmailServices {
       {
         firstName,
         verificationLink,
+        year: this.year,
       },
     );
     return this.sendEmail(sendEmailParams);
