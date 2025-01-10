@@ -37,7 +37,7 @@ export class UserService {
     return await this.userRepository.save(user);
   }
 
-  async uploadcompanyLogo(
+  async uploadProfilePicture(
     userId: string,
     file: Express.Multer.File,
   ): Promise<string> {

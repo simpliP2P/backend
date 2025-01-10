@@ -48,7 +48,7 @@ export class UserController {
 
       const userId = req.user.sub;
 
-      const url = await this.userService.uploadcompanyLogo(userId, file);
+      const url = await this.userService.uploadProfilePicture(userId, file);
 
       // Delete the local file after processing
       const filePath = join("../../uploads", file.filename);
