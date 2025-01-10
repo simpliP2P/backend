@@ -12,11 +12,12 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
 import { join } from "path";
 import { existsSync, unlink } from "fs";
+import { AppLogger } from "src/Logger/logger.service";
 
 @ApiTags("user")
 @Controller("user")
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService, private readonly logger: AppLogger) {}
 
   @Post("profile-picture")
   @UseInterceptors(
@@ -55,11 +56,11 @@ export class UserController {
       if (existsSync(filePath)) {
         unlink(filePath, (err) => {
           if (err) {
-            console.error("Error deleting file:", err);
+            this.logger.error("Error deleting file:", err.message);
           }
         });
       } else {
-        console.warn(`File not found for deletion: ${filePath}`);
+        this.logger.warn(`File not found for deletion: ${filePath}`);
       }
 
       return {

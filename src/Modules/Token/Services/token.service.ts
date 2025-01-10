@@ -1,19 +1,20 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { LessThan, MoreThan, MoreThanOrEqual, Repository } from "typeorm";
+import { LessThan, MoreThanOrEqual, Repository } from "typeorm";
 import { Token } from "../Entities/token.entity";
 import { TokenData, TokenType } from "../Enums/token.enum";
 import {
   InvalidTokenException,
 } from "src/Shared/Exceptions/app.exceptions";
-import * as bcrypt from "bcrypt";
 import * as crypto from "crypto";
+import { AppLogger } from "src/Logger/logger.service";
 
 @Injectable()
 export class TokenService {
   constructor(
     @InjectRepository(Token)
     private tokenRepository: Repository<Token>,
+    private readonly logger: AppLogger,
   ) {}
 
   async createToken(
@@ -55,7 +56,7 @@ export class TokenService {
         expires_at: LessThan(new Date()),
       })
       .catch((err) => {
-        console.error("Token cleanup failed:", err);
+        this.logger.error("Token cleanup failed:", err);
       });
 
     return storedToken;
