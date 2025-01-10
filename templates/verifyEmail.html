@@ -1,5 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html
+  lang="en"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:v="urn:schemas-microsoft-com:vml"
+  xmlns:o="urn:schemas-microsoft-com:office:office"
+>
   <head>
     <style>
       body {
@@ -54,19 +59,23 @@
         <h1>Verify Your Email</h1>
       </div>
       <div class="content">
-        <p>Hello <%= firstName %></p>
+        <p>Hello <%= firstName %>,</p>
         <p>
           Thank you for signing up! To complete your registration, please verify
-          your email address by clicking the button below, this link is valid for 15 minutes.
+          your email address by clicking the button below. This link is valid for 15 minutes.
         </p>
-        <a href="<%= verificationLink %>">Verify Email</a>
+        <a class="button" href="<%= verificationLink %>" target="_blank">Verify Email</a>
+        <p>If the button above doesn't work, copy and paste the following URL into your browser:</p>
         <p>
-          If you didn't sign up for this account, you can ignore this email.
+          <a href="<%= verificationLink %>" target="_blank"><%= verificationLink %></a>
         </p>
-        <p>Best regards, <br />SimpliP2P Team</p>
+        <p>
+          If you didn’t sign up for this account, you can ignore this email.
+        </p>
+        <p>Best regards,<br />SimpliP2P Team</p>
       </div>
       <div class="footer">
-        <p>&copy; 2025 SimpliP2P. All rights reserved.</p>
+        <p>&copy; <%= year %> SimpliP2P. All rights reserved.</p>
       </div>
     </div>
   </body>
