@@ -10,11 +10,13 @@ import {
 import { Response } from "express";
 import { GoogleOAuthServices } from "./../Services/googleOauth.service";
 import { HandleCustomerGoogleLoginCallbackInput } from "../Dtos/googleOauth.dto";
+import { Public } from "src/Shared/Decorators/custom.decorator";
 
 @Controller("auth/google")
 export class GoogleOAuthController {
   constructor(private readonly googleOAuthServices: GoogleOAuthServices) {}
 
+  @Public()
   @Get("initiate")
   initiateSignUpOrLogin(@Res() res: Response): void {
     const googleAuthUrl =
@@ -22,6 +24,7 @@ export class GoogleOAuthController {
     res.redirect(googleAuthUrl);
   }
 
+  @Public()
   @Post("callback")
   async handleCallback(
     @Body() body: HandleCustomerGoogleLoginCallbackInput,
