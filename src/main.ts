@@ -48,8 +48,17 @@ async function bootstrap() {
   app.enableCors({
     origin: "*",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    allowedHeaders: "Content-Type, Accept, Authorization",
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Access-Control-Allow-Origin",
+      "Access-Control-Allow-Headers",
+      "Access-Control-Allow-Methods",
+      "Access-Control-Allow-Credentials",
+    ],
     credentials: true,
+    maxAge: 86400,
   });
   
   const reflector = app.get(Reflector);
