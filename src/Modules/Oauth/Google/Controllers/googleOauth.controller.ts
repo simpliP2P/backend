@@ -21,7 +21,12 @@ export class GoogleOAuthController {
   initiateSignUpOrLogin(@Res() res: Response): void {
     const googleAuthUrl =
       this.googleOAuthServices.initiateSignUpOrLoginCustomerWithGoogle();
-    res.redirect(googleAuthUrl);
+
+    res.status(HttpStatus.CREATED).json({
+      status: "success",
+      message: "Google login/signup initiated",
+      data: { url: googleAuthUrl },
+    });
   }
 
   @Public()
