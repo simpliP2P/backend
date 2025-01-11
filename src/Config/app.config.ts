@@ -46,7 +46,7 @@ export default () => ({
       clientId: process.env.GOOGLE_OAUTH_CLIENT_ID,
       clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET,
       redirectUrl: {
-        staggingLink: "http://localhost:3000/auth/google/callback",
+        stagingLink: "http://localhost:3000/auth/google/callback",
         productionLink: "http://localhost:3000/auth/google/callback",
       },
     },

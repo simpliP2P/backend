@@ -7,13 +7,21 @@ class GoogleClientConfig {
   public googleClient: OAuth2Client;
 
   constructor(private readonly configService: ConfigService) {
+    console.log(
+      "clientId",
+      this.configService.get<string>("oauth.google.clientId"),
+    );
     this.googleClient = new OAuth2Client({
-      clientId: this.configService.get<string>("GOOGLE_CLIENT_ID"),
-      clientSecret: this.configService.get<string>("GOOGLE_CLIENT_SECRET"),
+      clientId: this.configService.get<string>("oauth.google.clientId"),
+      clientSecret: this.configService.get<string>("oauth.google.clientSecret"),
       redirectUri:
-        this.configService.get<string>("BRANCH_NAME") === "main"
-          ? this.configService.get<string>("PRODUCTION_REDIRECT_URL")
-          : this.configService.get<string>("STAGING_REDIRECT_URL"),
+        this.configService.get<string>("branchName") === "master"
+          ? this.configService.get<string>(
+              "oauth.google.redirectUrl.productionLink",
+            )
+          : this.configService.get<string>(
+              "oauth.google.redirectUrl.stagingLink",
+            ),
     });
   }
 }
