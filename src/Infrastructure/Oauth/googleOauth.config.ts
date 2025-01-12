@@ -7,10 +7,6 @@ class GoogleClientConfig {
   public googleClient: OAuth2Client;
 
   constructor(private readonly configService: ConfigService) {
-    console.log(
-      "clientId",
-      this.configService.get<string>("oauth.google.clientId"),
-    );
     this.googleClient = new OAuth2Client({
       clientId: this.configService.get<string>("oauth.google.clientId"),
       clientSecret: this.configService.get<string>("oauth.google.clientSecret"),
