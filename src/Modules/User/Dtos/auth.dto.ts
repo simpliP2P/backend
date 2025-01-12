@@ -28,27 +28,6 @@ export class SignUpDto {
   last_name: string;
 
   @ApiProperty({
-    description: "The company name",
-    type: String,
-  })
-  @IsString()
-  company_name: string;
-
-  @ApiProperty({
-    description: "The role of the user in the company",
-    type: String,
-  })
-  @IsString()
-  company_role: string;
-
-  @ApiProperty({
-    description: "The address of the company",
-    type: String,
-  })
-  @IsString()
-  company_address: string;
-
-  @ApiProperty({
     description: "The email address of the user",
     type: String,
     format: "email",
@@ -71,7 +50,7 @@ export class SignUpDto {
   password: string;
 
   @ApiProperty({
-    description: "The logo of the company",
+    description: "The logo of the organisation",
     type: String,
     required: false,
   })

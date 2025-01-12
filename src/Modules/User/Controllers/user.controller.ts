@@ -38,7 +38,7 @@ export class UserController {
       },
     }),
   )
-  async uploadcompanyLogo(
+  async uploadProfilePicture(
     @UploadedFile() file: Express.Multer.File,
     @Req() req: any,
   ): Promise<any> {
