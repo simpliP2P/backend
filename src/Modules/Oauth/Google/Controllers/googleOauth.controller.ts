@@ -5,13 +5,12 @@ import {
   Body,
   Res,
   HttpStatus,
-  BadRequestException,
 } from "@nestjs/common";
 import { Response } from "express";
 import { GoogleOAuthServices } from "./../Services/googleOauth.service";
 import { HandleCustomerGoogleLoginCallbackInput } from "../Dtos/googleOauth.dto";
 import { Public } from "src/Shared/Decorators/custom.decorator";
-
+import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 @Controller("auth/google")
 export class GoogleOAuthController {
   constructor(private readonly googleOAuthServices: GoogleOAuthServices) {}

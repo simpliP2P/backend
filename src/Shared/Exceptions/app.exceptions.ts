@@ -38,3 +38,15 @@ export class InvalidTokenException extends AppException {
     super("error", HttpStatus.BAD_REQUEST, "Token expired", null);
   }
 }
+
+export class UserNotFoundException extends AppException {
+  constructor() {
+    super("error", HttpStatus.NOT_FOUND, "User not found", null);
+  }
+}
+
+export class BadRequestException extends AppException {
+  constructor(message: string) {
+    super("error", HttpStatus.BAD_REQUEST, message, null);
+  }
+}
