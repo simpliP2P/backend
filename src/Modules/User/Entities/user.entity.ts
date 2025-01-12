@@ -1,26 +1,23 @@
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
   BeforeInsert,
-  CreateDateColumn,
-  UpdateDateColumn,
+  OneToMany,
+  ManyToOne,
 } from "typeorm";
 import { UserRole, ProviderType } from "../Enums/user.enum";
 import {
   IsOptional,
   IsDate,
-  minLength,
   MinLength,
   IsEmail,
   IsStrongPassword,
 } from "class-validator";
+import { Organisation, UserOrganisation } from "src/Modules/Organisation/Entities/organisation.entity";
+import { BaseEntity } from "src/Common/entities/base.entity";
 
 @Entity("users")
-export class User {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
-
+export class User extends BaseEntity {
   @MinLength(2)
   @Column({ type: "varchar" })
   first_name: string;
@@ -39,15 +36,6 @@ export class User {
   @IsStrongPassword()
   @Column({ type: "varchar", nullable: true })
   password_hash: string | null;
-
-  @Column({ type: "varchar", nullable: true })
-  company_name: string | null;
-
-  @Column({ type: "varchar", nullable: true })
-  company_role: string | null;
-
-  @Column({ type: "varchar", nullable: true })
-  company_address: string | null;
 
   @Column({ type: "varchar", nullable: true })
   profile_picture: string;
@@ -74,11 +62,15 @@ export class User {
   @Column({ type: "timestamp", nullable: true })
   verified_at: Date | null;
 
-  @CreateDateColumn()
-  created_at: Date;
+  // Single-organization restriction
+  @ManyToOne(() => Organisation, (org) => org.users)
+  organisation: Organisation;
 
-  @UpdateDateColumn()
-  updated_at: Date;
+  @OneToMany(() => UserOrganisation, (userOrg) => userOrg.user)
+  userOrganisations: UserOrganisation[];
+
+  @OneToMany(() => Organisation, (org) => org.creator)
+  created_organisations: Organisation[];
 
   @BeforeInsert()
   validateBeforeInsert() {
@@ -93,17 +85,9 @@ export class User {
     if (!this.password_hash) {
       throw new Error("Password is required for local provider accounts.");
     }
-    if (!this.company_name || !this.company_address || !this.company_role) {
-      throw new Error(
-        "company name, address and role are required for local provider accounts.",
-      );
-    }
   }
 
   private setDefaultsForExternalProvider() {
     this.password_hash = null;
-    this.company_name = this.company_name || null;
-    this.company_address = this.company_address || null;
-    this.company_role = this.company_role || null;
   }
 }
