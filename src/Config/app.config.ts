@@ -38,7 +38,7 @@ export default () => ({
       landingPage: "http://localhost:3000",
     },
     production: {
-      landingPage: "http://localhost:3000",
+      landingPage: "https://simplip2p.vercel.app",
     },
   },
   oauth: {
