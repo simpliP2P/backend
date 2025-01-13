@@ -10,10 +10,10 @@ export class Supplier extends BaseEntity {
   full_name: string;
 
   @IsEmail()
-  @Column({ type: "varchar", nullable: true })
+  @Column({ type: "varchar", nullable: true, unique: true })
   email: string;
 
-  @Column({ type: "varchar", nullable: true })
+  @Column({ type: "varchar", nullable: true, unique: true })
   phone: string;
 
   @Column({ type: "varchar", nullable: true })

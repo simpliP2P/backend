@@ -12,6 +12,7 @@ import { TokenModule } from "src/Modules/Token/token.module";
 import { MailModule } from "src/Modules/Mail/mail.module";
 import { UserOrganisationRepository } from "../Repositories/userOrganisation.repository";
 import { AppLogger } from "src/Logger/logger.service";
+import { SuppliersModule } from "src/Modules/Supplier/Modules/supplier.module";
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AppLogger } from "src/Logger/logger.service";
     UserModule,
     TokenModule,
     MailModule,
+    SuppliersModule
   ],
   controllers: [OrganisationController],
   providers: [OrganisationService, ClientHelper, UserOrganisationRepository, AppLogger],

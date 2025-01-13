@@ -72,3 +72,14 @@ export class OrganisationExists extends AppException {
     );
   }
 }
+
+export class SupplierExists extends AppException {
+  constructor() {
+    super(
+      "error",
+      HttpStatus.CONFLICT,
+      `Supplier with email or phone already exists`,
+      null,
+    );
+  }
+}
