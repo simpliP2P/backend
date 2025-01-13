@@ -14,6 +14,7 @@ import {
 } from "class-validator";
 import { UserOrganisation } from "src/Modules/Organisation/Entities/organisation.entity";
 import { BaseEntity } from "src/Common/entities/base.entity";
+import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchaseRequisition.entity";
 
 @Entity("users")
 export class User extends BaseEntity {
@@ -69,6 +70,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => UserOrganisation, (userOrg) => userOrg.user)
   userOrganisations: UserOrganisation[];
+
+  @OneToMany(() => PurchaseRequisition, (pr) => pr.created_by)
+  purchaseRequisitions: PurchaseRequisition[];
 
   @BeforeInsert()
   validateBeforeInsert() {
