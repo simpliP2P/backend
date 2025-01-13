@@ -229,7 +229,7 @@ export class OrganisationService {
       TokenType.ORG_INVITATION,
       60, // 1 hour
     );
-    const currentClientHost = this.clientHelper.getCurrentClient().landingPag;
+    const currentClientHost = this.clientHelper.getCurrentClient().landingPage;
     const invitationLink = `${currentClientHost}/organisation/${orgId}?invite=${token}`;
 
     await this.emailService.invitationEmail(email, {
