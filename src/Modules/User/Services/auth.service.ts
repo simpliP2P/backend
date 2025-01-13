@@ -1,17 +1,13 @@
 import {
-  BadRequestException,
   Injectable,
   UnauthorizedException,
   UnprocessableEntityException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { hash, compare } from "bcrypt";
+import { compare } from "bcrypt";
 import { User } from "../Entities/user.entity";
 import { SignUpDto, loginDto } from "../Dtos/auth.dto";
-import {
-  InvalidCredentialsException,
-} from "src/Shared/Exceptions/app.exceptions";
+import { InvalidCredentialsException } from "src/Shared/Exceptions/app.exceptions";
 import { UserService } from "./user.service";
 import { TokenHelper } from "src/Shared/Helpers/token.helper";
 import { EmailServices } from "src/Modules/Mail/Services/mail.service";
@@ -19,7 +15,7 @@ import { ClientHelper } from "src/Shared/Helpers/client.helper";
 import { ProviderType } from "../Enums/user.enum";
 import { TokenService } from "src/Modules/Token/Services/token.service";
 import { TokenType } from "src/Modules/Token/Enums/token.enum";
-import { Token } from "src/Modules/Token/Entities/token.entity";
+import { Repository } from "typeorm";
 
 @Injectable()
 export class AuthService {
@@ -56,11 +52,15 @@ export class AuthService {
   ): Promise<{ token: string; user: Partial<User> }> {
     // Find and validate user
     const user = await this.findAccountByEmail(loginDto.email);
+
     const validatedUser = await this.validateUserStatus(user);
 
     await this.verifyPassword(loginDto.password, validatedUser.password_hash);
 
-    return this.generateLoginResponse(validatedUser);
+    // single org per user
+    const orgId = user?.userOrganisations[0]?.id ?? "";
+
+    return this.generateLoginResponse(validatedUser, orgId);
   }
 
   public async verifyEmail(token: string): Promise<void> {
@@ -106,22 +106,19 @@ export class AuthService {
       throw new UnprocessableEntityException("");
     }
 
-    await this.userService.resetPasswordUsingVerifiedToken(verifiedToken, newPassword, oldPasswordHash);
+    await this.userService.resetPasswordUsingVerifiedToken(
+      verifiedToken,
+      newPassword,
+      oldPasswordHash,
+    );
   }
 
   private async findAccountByEmail(email: string) {
     return await this.userService.findAccount({
       where: { email },
+      relations: ["userOrganisations"],
     });
   }
-
-  // private async findAccountByEmail(email: string, loadOrg: boolean) {
-  // const relations = loadOrg ? ["organisation"] : [];
-
-  // return await this.userService.findAccount({
-  //   where: { email },
-  //   relations: relations, // Conditionally load organisation
-  // });
 
   private sanitizeUser(user: User): Partial<User> {
     const { password_hash, created_at, updated_at, ...sanitizedUser } = user;
@@ -154,12 +151,13 @@ export class AuthService {
     }
   }
 
-  private generateLoginResponse(user: User): {
+  private generateLoginResponse(user: User, orgId: string): {
     token: string;
     user: Partial<User>;
   } {
     const payload = {
       sub: user.id,
+      org_sub: orgId,
     };
 
     return {
