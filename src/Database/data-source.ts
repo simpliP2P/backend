@@ -5,10 +5,10 @@ import { join } from "path";
 
 dotenv.config();
 const dbConfig = AppConfig.default().database;
-const entityPath = join(__dirname + "/../Modules/**/*.entity{.ts,.js}");
-const inProd = AppConfig.default().isAppInProduction
+const entityPath = join(__dirname + "/../Modules/**/**/*.entity{.ts,.js}");
+const inProd = AppConfig.default().isAppInProduction;
 
-export const AppDataSource = new DataSource({
+export const AppDataSource = new DataSource({ 
   type: "postgres",
   host: dbConfig.host,
   port: dbConfig.port,
