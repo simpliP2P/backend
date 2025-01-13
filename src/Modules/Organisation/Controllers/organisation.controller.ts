@@ -58,7 +58,7 @@ export class OrganisationController {
 
       return {
         status: "success",
-        message: "Check your email for verification link",
+        message: "Invitation sent to user successfully",
         data: {},
       };
     } catch (error) {
