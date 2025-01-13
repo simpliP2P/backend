@@ -102,7 +102,7 @@ export class verifyEmailDto {
   token: string;
 }
 
-export class forgotPasswordDto {
+export class initiateResetPasswordDto {
   @ApiProperty({
     type: String,
     format: "email",
@@ -112,9 +112,11 @@ export class forgotPasswordDto {
 }
 
 export class resetPasswordDto extends verifyEmailDto {
-  @ApiProperty({
-    type: String,
-  })
   @IsString()
+  @MinLength(8, { message: "Password must be at least 8 characters long" })
+  @Matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^a-zA-Z0-9\s]).{8,}$/, {
+    message:
+      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+  })
   new_password: string;
 }

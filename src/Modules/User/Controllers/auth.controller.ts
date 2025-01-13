@@ -2,7 +2,7 @@ import { Controller, Post, Body, Res, HttpStatus, UnauthorizedException } from "
 import { AuthService } from "../Services/auth.service";
 import {
   SignUpDto,
-  forgotPasswordDto,
+  initiateResetPasswordDto,
   loginDto,
   resetPasswordDto,
   verifyEmailDto,
@@ -85,14 +85,14 @@ export class AuthController {
     }
   }
 
-  @Post("forgot-password")
+  @Post("initiate-reset-password")
   @Public()
-  @ApiBody({ type: forgotPasswordDto })
-  async forgotPassword(
-    @Body() body: forgotPasswordDto,
+  @ApiBody({ type: initiateResetPasswordDto })
+  async initiateResetPassword(
+    @Body() body: initiateResetPasswordDto,
   ): Promise<ApiResponse<{}>> {
     try {
-      await this.authService.forgotPassword(body.email);
+      await this.authService.initiateResetPassword(body.email);
 
       return {
         status: "success",
