@@ -46,7 +46,29 @@ export class UserNotFoundException extends AppException {
 }
 
 export class BadRequestException extends AppException {
-  constructor(message: string) {
-    super("error", HttpStatus.BAD_REQUEST, message, null);
+  constructor(info: string) {
+    super("error", HttpStatus.BAD_REQUEST, info, null);
+  }
+}
+
+export class UserHasOrganisation extends AppException {
+  constructor() {
+    super(
+      "error",
+      HttpStatus.FORBIDDEN,
+      "User is already associated with an organisation.",
+      null,
+    );
+  }
+} 
+
+export class OrganisationExists extends AppException {
+  constructor(name: string) {
+    super(
+      "error",
+      HttpStatus.CONFLICT,
+      `Organisation with name ${name} already exists`,
+      null,
+    );
   }
 }

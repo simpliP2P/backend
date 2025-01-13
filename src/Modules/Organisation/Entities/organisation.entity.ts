@@ -16,13 +16,6 @@ export class Organisation extends BaseEntity {
   @Column({ type: "varchar" })
   address: string;
 
-  @ManyToOne(() => User, (user) => user.created_organisations)
-  @JoinColumn({ name: "creator_id" })
-  creator: User;
-
-  @OneToMany(() => User, (user) => user.organisation)
-  users: User[];
-
   @OneToMany(() => UserOrganisation, (userOrg) => userOrg.organisation)
   userOrganisations: UserOrganisation[];
 
@@ -35,7 +28,6 @@ export class Organisation extends BaseEntity {
   @OneToMany(() => PurchaseRequisition, (pr) => pr.organisation)
   purchaseRequisitions: PurchaseRequisition[];
 }
-
 
 @Entity("user_organisations")
 export class UserOrganisation extends BaseEntity {
@@ -52,4 +44,10 @@ export class UserOrganisation extends BaseEntity {
 
   @Column({ type: "json", nullable: true })
   permissions: string[]; // Array of permissions like ["VIEW_REPORTS", "MANAGE_ORDERS"]
+
+  @Column({ default: false })
+  is_creator: boolean;
+
+  @Column({ default: false })
+  accepted_invitation: boolean;
 }

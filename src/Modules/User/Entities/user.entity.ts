@@ -3,7 +3,6 @@ import {
   Column,
   BeforeInsert,
   OneToMany,
-  ManyToOne,
 } from "typeorm";
 import { UserRole, ProviderType } from "../Enums/user.enum";
 import {
@@ -13,7 +12,7 @@ import {
   IsEmail,
   IsStrongPassword,
 } from "class-validator";
-import { Organisation, UserOrganisation } from "src/Modules/Organisation/Entities/organisation.entity";
+import { UserOrganisation } from "src/Modules/Organisation/Entities/organisation.entity";
 import { BaseEntity } from "src/Common/entities/base.entity";
 
 @Entity("users")
@@ -30,7 +29,7 @@ export class User extends BaseEntity {
   @Column({ type: "varchar", unique: true })
   email: string;
 
-  @Column({ type: "varchar", nullable: true, length: 15 })
+  @Column({ type: "varchar", nullable: true, length: 15, unique: true })
   phone: string;
 
   @IsStrongPassword()
@@ -57,20 +56,19 @@ export class User extends BaseEntity {
   @Column({ default: false })
   is_verified: boolean;
 
+  @Column({ default: true })
+  is_active: boolean;
+
+  @Column({ type: "timestamp", nullable: true })
+  last_login: Date;
+
   @IsOptional()
   @IsDate()
   @Column({ type: "timestamp", nullable: true })
   verified_at: Date | null;
 
-  // Single-organization restriction
-  @ManyToOne(() => Organisation, (org) => org.users)
-  organisation: Organisation;
-
   @OneToMany(() => UserOrganisation, (userOrg) => userOrg.user)
   userOrganisations: UserOrganisation[];
-
-  @OneToMany(() => Organisation, (org) => org.creator)
-  created_organisations: Organisation[];
 
   @BeforeInsert()
   validateBeforeInsert() {

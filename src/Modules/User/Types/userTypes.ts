@@ -7,6 +7,12 @@ import {
 } from "class-validator";
 import { ProviderType } from "../Enums/user.enum";
 
+export class CreateLocalAccountInput {
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+}
 export class CreateGoogleAccountInput {
   @IsString()
   @MinLength(3)

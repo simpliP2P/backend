@@ -10,6 +10,7 @@ import { RequestLoggerMiddleware } from "./Middleware/request-logger.middleware"
 import { AppLogger } from "./Logger/logger.service";
 import { OAuthModule } from "./Modules/Oauth/oauth.module";
 import { CloudinaryConfig } from "./Config/cloudinaryClient.config";
+import { OrganisationModule } from "./Modules/Organisation/Modules/organisation.module";
 
 @Module({
   // Declares external modules that this module depends on
@@ -22,6 +23,7 @@ import { CloudinaryConfig } from "./Config/cloudinaryClient.config";
     DatabaseModule,
     AuthModule,
     OAuthModule,
+    OrganisationModule,
   ],
   // Defines the controllers for this module.
   controllers: [AppController],

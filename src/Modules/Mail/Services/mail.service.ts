@@ -4,6 +4,7 @@ import { render } from "ejs";
 import { BrevoEmailService } from "../../../Infrastructure/Brevo/brevoMail";
 import { AppLogger } from "src/Logger/logger.service";
 import { Injectable } from "@nestjs/common";
+import { emailInvitationData } from "src/Modules/Organisation/Types/organisationTypes";
 
 @Injectable()
 export class EmailServices {
@@ -67,6 +68,26 @@ export class EmailServices {
     return this.sendEmail(sendEmailParams);
   }
 
+  async invitationEmail(email: string, data: emailInvitationData) {
+    try {
+      const subject = `Invitation to join ${data.organisationName}`;
+      const templateName = "organisationInvitationEmail";
+      const sendEmailParams = await this.buildSendEmailParams(
+        email,
+        subject,
+        templateName,
+        {
+          ...data,
+          year: this.year,
+        },
+      );
+      return this.sendEmail(sendEmailParams);
+    } catch (error) {
+      this.logger.error("Error sending invitation email:", error);
+      throw new Error(`Failed to send invitation email: ${error.message}`);
+    }
+  }
+
   private async sendEmail(params: {
     toAddress: string;
     renderedTemplate: string;
@@ -95,7 +116,7 @@ export class EmailServices {
   ) {
     const filePath = join(
       __dirname,
-      `../../../../templates/${templateName}.html`,
+      `../../../../templates/${templateName}.html`, // Ensure the template path is correct
     );
 
     if (!existsSync(filePath)) {
@@ -105,6 +126,11 @@ export class EmailServices {
     }
 
     const template = readFileSync(filePath, "utf8");
+
+    // Check if the template is loaded properly
+    if (!template) {
+      throw new Error(`Failed to load template: ${templateName}`);
+    }
     const renderedTemplate = render(template, data);
 
     return { toAddress, renderedTemplate, subject };

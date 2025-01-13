@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
   UnprocessableEntityException,
 } from "@nestjs/common";
@@ -11,7 +10,6 @@ import { hash, compare } from "bcrypt";
 import { User } from "../Entities/user.entity";
 import { SignUpDto, loginDto } from "../Dtos/auth.dto";
 import {
-  EmailExistsException,
   InvalidCredentialsException,
 } from "src/Shared/Exceptions/app.exceptions";
 import { UserService } from "./user.service";
@@ -21,6 +19,7 @@ import { ClientHelper } from "src/Shared/Helpers/client.helper";
 import { ProviderType } from "../Enums/user.enum";
 import { TokenService } from "src/Modules/Token/Services/token.service";
 import { TokenType } from "src/Modules/Token/Enums/token.enum";
+import { Token } from "src/Modules/Token/Entities/token.entity";
 
 @Injectable()
 export class AuthService {
@@ -35,21 +34,7 @@ export class AuthService {
   ) {}
 
   public async signUp(signUpDto: SignUpDto): Promise<void> {
-    const existingUser = await this.findAccountByEmail(signUpDto.email);
-
-    if (existingUser) {
-      throw new EmailExistsException();
-    }
-
-    const hashedPassword = await hash(signUpDto.password, 12);
-
-    const user = this.userRepository.create({
-      ...signUpDto,
-      password_hash: hashedPassword,
-    });
-    user.provider = ProviderType.LOCAL;
-
-    const createdAccount = await this.userRepository.save(user);
+    const createdAccount = await this.userService.createLocalAccount(signUpDto);
 
     const verificationToken = await this.tokenService.createToken(
       createdAccount.id,
@@ -58,7 +43,7 @@ export class AuthService {
 
     const currentClientHost = this.clientHelper.getCurrentClient().landingPage;
     const verificationLink = `${currentClientHost}/auth/verify-account/${verificationToken}`;
-    
+
     await this.emailService.sendVerificationEmail(
       signUpDto.first_name,
       signUpDto.email,
@@ -79,22 +64,15 @@ export class AuthService {
   }
 
   public async verifyEmail(token: string): Promise<void> {
-    const verifiedToken = await this.tokenService.verifyToken(token, TokenType.EMAIL_VERIFICATION)
+    const verifiedToken = await this.tokenService.verifyToken(
+      token,
+      TokenType.EMAIL_VERIFICATION,
+    );
 
-    const user = await this.userService.findAccount({
-      where: { id: verifiedToken.user_id },
-    });
-
-    if (!user) {
-      throw new UnauthorizedException("Invalid verification token");
-    }
-
-    user.is_verified = true;
-    user.verified_at = new Date();
-    await this.userRepository.save(user);
+    await this.userService.updateAccountUsingVerificationToken(verifiedToken);
   }
 
-  public async forgotPassword(email: string): Promise<void> {
+  public async initiateResetPassword(email: string): Promise<void> {
     const user = await this.findAccountByEmail(email);
     if (!user) return; // Silent fail for security
 
@@ -113,39 +91,22 @@ export class AuthService {
     );
   }
 
-  async resetPassword(token: string, newPassword: string): Promise<void> {
+  public async resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<void> {
     // Verify token and get associated user
     const verifiedToken = await this.tokenService.verifyToken(
       token,
       TokenType.PASSWORD_RESET,
     );
 
-    // Only allow password reset for local accounts
-    if (verifiedToken.user.provider !== ProviderType.LOCAL) {
-      throw new BadRequestException(
-        "Password reset is not allowed for this account.",
-      );
-    }
-
     const oldPasswordHash = verifiedToken.user.password_hash;
     if (!oldPasswordHash) {
       throw new UnprocessableEntityException("");
     }
 
-    const hashedPassword = await hash(newPassword, 10);
-
-    const isPasswordSame = await compare(newPassword, oldPasswordHash);
-    if (isPasswordSame) {
-      throw new UnprocessableEntityException("Cannot set to old password");
-    }
-
-    // Update user's password
-    await this.userRepository.update(verifiedToken.user_id, {
-      password_hash: hashedPassword,
-    });
-
-    // Delete used token
-    await this.tokenService.delete(verifiedToken.id);
+    await this.userService.resetPasswordUsingVerifiedToken(verifiedToken, newPassword, oldPasswordHash);
   }
 
   private async findAccountByEmail(email: string) {
@@ -153,6 +114,14 @@ export class AuthService {
       where: { email },
     });
   }
+
+  // private async findAccountByEmail(email: string, loadOrg: boolean) {
+  // const relations = loadOrg ? ["organisation"] : [];
+
+  // return await this.userService.findAccount({
+  //   where: { email },
+  //   relations: relations, // Conditionally load organisation
+  // });
 
   private sanitizeUser(user: User): Partial<User> {
     const { password_hash, created_at, updated_at, ...sanitizedUser } = user;
