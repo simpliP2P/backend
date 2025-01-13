@@ -228,7 +228,6 @@ export class OrganisationService {
       userId,
       TokenType.ORG_INVITATION,
       60, // 1 hour
-      { orgId },
     );
     const currentClientHost = this.clientHelper.getCurrentClient().landingPage;
     const invitationLink = `${currentClientHost}/organisation/${orgId}?invite=${token}`;
