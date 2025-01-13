@@ -173,13 +173,13 @@ export class OrganisationService {
 
     await this.userService.updateAccountUsingVerificationToken(verifiedToken);
 
-    await this.userOrganisationRepository.update(
-      {
-        user: { id: verifiedToken.user_id },
-        organisation: { id: organisationId },
-      },
-      { accepted_invitation: true },
-    );
+    await this.userOrganisationRepository
+      .createQueryBuilder()
+      .update()
+      .set({ accepted_invitation: true })
+      .where("user_id = :userId", { userId: verifiedToken.user_id })
+      .andWhere("organisation_id = :organisationId", { organisationId })
+      .execute();
 
     await this.userService.resetPasswordUsingVerifiedToken(
       verifiedToken,
