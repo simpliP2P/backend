@@ -112,4 +112,8 @@ export class SuppliersService {
 
     await this.supplierRepository.remove(supplier);
   }
+
+  async count(query: any) {
+    return await this.supplierRepository.count(query);
+  }
 }

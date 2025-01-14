@@ -56,4 +56,8 @@ export class PurchaseRequisitionService {
 
     return this.purchaseRequisitionRepository.save(requisition);
   }
+
+  async count(query: any) {
+    return this.purchaseRequisitionRepository.count(query);
+  }
 }
