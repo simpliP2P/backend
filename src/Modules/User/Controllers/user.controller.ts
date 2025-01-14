@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Controller,
+  Get,
   Post,
   Req,
   UploadedFile,
@@ -15,9 +16,20 @@ import { existsSync, unlink } from "fs";
 import { AppLogger } from "src/Logger/logger.service";
 
 @ApiTags("user")
-@Controller("user")
+@Controller("users")
 export class UserController {
   constructor(private readonly userService: UserService, private readonly logger: AppLogger) {}
+
+  @Get("me")
+  async getProfile(@Req() req: any): Promise<any> {
+    const userId = req.user.sub;
+    const user = await this.userService.getUserProfile(userId);
+    return {
+      status: "success",
+      message: "User profile retrieved successfully",
+      data: user,
+    };
+  }
 
   @Post("profile-picture")
   @UseInterceptors(

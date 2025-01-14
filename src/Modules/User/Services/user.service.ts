@@ -1,7 +1,7 @@
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "../Entities/user.entity";
 import { FindOneOptions, Repository } from "typeorm";
-import { Injectable, UnauthorizedException, UnprocessableEntityException } from "@nestjs/common";
+import { Injectable, NotFoundException, UnauthorizedException, UnprocessableEntityException } from "@nestjs/common";
 import { BadRequestException, EmailExistsException } from "src/Shared/Exceptions/app.exceptions";
 import {
   CreateGoogleAccountInput,
@@ -136,4 +136,87 @@ export class UserService {
     // Delete used token
     await this.tokenService.delete(verifiedToken.id);
   }
+
+  async getUserProfile(userId: string): Promise<any> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ["userOrganisations", "userOrganisations.organisation"],
+      select: {
+        id: true,
+        first_name: true,
+        last_name: true,
+        email: true,
+        userOrganisations: {
+          id: true,
+          role: true,
+          organisation: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    console.log("user", JSON.stringify(user));
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
+    // Format the response
+    return {
+      id: user.id,
+      name: `${user.first_name} ${user.last_name}`,
+      email: user.email,
+      organisations: user.userOrganisations.map((uo) => ({
+        id: uo.organisation.id,
+        name: uo.organisation.name,
+        role: uo.role,
+      })),
+    };
+  }
+
+  // async getUserProfile(userId: string): Promise<Partial<User>> {
+  //   // Find the user by ID, including only the necessary fields
+  //   const user = await this.findAccount({
+  //     where: { id: userId },
+  //     relations: ["userOrganisations"], // Include relations if needed
+  //   });
+
+  //   console.log("user", JSON.stringify(user));
+
+  //   if (!user) {
+  //     throw new NotFoundException("User not found");
+  //   }
+
+  //   // Return only the necessary details
+  //   const {
+  //     id,
+  //     first_name,
+  //     last_name,
+  //     email,
+  //     phone,
+  //     profile_picture,
+  //     role,
+  //     provider,
+  //     is_verified,
+  //     last_login,
+  //     verified_at,
+  //     is_active,
+  //   } = user;
+
+  //   return {
+  //     id,
+  //     first_name,
+  //     last_name,
+  //     email,
+  //     phone,
+  //     profile_picture,
+  //     role,
+  //     provider,
+  //     is_verified,
+  //     last_login,
+  //     verified_at,
+  //     is_active,
+  //   };
+  // }
 }
