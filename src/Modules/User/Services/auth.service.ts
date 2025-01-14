@@ -60,7 +60,7 @@ export class AuthService {
     // single org per user
     const orgId = user?.userOrganisations[0]?.id ?? "";
 
-    return this.generateLoginResponse(validatedUser, orgId);
+    return this.generateLoginResponse(validatedUser);
   }
 
   public async verifyEmail(token: string): Promise<void> {
@@ -151,13 +151,13 @@ export class AuthService {
     }
   }
 
-  private generateLoginResponse(user: User, orgId: string): {
+  private generateLoginResponse(user: User): {
     token: string;
     user: Partial<User>;
   } {
     const payload = {
       sub: user.id,
-      org_sub: orgId,
+      // org_sub: orgId,
     };
 
     return {
