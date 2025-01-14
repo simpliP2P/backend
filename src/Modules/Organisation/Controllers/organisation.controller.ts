@@ -62,7 +62,7 @@ export class OrganisationController {
 
   @Post(":organisationId/invite-user")
   @SetMetadata("permissions", [
-    PermissionType.SUPER_USER,
+    PermissionType.OWNER,
     PermissionType.MANAGE_USERS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
@@ -111,7 +111,7 @@ export class OrganisationController {
    */
   @Post(":organisationId/suppliers")
   @SetMetadata("permissions", [
-    PermissionType.SUPER_USER,
+    PermissionType.OWNER,
     PermissionType.MANAGE_USERS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
@@ -137,7 +137,7 @@ export class OrganisationController {
 
   @Get(":organisationId/suppliers")
   @SetMetadata("permissions", [
-    PermissionType.SUPER_USER,
+    PermissionType.OWNER,
     PermissionType.MANAGE_SUPPLIERS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
@@ -159,7 +159,7 @@ export class OrganisationController {
 
   @Get(":organisationId/suppliers/:supplierId")
   @SetMetadata("permissions", [
-    PermissionType.SUPER_USER,
+    PermissionType.OWNER,
     PermissionType.MANAGE_SUPPLIERS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
@@ -185,7 +185,7 @@ export class OrganisationController {
 
   @Put(":organisationId/suppliers/:supplierId")
   @SetMetadata("permissions", [
-    PermissionType.SUPER_USER,
+    PermissionType.OWNER,
     PermissionType.MANAGE_SUPPLIERS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
@@ -213,7 +213,7 @@ export class OrganisationController {
 
   @Delete(":organisationId/suppliers/:supplierId")
   @SetMetadata("permissions", [
-    PermissionType.SUPER_USER,
+    PermissionType.OWNER,
     PermissionType.MANAGE_SUPPLIERS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
@@ -240,7 +240,7 @@ export class OrganisationController {
 
   @Post(":organisationId/requisitions")
   @SetMetadata("permissions", [
-    PermissionType.SUPER_USER,
+    PermissionType.OWNER,
     PermissionType.MANAGE_PURCHASE_REQUISITIONS,
   ])
   @UseGuards(OrganisationPermissionsGuard)

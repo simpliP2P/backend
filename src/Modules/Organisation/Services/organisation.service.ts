@@ -67,7 +67,7 @@ export class OrganisationService {
         user: { id: creatorId } as User,
         organisation: createdOrg,
         role: creator_role,
-        permissions: [PermissionType.SUPER_USER],
+        permissions: [PermissionType.OWNER],
         is_creator: true,
       });
     } catch (error) {
