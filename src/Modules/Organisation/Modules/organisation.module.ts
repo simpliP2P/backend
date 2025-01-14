@@ -13,17 +13,25 @@ import { MailModule } from "src/Modules/Mail/mail.module";
 import { UserOrganisationRepository } from "../Repositories/userOrganisation.repository";
 import { AppLogger } from "src/Logger/logger.service";
 import { SuppliersModule } from "src/Modules/Supplier/Modules/supplier.module";
+import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchaseRequisition.service";
+import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchaseRequisition.entity";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Organisation, UserOrganisation]),
+    TypeOrmModule.forFeature([Organisation, UserOrganisation, PurchaseRequisition]),
     UserModule,
     TokenModule,
     MailModule,
-    SuppliersModule
+    SuppliersModule,
   ],
   controllers: [OrganisationController],
-  providers: [OrganisationService, ClientHelper, UserOrganisationRepository, AppLogger],
+  providers: [
+    OrganisationService,
+    ClientHelper,
+    UserOrganisationRepository,
+    AppLogger,
+    PurchaseRequisitionService,
+  ],
   exports: [OrganisationService],
 })
 export class OrganisationModule {}

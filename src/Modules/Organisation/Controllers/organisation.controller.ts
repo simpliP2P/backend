@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Put,
   Req,
@@ -21,13 +22,21 @@ import { OrganisationPermissionsGuard } from "src/Guards/permissions.guard";
 import { PermissionType } from "../Enums/userOrganisation.enum";
 import { Public } from "src/Shared/Decorators/custom.decorator";
 import { SuppliersService } from "src/Modules/Supplier/Services/supplier.service";
-import { CreateSupplierDto, UpdateSupplierDto } from "src/Modules/Supplier/Dtos/supplier.dto";
+import {
+  CreateSupplierDto,
+  UpdateSupplierDto,
+} from "src/Modules/Supplier/Dtos/supplier.dto";
+import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchaseRequisition.entity";
+import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchaseRequisition.service";
+import { ApprovalStatus } from "src/Modules/PurchaseRequisition/Enums/purchaseRequisition.enum";
+import { User } from "src/Modules/User/Entities/user.entity";
 
 @Controller("organisations")
 export class OrganisationController {
   constructor(
     private readonly organisationService: OrganisationService,
     private readonly supplierService: SuppliersService,
+    private readonly purchaseRequisitionService: PurchaseRequisitionService,
   ) {}
 
   @Post()
@@ -97,6 +106,9 @@ export class OrganisationController {
     }
   }
 
+  /**
+   * Supplier routes
+   */
   @Post(":organisationId/suppliers")
   @SetMetadata("permissions", [
     PermissionType.OWNER,
@@ -210,14 +222,75 @@ export class OrganisationController {
     @Param("supplierId") supplierId: string,
   ) {
     try {
-      await this.supplierService.removeSupplier(
-        supplierId,
-        orgId,
-      );
+      await this.supplierService.removeSupplier(supplierId, orgId);
 
       return {
         status: "success",
         message: "Supplier deleted successfully",
+        data: {},
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Purchase Requisition routes
+   */
+
+  @Post(":organisationId/requisitions")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_PURCHASE_REQUISITIONS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async createRequisition(
+    @Param("organisationId") organisationId: string,
+    @Body() data: Partial<PurchaseRequisition>,
+    @Req() req: Request,
+  ) {
+    try {
+      const userId = req.user.sub;
+
+      if (!userId) return;
+
+      const purchaseRequisition =
+        await this.purchaseRequisitionService.createPurchaseRequisition(
+          organisationId,
+          { ...data, created_by: { id: userId } as User },
+        );
+
+      return {
+        status: "success",
+        message: "Purchase requisition created successfully",
+        data: purchaseRequisition,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Patch(":organisationId/requisitions/:id/approval")
+  async updateApproval(
+    @Param("id") requisitionId: string,
+    @Req() req: Request,
+    @Body()
+    approvalData: {
+      approval_status: ApprovalStatus;
+      approval_justification: string;
+    },
+  ) {
+    try {
+      const userId = req.user.sub;
+
+      await this.purchaseRequisitionService.updateApprovalDetails(
+        requisitionId,
+        { ...approvalData, approved_by: userId },
+      );
+
+      return {
+        status: "success",
+        message: "Purchase requisition updated successfully",
         data: {},
       };
     } catch (error) {
