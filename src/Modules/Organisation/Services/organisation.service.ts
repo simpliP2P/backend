@@ -67,7 +67,7 @@ export class OrganisationService {
         user: { id: creatorId } as User,
         organisation: createdOrg,
         role: creator_role,
-        permissions: [PermissionType.OWNER],
+        permissions: [PermissionType.SUPER_USER],
         is_creator: true,
       });
     } catch (error) {
@@ -186,7 +186,6 @@ export class OrganisationService {
       newPassword,
       "", // not sending old password hash(edgecase: scenario where user password equals generated password)
     );
-
   }
 
   private generateStrongPassword(): string {
