@@ -31,7 +31,7 @@ export class UserController {
     };
   }
 
-  @Post("profile-picture")
+  @Post("me/profile-picture")
   @UseInterceptors(
     FileInterceptor("file", {
       storage: diskStorage({
