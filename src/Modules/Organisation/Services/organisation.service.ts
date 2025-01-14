@@ -24,6 +24,9 @@ import { ClientHelper } from "src/Shared/Helpers/client.helper";
 import { TokenService } from "src/Modules/Token/Services/token.service";
 import { TokenType } from "src/Modules/Token/Enums/token.enum";
 import { AppLogger } from "src/Logger/logger.service";
+import { SuppliersService } from "src/Modules/Supplier/Services/supplier.service";
+import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchaseOrder.service";
+import { ProductService } from "src/Modules/Product/Services/product.service";
 
 @Injectable()
 export class OrganisationService {
@@ -34,8 +37,12 @@ export class OrganisationService {
     private userOrganisationRepository: Repository<UserOrganisation>,
     private readonly userService: UserService,
     private readonly emailService: EmailServices,
-    private readonly clientHelper: ClientHelper,
     private readonly tokenService: TokenService,
+    private readonly supplierService: SuppliersService,
+    private readonly purchaseOrderService: PurchaseOrderService,
+    private readonly productService: ProductService,
+
+    private readonly clientHelper: ClientHelper,
     private readonly logger: AppLogger,
   ) {}
 
@@ -186,6 +193,29 @@ export class OrganisationService {
       newPassword,
       "", // not sending old password hash(edgecase: scenario where user password equals generated password)
     );
+  }
+
+  async getOrganisationMetrics(organisationId: string) {
+    const totalSuppliers = await this.supplierService.count({
+      where: { organisation: { id: organisationId } },
+    });
+
+    const totalProducts = await this.productService.count({
+      where: { organisation: { id: organisationId } },
+    });
+
+    const pendingPurchaseOrders = await this.purchaseOrderService.count({
+      where: { organisation: { id: organisationId }, status: "PENDING" },
+    });
+
+    return {
+      organisationId,
+      metrics: {
+        totalSuppliers,
+        totalProducts,
+        pendingPurchaseOrders,
+      },
+    };
   }
 
   private generateStrongPassword(): string {

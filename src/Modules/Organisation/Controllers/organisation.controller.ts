@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   Req,
   SetMetadata,
   UseGuards,
@@ -30,6 +31,9 @@ import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/pu
 import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchaseRequisition.service";
 import { ApprovalStatus } from "src/Modules/PurchaseRequisition/Enums/purchaseRequisition.enum";
 import { User } from "src/Modules/User/Entities/user.entity";
+import { ProductService } from "src/Modules/Product/Services/product.service";
+import { Product } from "src/Modules/Product/Entities/product.entity";
+import { CreateProductDto } from "src/Modules/Product/Dtos/product.dto";
 
 @Controller("organisations")
 export class OrganisationController {
@@ -37,6 +41,7 @@ export class OrganisationController {
     private readonly organisationService: OrganisationService,
     private readonly supplierService: SuppliersService,
     private readonly purchaseRequisitionService: PurchaseRequisitionService,
+    private readonly productService: ProductService,
   ) {}
 
   @Post()
@@ -106,6 +111,23 @@ export class OrganisationController {
     }
   }
 
+  @Get(":organisationId/dashboard")
+  async dashboard(@Param("organisationId") orgId: string) {
+    try {
+      const organisations = await this.organisationService.getOrganisationMetrics(
+        orgId,
+      );
+
+      return {
+        status: "success",
+        message: "Metrics fetched successfully",
+        data: organisations,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   /**
    * Supplier routes
    */
@@ -141,10 +163,14 @@ export class OrganisationController {
     PermissionType.MANAGE_SUPPLIERS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
-  async getAllSuppliers(@Param("organisationId") orgId: string) {
+  async getAllSuppliers(
+    @Param("organisationId") orgId: string,
+    @Query("page") page: number,
+    @Query("pageSize") pageSize: number,
+  ) {
     try {
       const { data, metadata } =
-        await this.supplierService.findAllByOrganisation(orgId);
+        await this.supplierService.findAllByOrganisation(orgId, page, pageSize);
 
       return {
         status: "success",
