@@ -52,9 +52,9 @@ export class SuppliersService {
       data,
       metadata: {
         total,
-        page,
-        pageSize,
-        totalPages: Math.ceil(total / pageSize),
+        page: _page,
+        pageSize: _pageSize,
+        totalPages: Math.ceil(total / _pageSize),
       },
     };
   }
