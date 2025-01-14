@@ -21,12 +21,11 @@ export class SuppliersService {
         ...createSupplierDto,
         organisation: { id: organisationId },
       });
-  
+
       return await this.supplierRepository.save(supplier);
-      
     } catch (error) {
       if (error.code === "23505") {
-        throw new SupplierExists()
+        throw new SupplierExists();
       }
     }
   }
@@ -36,11 +35,16 @@ export class SuppliersService {
     page: number = 1,
     pageSize: number = 10,
   ) {
-    const skip = (page - 1) * pageSize; // Calculate the offset
+    let _page = page;
+    let _pageSize = pageSize;
+    if (isNaN(page) || page < 1) _page = 1;
+    if (isNaN(pageSize) || pageSize < 1) _pageSize = 10;
+    
+    const skip = (_page - 1) * _pageSize; // Calculate the offset
 
     const [data, total] = await this.supplierRepository.findAndCount({
       where: { organisation: { id: organisationId } },
-      take: pageSize, // Limit the number of results
+      take: _pageSize, // Limit the number of results
       skip, // Skip the previous results
     });
 
@@ -79,7 +83,10 @@ export class SuppliersService {
     organisationId: string,
     updateSupplierDto: UpdateSupplierDto,
   ) {
-    const supplier = await this.findOneByOrganisation(supplierId, organisationId);
+    const supplier = await this.findOneByOrganisation(
+      supplierId,
+      organisationId,
+    );
 
     if (!supplier) {
       throw new NotFoundException(`Supplier with ID ${supplierId} not found`);
@@ -94,7 +101,10 @@ export class SuppliersService {
   }
 
   async removeSupplier(supplierId: string, organisationId: string) {
-    const supplier = await this.findOneByOrganisation(supplierId, organisationId);
+    const supplier = await this.findOneByOrganisation(
+      supplierId,
+      organisationId,
+    );
 
     if (!supplier) {
       throw new NotFoundException(`Supplier with ID ${supplierId} not found`);
@@ -102,5 +112,4 @@ export class SuppliersService {
 
     await this.supplierRepository.remove(supplier);
   }
-
 }
