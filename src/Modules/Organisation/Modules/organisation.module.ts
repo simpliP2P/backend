@@ -15,7 +15,7 @@ import { AppLogger } from "src/Logger/logger.service";
 import { SuppliersModule } from "src/Modules/Supplier/Modules/supplier.module";
 import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchaseRequisition.service";
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchaseRequisition.entity";
-// import { ProductModule } from "src/Modules/Product/Modules/product.module";
+import { ProductModule } from "src/Modules/Product/Modules/product.module";
 import { PurchaseOrderModule } from "src/Modules/PurchaseOrder/Modules/purchaseOrder.module";
 
 @Module({
@@ -25,7 +25,7 @@ import { PurchaseOrderModule } from "src/Modules/PurchaseOrder/Modules/purchaseO
     TokenModule,
     MailModule,
     SuppliersModule,
-    // ProductModule,
+    ProductModule,
     PurchaseOrderModule
   ],
   controllers: [OrganisationController],

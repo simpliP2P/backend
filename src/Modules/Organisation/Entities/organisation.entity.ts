@@ -5,6 +5,7 @@ import { Supplier } from "src/Modules/Supplier/Entities/supplier.entity";
 import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchaseOrder.entity";
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchaseRequisition.entity";
 import { BaseEntity } from "src/Common/entities/base.entity";
+import { Product } from "src/Modules/Product/Entities/product.entity";
 
 @Entity("organisations")
 export class Organisation extends BaseEntity {
@@ -15,6 +16,9 @@ export class Organisation extends BaseEntity {
 
   @Column({ type: "varchar" })
   address: string;
+
+  @OneToMany(() => Product, (product) => product.organisation)
+  products: Product[];
 
   @OneToMany(() => UserOrganisation, (userOrg) => userOrg.organisation)
   userOrganisations: UserOrganisation[];

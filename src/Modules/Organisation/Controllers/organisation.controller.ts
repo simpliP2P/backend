@@ -33,7 +33,10 @@ import { ApprovalStatus } from "src/Modules/PurchaseRequisition/Enums/purchaseRe
 import { User } from "src/Modules/User/Entities/user.entity";
 import { ProductService } from "src/Modules/Product/Services/product.service";
 import { Product } from "src/Modules/Product/Entities/product.entity";
-import { CreateProductDto } from "src/Modules/Product/Dtos/product.dto";
+import {
+  CreateProductDto,
+  UpdateProductDto,
+} from "src/Modules/Product/Dtos/product.dto";
 
 @Controller("organisations")
 export class OrganisationController {
@@ -114,9 +117,8 @@ export class OrganisationController {
   @Get(":organisationId/dashboard")
   async dashboard(@Param("organisationId") orgId: string) {
     try {
-      const organisations = await this.organisationService.getOrganisationMetrics(
-        orgId,
-      );
+      const organisations =
+        await this.organisationService.getOrganisationMetrics(orgId);
 
       return {
         status: "success",
@@ -317,6 +319,146 @@ export class OrganisationController {
       return {
         status: "success",
         message: "Purchase requisition updated successfully",
+        data: {},
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Products routes
+   */
+  @Post(":organisationId/products")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_PRODUCTS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async createProduct(
+    @Param("organisationId") organisationId: string,
+    @Body() data: CreateProductDto,
+    @Req() req: Request,
+  ) {
+    try {
+      const userId = req.user.sub;
+
+      if (!userId) return;
+
+      const createdProduct = await this.productService.addProductToOrganisation(
+        organisationId,
+        data,
+      );
+
+      return {
+        status: "success",
+        message: "Product created successfully",
+        data: createdProduct,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get(":organisationId/products")
+  @SetMetadata("permissions", [PermissionType.ORG_MEMBER])
+  @UseGuards(OrganisationPermissionsGuard)
+  async getAllProducts(
+    @Param("organisationId") organisationId: string,
+    @Query("page") page: number,
+    @Query("pageSize") pageSize: number,
+  ) {
+    try {
+      const { data, metadata } =
+        await this.productService.findAllProductsByOrganisation(
+          organisationId,
+          page,
+          pageSize,
+        );
+
+      return {
+        status: "success",
+        message: "Products fetched successfully",
+        data,
+        metadata,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get(":organisationId/products/:productId")
+  @SetMetadata("permissions", [PermissionType.ORG_MEMBER])
+  @UseGuards(OrganisationPermissionsGuard)
+  async getProductById(
+    @Param("organisationId") organisationId: string,
+    @Param("productId") productId: string,
+  ) {
+    try {
+      const product = await this.productService.findSingleOrganisationProduct(
+        organisationId,
+        productId,
+      );
+
+      return {
+        status: "success",
+        message: "Product fetched successfully",
+        data: product,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Put(":organisationId/products/:productId")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_PRODUCTS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async updateProduct(
+    @Param("organisationId") organisationId: string,
+    @Param("productId") productId: string,
+    @Body() data: UpdateProductDto,
+  ) {
+    try {
+      const updatedProduct =
+        await this.productService.updateOrganisationProduct(
+          organisationId,
+          productId,
+          data,
+        );
+
+      return {
+        status: "success",
+        message: "Product updated successfully",
+        data: updatedProduct,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Delete(":organisationId/products/:productId")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_PRODUCTS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async deleteProduct(
+    @Param("organisationId") organisationId: string,
+    @Param("productId") productId: string,
+  ) {
+    try {
+      const updatedProduct =
+        await this.productService.deleteOrganisationProduct(
+          organisationId,
+          productId,
+        );
+
+      return {
+        status: "success",
+        message: "Product deleted successfully",
         data: {},
       };
     } catch (error) {
