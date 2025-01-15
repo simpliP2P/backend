@@ -25,7 +25,7 @@ import { TokenService } from "src/Modules/Token/Services/token.service";
 import { TokenType } from "src/Modules/Token/Enums/token.enum";
 import { AppLogger } from "src/Logger/logger.service";
 import { SuppliersService } from "src/Modules/Supplier/Services/supplier.service";
-import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchaseOrder.service";
+// import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchaseOrder.service";
 import { ProductService } from "src/Modules/Product/Services/product.service";
 
 @Injectable()
@@ -39,7 +39,7 @@ export class OrganisationService {
     private readonly emailService: EmailServices,
     private readonly tokenService: TokenService,
     private readonly supplierService: SuppliersService,
-    private readonly purchaseOrderService: PurchaseOrderService,
+    // private readonly purchaseOrderService: PurchaseOrderService,
     private readonly productService: ProductService,
 
     private readonly clientHelper: ClientHelper,
@@ -204,16 +204,16 @@ export class OrganisationService {
       where: { organisation: { id: organisationId } },
     });
 
-    const pendingPurchaseOrders = await this.purchaseOrderService.count({
-      where: { organisation: { id: organisationId }, status: "PENDING" },
-    });
+    // const pendingPurchaseOrders = await this.purchaseOrderService.count({
+    //   where: { organisation: { id: organisationId }, status: "PENDING" },
+    // });
 
     return {
       organisationId,
       metrics: {
         totalSuppliers,
         totalProducts,
-        pendingPurchaseOrders,
+        pendingPurchaseOrders: 0,
       },
     };
   }
