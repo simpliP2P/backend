@@ -137,7 +137,7 @@ export class UserService {
     await this.tokenService.delete(verifiedToken.id);
   }
 
-  async getUserProfile(userId: string): Promise<any> {
+  public async getUserProfile(userId: string): Promise<any> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ["userOrganisations", "userOrganisations.organisation"],
