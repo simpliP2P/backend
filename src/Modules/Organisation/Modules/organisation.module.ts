@@ -16,7 +16,7 @@ import { SuppliersModule } from "src/Modules/Supplier/Modules/supplier.module";
 import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchaseRequisition.service";
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchaseRequisition.entity";
 import { ProductModule } from "src/Modules/Product/Modules/product.module";
-import { PurchaseOrderModule } from "src/Modules/PurchaseOrder/Modules/purchaseOrder.module";
+// import { PurchaseOrderModule } from "src/Modules/PurchaseOrder/Modules/purchaseOrder.module";
 
 @Module({
   imports: [
@@ -26,7 +26,7 @@ import { PurchaseOrderModule } from "src/Modules/PurchaseOrder/Modules/purchaseO
     MailModule,
     SuppliersModule,
     ProductModule,
-    PurchaseOrderModule
+    // PurchaseOrderModule
   ],
   controllers: [OrganisationController],
   providers: [
