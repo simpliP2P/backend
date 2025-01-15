@@ -14,6 +14,7 @@ import { UserService } from "src/Modules/User/Services/user.service";
 import { PermissionType } from "../Enums/userOrganisation.enum";
 import { User } from "src/Modules/User/Entities/user.entity";
 import {
+  BadRequestException,
   EmailExistsException,
   OrganisationExists,
   UserHasOrganisation,
@@ -61,6 +62,17 @@ export class OrganisationService {
     let createdOrg: Organisation;
 
     try {
+      const hasUserCreatedOrg =
+        !!(await this.userOrganisationRepository.findOne({
+          where: { user: { id: creatorId }, is_creator: true },
+        }));
+
+      if (hasUserCreatedOrg) {
+        throw new BadRequestException(
+          "Each user can create only one organization",
+        );
+      }
+
       const organisation = this.organisationRepository.create({
         name,
         address,
