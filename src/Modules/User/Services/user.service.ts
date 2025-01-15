@@ -146,9 +146,11 @@ export class UserService {
         first_name: true,
         last_name: true,
         email: true,
+        profile_picture: true,
         userOrganisations: {
           id: true,
           role: true,
+          is_creator: true,
           organisation: {
             id: true,
             name: true,
@@ -157,7 +159,6 @@ export class UserService {
       },
     });
 
-    console.log("user", JSON.stringify(user));
     if (!user) {
       throw new NotFoundException("User not found");
     }
@@ -167,56 +168,13 @@ export class UserService {
       id: user.id,
       name: `${user.first_name} ${user.last_name}`,
       email: user.email,
+      profile_picture: user.profile_picture,
       organisations: user.userOrganisations.map((uo) => ({
         id: uo.organisation.id,
         name: uo.organisation.name,
         role: uo.role,
+        is_creator: uo.is_creator,
       })),
     };
   }
-
-  // async getUserProfile(userId: string): Promise<Partial<User>> {
-  //   // Find the user by ID, including only the necessary fields
-  //   const user = await this.findAccount({
-  //     where: { id: userId },
-  //     relations: ["userOrganisations"], // Include relations if needed
-  //   });
-
-  //   console.log("user", JSON.stringify(user));
-
-  //   if (!user) {
-  //     throw new NotFoundException("User not found");
-  //   }
-
-  //   // Return only the necessary details
-  //   const {
-  //     id,
-  //     first_name,
-  //     last_name,
-  //     email,
-  //     phone,
-  //     profile_picture,
-  //     role,
-  //     provider,
-  //     is_verified,
-  //     last_login,
-  //     verified_at,
-  //     is_active,
-  //   } = user;
-
-  //   return {
-  //     id,
-  //     first_name,
-  //     last_name,
-  //     email,
-  //     phone,
-  //     profile_picture,
-  //     role,
-  //     provider,
-  //     is_verified,
-  //     last_login,
-  //     verified_at,
-  //     is_active,
-  //   };
-  // }
 }
