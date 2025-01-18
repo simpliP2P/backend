@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import {
   Organisation,
@@ -28,6 +28,7 @@ import { AppLogger } from "src/Logger/logger.service";
 import { SuppliersService } from "src/Modules/Supplier/Services/supplier.service";
 // import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchaseOrder.service";
 import { ProductService } from "src/Modules/Product/Services/product.service";
+import { UploadService } from "src/Modules/Upload/Services/upload.service";
 
 @Injectable()
 export class OrganisationService {
@@ -42,6 +43,7 @@ export class OrganisationService {
     private readonly supplierService: SuppliersService,
     // private readonly purchaseOrderService: PurchaseOrderService,
     private readonly productService: ProductService,
+    private readonly uploadService: UploadService,
 
     private readonly clientHelper: ClientHelper,
     private readonly logger: AppLogger,
@@ -192,13 +194,13 @@ export class OrganisationService {
 
     await this.userService.updateAccountUsingVerificationToken(verifiedToken);
 
-    await this.userOrganisationRepository
-      .createQueryBuilder()
-      .update()
-      .set({ accepted_invitation: true })
-      .where("user_id = :userId", { userId: verifiedToken.user_id })
-      .andWhere("organisation_id = :organisationId", { organisationId })
-      .execute();
+    await this.userOrganisationRepository.update(
+      {
+        user: { id: verifiedToken.user_id }, // Ensure this matches your entity relations
+        organisation: { id: organisationId },
+      },
+      { accepted_invitation: true },
+    );
 
     await this.userService.resetPasswordUsingVerifiedToken(
       verifiedToken,
@@ -229,6 +231,69 @@ export class OrganisationService {
       },
     };
   }
+
+  async getOrganisationMembers(organisationId: string) {
+    // Check if the organization exists
+    const organisation = await this.organisationRepository.findOne({
+      where: { id: organisationId },
+    });
+
+    if (!organisation) {
+      throw new NotFoundException(
+        `Organisation with ID ${organisationId} not found`,
+      );
+    }
+
+    // Fetch users associated with the organization
+    const userOrganisations = await this.userOrganisationRepository.find({
+      where: { organisation: { id: organisationId }, is_creator: false },
+      relations: ["user"],
+    });
+
+    // Map the results to return user details along with their roles and permissions
+    const users = userOrganisations.map((userOrg) => ({
+      id: userOrg.user.id,
+      firstName: userOrg.user.first_name,
+      lastName: userOrg.user.last_name,
+      email: userOrg.user.email,
+      phone: userOrg.user.phone,
+      role: userOrg.role,
+      permissions: userOrg.permissions,
+      last_login: userOrg.user.last_login,
+    }));
+
+    return {
+      organisation: {
+        id: organisation.id,
+        name: organisation.name,
+        address: organisation.address,
+        logo: organisation.logo,
+      },
+      users,
+    };
+  }
+
+  /*
+  public async uploadLogo(orgId: string, file: Express.Multer.File) {
+    // Upload img to cloud
+    const imageUrl = await this.uploadService.uploadImage(file.path);
+
+    const org = await this.findOrganisation({ where: { id: orgId } });
+    if (!org) {
+      throw new Error("Organisation not found");
+    }
+
+    // remove existing img from cloud
+    if (org.logo) {
+      this.uploadService.removeImage(imageUrl);
+    }
+
+    // Save the logo URL to the user entity in DB
+    org.logo = imageUrl;
+    await this.organisationRepository.save(org);
+
+    return imageUrl;
+  }*/
 
   private generateStrongPassword(): string {
     const upperCaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";

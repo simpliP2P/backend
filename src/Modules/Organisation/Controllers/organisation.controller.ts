@@ -10,7 +10,9 @@ import {
   Query,
   Req,
   SetMetadata,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from "@nestjs/common";
 import { OrganisationService } from "../Services/organisation.service";
 import {
@@ -37,6 +39,7 @@ import {
   CreateProductDto,
   UpdateProductDto,
 } from "src/Modules/Product/Dtos/product.dto";
+import { AppLogger } from "src/Logger/logger.service";
 
 @Controller("organisations")
 export class OrganisationController {
@@ -45,6 +48,7 @@ export class OrganisationController {
     private readonly supplierService: SuppliersService,
     private readonly purchaseRequisitionService: PurchaseRequisitionService,
     private readonly productService: ProductService,
+    private readonly logger: AppLogger,
   ) {}
 
   @Post()
@@ -129,6 +133,82 @@ export class OrganisationController {
       throw error;
     }
   }
+
+  @Get(":organisationId/members")
+  @SetMetadata("permissions", [PermissionType.OWNER])
+  @UseGuards(OrganisationPermissionsGuard)
+  async getMembers(@Param("organisationId") orgId: string) {
+    try {
+      const members =
+        await this.organisationService.getOrganisationMembers(orgId);
+
+      return {
+        status: "success",
+        message: "Members fetched successfully",
+        data: members,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /*
+  @Post(":organisationId/logo")
+  @SetMetadata("permissions", [PermissionType.OWNER])
+  @UseGuards(OrganisationPermissionsGuard)
+  @UseInterceptors(
+    FileInterceptor("file", {
+      storage: diskStorage({
+        destination: "../../uploads",
+        filename: (req, file, callback) => {
+          const uniqueName = `${Date.now()}-${file.originalname}`;
+          callback(null, uniqueName);
+        },
+      }),
+      limits: { fileSize: 0.1 * 1024 * 1024 }, // max: approx. 100MB
+      fileFilter: (req, file, callback) => {
+        if (!file.mimetype.match(/image\/(jpeg|png|jpg)$/)) {
+          return callback(new BadRequestException("Invalid file type"), false);
+        }
+        callback(null, true);
+      },
+    }),
+  )
+  async uploadLogo(
+    @Param("organisationId") orgId: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: any,
+  ): Promise<any> {
+    try {
+      if (!file) {
+        throw new BadRequestException("No file uploaded");
+      }
+
+      const userId = req.user.sub;
+
+      const url = await this.organisationService.uploadLogo(userId, file);
+
+      // Delete the local file after processing
+      const filePath = join("../../uploads", file.filename);
+      if (existsSync(filePath)) {
+        unlink(filePath, (err) => {
+          if (err) {
+            this.logger.error("Error deleting file:", err.message);
+          }
+        });
+      } else {
+        this.logger.warn(`File not found for deletion: ${filePath}`);
+      }
+
+      return {
+        status: "success",
+        message: "Profile picture uploaded successfully",
+        data: { url },
+      };
+    } catch (error) {
+      throw error;
+    }
+  }*/
 
   /**
    * Supplier routes
