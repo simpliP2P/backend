@@ -17,6 +17,9 @@ export class Organisation extends BaseEntity {
   @Column({ type: "varchar" })
   address: string;
 
+  @Column({ nullable: true })
+  logo: string;
+
   @OneToMany(() => Product, (product) => product.organisation)
   products: Product[];
 

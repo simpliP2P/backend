@@ -276,7 +276,6 @@ export class OrganisationService {
     };
   }
 
-  /*
   public async uploadLogo(orgId: string, file: Express.Multer.File) {
     // Upload img to cloud
     const imageUrl = await this.uploadService.uploadImage(file.path);
@@ -296,7 +295,7 @@ export class OrganisationService {
     await this.organisationRepository.save(org);
 
     return imageUrl;
-  }*/
+  }
 
   private generateStrongPassword(): string {
     const upperCaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";

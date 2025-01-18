@@ -34,11 +34,15 @@ import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Serv
 import { ApprovalStatus } from "src/Modules/PurchaseRequisition/Enums/purchaseRequisition.enum";
 import { User } from "src/Modules/User/Entities/user.entity";
 import { ProductService } from "src/Modules/Product/Services/product.service";
-import { Product } from "src/Modules/Product/Entities/product.entity";
 import {
   CreateProductDto,
   UpdateProductDto,
 } from "src/Modules/Product/Dtos/product.dto";
+import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { diskStorage } from "multer";
+import { join } from "path";
+import { existsSync, unlink } from "fs";
 import { AppLogger } from "src/Logger/logger.service";
 
 @Controller("organisations")
@@ -152,7 +156,6 @@ export class OrganisationController {
     }
   }
 
-  /*
   @Post(":organisationId/logo")
   @SetMetadata("permissions", [PermissionType.OWNER])
   @UseGuards(OrganisationPermissionsGuard)
@@ -184,9 +187,7 @@ export class OrganisationController {
         throw new BadRequestException("No file uploaded");
       }
 
-      const userId = req.user.sub;
-
-      const url = await this.organisationService.uploadLogo(userId, file);
+      const url = await this.organisationService.uploadLogo(orgId, file);
 
       // Delete the local file after processing
       const filePath = join("../../uploads", file.filename);
@@ -202,13 +203,13 @@ export class OrganisationController {
 
       return {
         status: "success",
-        message: "Profile picture uploaded successfully",
+        message: "logo uploaded successfully",
         data: { url },
       };
     } catch (error) {
       throw error;
     }
-  }*/
+  }
 
   /**
    * Supplier routes
@@ -345,7 +346,6 @@ export class OrganisationController {
   /**
    * Purchase Requisition routes
    */
-
   @Post(":organisationId/requisitions")
   @SetMetadata("permissions", [
     PermissionType.OWNER,
