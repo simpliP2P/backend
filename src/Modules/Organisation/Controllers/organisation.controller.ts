@@ -19,6 +19,7 @@ import {
   acceptInvitationDto,
   addUserToOrgDto,
   CreateOrganisationDto,
+  updateUserDetailsDto,
 } from "../Dtos/organisation.dto";
 import { Request } from "express";
 import { OrganisationPermissionsGuard } from "src/Guards/permissions.guard";
@@ -123,6 +124,8 @@ export class OrganisationController {
   }
 
   @Get(":organisationId/dashboard")
+  @SetMetadata("permissions", [PermissionType.ORG_MEMBER])
+  @UseGuards(OrganisationPermissionsGuard)
   async dashboard(@Param("organisationId") orgId: string) {
     try {
       const organisations =
@@ -205,6 +208,27 @@ export class OrganisationController {
         status: "success",
         message: "logo uploaded successfully",
         data: { url },
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Patch(":organisationId/members/:memberId")
+  @SetMetadata("permissions", [PermissionType.OWNER])
+  @UseGuards(OrganisationPermissionsGuard)
+  async updateUserDetails(
+    @Param("organisationId") orgId: string,
+    @Param("memberId") userId: string,
+    @Body() reqBody: updateUserDetailsDto
+  ) {
+    try {
+      const member = await this.organisationService.updateUserDetails(userId, orgId, reqBody);
+
+      return {
+        status: "success",
+        message: "Updated successfully",
+        data: member,
       };
     } catch (error) {
       throw error;
@@ -379,6 +403,11 @@ export class OrganisationController {
   }
 
   @Patch(":organisationId/requisitions/:id/approval")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_PURCHASE_REQUISITIONS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
   async updateApproval(
     @Param("id") requisitionId: string,
     @Req() req: Request,

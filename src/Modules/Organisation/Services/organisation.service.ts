@@ -9,6 +9,7 @@ import {
   addUserToOrg,
   baseEmailInvitationData,
   CreateOrganisationInput,
+  updateUserDetails,
 } from "../Types/organisationTypes";
 import { UserService } from "src/Modules/User/Services/user.service";
 import { PermissionType } from "../Enums/userOrganisation.enum";
@@ -301,14 +302,12 @@ export class OrganisationService {
   public async updateUserDetails(
     userId: string,
     organisationId: string,
-    data: any,
+    data: updateUserDetails,
   ) {
     await this.userOrganisationRepository.update(
       { user: { id: userId }, organisation: { id: organisationId } },
-      { role: data.role, permissions: data.permissions },
+      data,
     );
-
-
   }
 
   private generateStrongPassword(): string {

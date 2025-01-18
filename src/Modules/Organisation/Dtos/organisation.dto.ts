@@ -41,7 +41,18 @@ class IsValidPermission implements ValidatorConstraintInterface {
   }
 }
 
-export class addUserToOrgDto {
+export class updateUserDetailsDto {
+  @IsString()
+  @MinLength(2)
+  role: string;
+
+  @IsArray()
+  @ArrayNotEmpty()
+  @Validate(IsValidPermission, { each: true })
+  permissions: string[];
+}
+
+export class addUserToOrgDto extends updateUserDetailsDto {
   @IsString()
   @MinLength(3)
   first_name: string;
@@ -52,15 +63,6 @@ export class addUserToOrgDto {
 
   @IsEmail()
   email: string;
-
-  @IsString()
-  @MinLength(2)
-  role: string;
-
-  @IsArray()
-  @ArrayNotEmpty()
-  @Validate(IsValidPermission, { each: true })
-  permissions: string[];
 }
 
 export class acceptInvitationDto {

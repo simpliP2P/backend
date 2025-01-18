@@ -4,12 +4,15 @@ export interface CreateOrganisationInput {
   creator_role: string;
 }
 
-export interface addUserToOrg {
+export interface updateUserDetails {
+  role: string;
+  permissions: string[];
+}
+
+export interface addUserToOrg extends updateUserDetails {
   first_name: string;
   last_name: string;
   email: string;
-  role: string;
-  permissions: string[];
 }
 
 export interface baseEmailInvitationData {
