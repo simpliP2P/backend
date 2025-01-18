@@ -8,6 +8,7 @@ import { MailModule } from "src/Modules/Mail/mail.module";
 import { ClientHelper } from "src/Shared/Helpers/client.helper";
 import { TokenModule } from "src/Modules/Token/token.module";
 import { UserModule } from "./user.module";
+import { AppLogger } from "src/Logger/logger.service";
 
 @Module({
   imports: [
@@ -18,6 +19,6 @@ import { UserModule } from "./user.module";
     UserModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, ClientHelper],
+  providers: [AuthService, ClientHelper, AppLogger],
 })
 export class AuthModule {}

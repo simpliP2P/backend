@@ -15,7 +15,10 @@ import { ClientHelper } from "src/Shared/Helpers/client.helper";
 import { ProviderType } from "../Enums/user.enum";
 import { TokenService } from "src/Modules/Token/Services/token.service";
 import { TokenType } from "src/Modules/Token/Enums/token.enum";
+import { createHash, randomUUID } from "crypto";
+import { Request } from "express";
 import { Repository } from "typeorm";
+import { AppLogger } from "src/Logger/logger.service";
 
 @Injectable()
 export class AuthService {
@@ -27,7 +30,9 @@ export class AuthService {
     private emailService: EmailServices,
     private clientHelper: ClientHelper,
     private tokenService: TokenService,
-  ) {}
+    private logger: AppLogger,
+  ) {
+  }
 
   public async signUp(signUpDto: SignUpDto): Promise<void> {
     const createdAccount = await this.userService.createLocalAccount(signUpDto);
@@ -57,8 +62,19 @@ export class AuthService {
 
     await this.verifyPassword(loginDto.password, validatedUser.password_hash);
 
-    // single org per user
-    const orgId = user?.userOrganisations[0]?.id ?? "";
+    this.userRepository
+      .update(
+        {
+          id: validatedUser.id,
+        },
+        { last_login: new Date() },
+      )
+      .catch((error) => {
+        this.logger.error(
+          `Unable to update last login of userId: ${validatedUser.id}`,
+          error,
+        );
+      });
 
     return this.generateLoginResponse(validatedUser);
   }
@@ -113,8 +129,62 @@ export class AuthService {
     );
   }
 
+  /*
+  public async generateTokens(user: User, req: Request) {
+    // Generate access token with short lifespan
+    const accessToken = this.tokenHelper.generateAccessToken({
+      sub: user.id,
+    });
+
+    // Generate refresh token
+    const deviceFingerprint = this.generateDeviceFingerprint(req);
+    const familyId = randomUUID();
+
+    const refreshToken = await this.tokenService.save({
+      token: randomUUID(),
+      type: TokenType.REFRESH_TOKEN,
+      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      user_id: user.id,
+      meta_data: {
+        tokenFamily: familyId,
+        deviceId: deviceFingerprint,
+        userAgent: req.headers["user-agent"],
+        fingerprint: deviceFingerprint,
+        lastIpAddress: req.ip,
+        previousTokenId: null, // First token in family
+        used: false,
+      },
+    });
+
+    return {
+      accessToken,
+      refreshToken: refreshToken.token,
+    };
+  }
+
+  public async logout(refreshToken: string) {
+    const tokenDoc = await this.tokenService.findToken({
+      where: { token: refreshToken },
+    });
+
+    if (tokenDoc) {
+      // Delete the token immediately rather than just invalidating
+      await this.tokenService.delete(tokenDoc.id);
+    }
+  }
+
+  public async logoutAll(userId: string) {
+    // Delete all refresh tokens for user
+    await this.tokenService.delete({ userId });
+  }
+
+  public async invalidateTokenFamily(familyId: string) {
+    // Delete all tokens in the family
+    await this.tokenService.delete({ tokenFamily: familyId });
+  }*/
+
   private async findAccountByEmail(email: string) {
-    return await this.userService.findAccount({
+    return await this.userRepository.findOne({
       where: { email },
       relations: ["userOrganisations"],
     });
@@ -165,4 +235,14 @@ export class AuthService {
       user: this.sanitizeUser(user),
     };
   }
+/*
+  private generateDeviceFingerprint(req: Request): string {
+    const factors = [
+      req.headers["user-agent"],
+      req.headers["accept-language"],
+      req.ip,
+    ];
+
+    return createHash("sha256").update(factors.join("|")).digest("hex");
+  }*/
 }
