@@ -119,7 +119,7 @@ export class AuthService {
 
     const oldPasswordHash = verifiedToken.user.password_hash;
     if (!oldPasswordHash) {
-      throw new UnprocessableEntityException("");
+      throw new UnprocessableEntityException("Cant reset password, try login using google provider");
     }
 
     await this.userService.resetPasswordUsingVerifiedToken(
