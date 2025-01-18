@@ -260,6 +260,7 @@ export class OrganisationService {
       phone: userOrg.user.phone,
       role: userOrg.role,
       permissions: userOrg.permissions,
+      last_login: userOrg.user.last_login,
       online_status:
         userOrg.user.last_login &&
         this.onlineStatus(userOrg.user.last_login.toISOString()),
@@ -270,7 +271,6 @@ export class OrganisationService {
         id: organisation.id,
         name: organisation.name,
         address: organisation.address,
-        logo: organisation.logo,
       },
       users,
     };
