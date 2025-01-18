@@ -29,6 +29,7 @@ import { SuppliersService } from "src/Modules/Supplier/Services/supplier.service
 // import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchaseOrder.service";
 import { ProductService } from "src/Modules/Product/Services/product.service";
 import { UploadService } from "src/Modules/Upload/Services/upload.service";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class OrganisationService {
@@ -44,9 +45,9 @@ export class OrganisationService {
     // private readonly purchaseOrderService: PurchaseOrderService,
     private readonly productService: ProductService,
     private readonly uploadService: UploadService,
-
     private readonly clientHelper: ClientHelper,
     private readonly logger: AppLogger,
+    private readonly configService: ConfigService
   ) {}
 
   public async findOrganisation(
@@ -260,6 +261,9 @@ export class OrganisationService {
       role: userOrg.role,
       permissions: userOrg.permissions,
       last_login: userOrg.user.last_login,
+      online_status:
+        userOrg.user.last_login &&
+        this.onlineStatus(userOrg.user.last_login.toISOString()),
     }));
 
     return {
@@ -342,6 +346,27 @@ export class OrganisationService {
       ...data,
       invitationLink,
     });
+  }
+
+  private onlineStatus(timestamp: string) {
+    const now = new Date(); // Current time
+
+    // Convert the timestamp to a Date object
+    const timestampDate = new Date(timestamp);
+
+    // Calculate the difference in milliseconds
+    const differenceInMilliseconds = now.getTime() - timestampDate.getTime();
+
+    // Convert the difference to minutes
+    const differenceInMinutes = differenceInMilliseconds / (1000 * 60);
+
+    const expiresIn = this.configService.get(
+      "tokenSecrets.accessToken.expiresIn",
+    );
+    const match = expiresIn.match(/^(\d+)([a-zA-Z]+)$/);
+    const number = parseInt(match[1], 10);
+
+    return differenceInMinutes < number;
   }
 
   // for delete, implement a soft delete
