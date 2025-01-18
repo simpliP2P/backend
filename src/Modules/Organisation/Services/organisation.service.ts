@@ -47,7 +47,7 @@ export class OrganisationService {
     private readonly uploadService: UploadService,
     private readonly clientHelper: ClientHelper,
     private readonly logger: AppLogger,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
   ) {}
 
   public async findOrganisation(
@@ -260,6 +260,7 @@ export class OrganisationService {
       phone: userOrg.user.phone,
       role: userOrg.role,
       permissions: userOrg.permissions,
+      profile_picture: userOrg.user.profile_picture,
       last_login: userOrg.user.last_login,
       online_status:
         userOrg.user.last_login &&
@@ -295,6 +296,19 @@ export class OrganisationService {
     await this.organisationRepository.save(org);
 
     return imageUrl;
+  }
+
+  public async updateUserDetails(
+    userId: string,
+    organisationId: string,
+    data: any,
+  ) {
+    await this.userOrganisationRepository.update(
+      { user: { id: userId }, organisation: { id: organisationId } },
+      { role: data.role, permissions: data.permissions },
+    );
+
+
   }
 
   private generateStrongPassword(): string {
