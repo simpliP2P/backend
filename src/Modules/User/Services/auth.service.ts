@@ -15,8 +15,6 @@ import { ClientHelper } from "src/Shared/Helpers/client.helper";
 import { ProviderType } from "../Enums/user.enum";
 import { TokenService } from "src/Modules/Token/Services/token.service";
 import { TokenType } from "src/Modules/Token/Enums/token.enum";
-import { createHash, randomUUID } from "crypto";
-import { Request } from "express";
 import { Repository } from "typeorm";
 import { AppLogger } from "src/Logger/logger.service";
 
@@ -62,19 +60,12 @@ export class AuthService {
 
     await this.verifyPassword(loginDto.password, validatedUser.password_hash);
 
-    this.userRepository
-      .update(
-        {
-          id: validatedUser.id,
-        },
-        { last_login: new Date() },
-      )
-      .catch((error) => {
-        this.logger.error(
-          `Unable to update last login of userId: ${validatedUser.id}`,
-          error,
-        );
-      });
+    this.userService.updateLastLogin(validatedUser.id).catch((error) => {
+      this.logger.error(
+        `Unable to update last login of userId: ${validatedUser.id}`,
+        error,
+      );
+    });
 
     return this.generateLoginResponse(validatedUser);
   }
@@ -191,7 +182,7 @@ export class AuthService {
   }
 
   private sanitizeUser(user: User): Partial<User> {
-    const { password_hash, created_at, updated_at, ...sanitizedUser } = user;
+    const { password_hash, created_at, updated_at, last_login, ...sanitizedUser } = user;
     return sanitizedUser;
   }
 

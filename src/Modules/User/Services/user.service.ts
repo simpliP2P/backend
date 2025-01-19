@@ -1,8 +1,16 @@
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "../Entities/user.entity";
 import { FindOneOptions, Repository } from "typeorm";
-import { Injectable, NotFoundException, UnauthorizedException, UnprocessableEntityException } from "@nestjs/common";
-import { BadRequestException, EmailExistsException } from "src/Shared/Exceptions/app.exceptions";
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+  UnprocessableEntityException,
+} from "@nestjs/common";
+import {
+  BadRequestException,
+  EmailExistsException,
+} from "src/Shared/Exceptions/app.exceptions";
 import {
   CreateGoogleAccountInput,
   CreateLocalAccountInput,
@@ -107,6 +115,15 @@ export class UserService {
     user.is_verified = true;
     user.verified_at = new Date();
     await this.userRepository.save(user);
+  }
+
+  public async updateLastLogin(userId: string): Promise<void> {
+    await this.userRepository.update(
+      {
+        id: userId,
+      },
+      { last_login: new Date() },
+    );
   }
 
   public async resetPasswordUsingVerifiedToken(

@@ -112,10 +112,14 @@ export class GoogleOAuthServices {
    * Assigns a session to an account.
    */
   private async assignSession(account: any): Promise<{ token: string }> {
+    const userId = account._id;
+
     const token = this.tokenHelper.generateAccessToken({
-      id: account._id,
+      id: userId,
       role: "user",
     });
+
+    await this.userService.updateLastLogin(userId);
 
     return { token };
   }
