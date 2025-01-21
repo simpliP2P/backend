@@ -34,6 +34,11 @@ export class CreateGoogleAccountInput {
   verified_at: Date;
 }
 
+export interface UpdateUserAccountInput {
+  first_name: string;
+  last_name: string; 
+}
+
 export interface ForgetCustomerPasswordInput {
   email: string;
 }

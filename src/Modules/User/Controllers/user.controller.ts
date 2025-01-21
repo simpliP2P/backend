@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Controller,
   Get,
   Post,
@@ -14,6 +13,7 @@ import { diskStorage } from "multer";
 import { join } from "path";
 import { existsSync, unlink } from "fs";
 import { AppLogger } from "src/Logger/logger.service";
+import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 
 @ApiTags("user")
 @Controller("users")
@@ -41,7 +41,7 @@ export class UserController {
           callback(null, uniqueName);
         },
       }),
-      limits: { fileSize: 0.3 * 1024 * 1024 }, // approx. 300MB
+      limits: { fileSize: 0.1 * 1024 * 1024 }, // max: approx. 100MB
       fileFilter: (req, file, callback) => {
         if (!file.mimetype.match(/image\/(jpeg|png|jpg)$/)) {
           return callback(new BadRequestException("Invalid file type"), false);

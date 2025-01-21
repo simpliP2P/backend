@@ -7,7 +7,7 @@ import {
   JoinColumn,
 } from "typeorm";
 import { User } from "../../User/Entities/user.entity";
-import { TokenType } from "../Enums/token.enum";
+import { MetaData, TokenType } from "../Enums/token.enum";
 
 @Entity("tokens")
 export class Token {
@@ -29,6 +29,9 @@ export class Token {
 
   @Column()
   user_id: string;
+
+  @Column({ type: "jsonb", nullable: true })
+  meta_data: MetaData;
 
   @CreateDateColumn()
   created_at: Date;
