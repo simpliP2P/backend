@@ -171,6 +171,7 @@ export class UserService {
           organisation: {
             id: true,
             name: true,
+            logo: true,
           },
         },
       },
