@@ -14,9 +14,12 @@ import { EmailServices } from "src/Modules/Mail/Services/mail.service";
 import { ClientHelper } from "src/Shared/Helpers/client.helper";
 import { ProviderType } from "../Enums/user.enum";
 import { TokenService } from "src/Modules/Token/Services/token.service";
-import { TokenType } from "src/Modules/Token/Enums/token.enum";
+import { MetaData, TokenType } from "src/Modules/Token/Enums/token.enum";
 import { Repository } from "typeorm";
 import { AppLogger } from "src/Logger/logger.service";
+import { randomUUID, createHash } from "crypto";
+import { Request } from "express";
+import { AuthTokens } from "../Types/authTypes";
 
 @Injectable()
 export class AuthService {
@@ -29,8 +32,7 @@ export class AuthService {
     private clientHelper: ClientHelper,
     private tokenService: TokenService,
     private logger: AppLogger,
-  ) {
-  }
+  ) {}
 
   public async signUp(signUpDto: SignUpDto): Promise<void> {
     const createdAccount = await this.userService.createLocalAccount(signUpDto);
@@ -52,7 +54,8 @@ export class AuthService {
 
   public async login(
     loginDto: loginDto,
-  ): Promise<{ token: string; user: Partial<User> }> {
+    req: Request,
+  ): Promise<{ tokens: AuthTokens; user: Partial<User> }> {
     // Find and validate user
     const user = await this.findAccountByEmail(loginDto.email);
 
@@ -67,7 +70,7 @@ export class AuthService {
       );
     });
 
-    return this.generateLoginResponse(validatedUser);
+    return await this.generateLoginResponse(validatedUser, req);
   }
 
   public async verifyEmail(token: string): Promise<void> {
@@ -110,7 +113,9 @@ export class AuthService {
 
     const oldPasswordHash = verifiedToken.user.password_hash;
     if (!oldPasswordHash) {
-      throw new UnprocessableEntityException("Cant reset password, try login using google provider");
+      throw new UnprocessableEntityException(
+        "Cant reset password, try login using google provider",
+      );
     }
 
     await this.userService.resetPasswordUsingVerifiedToken(
@@ -120,32 +125,70 @@ export class AuthService {
     );
   }
 
-  /*
-  public async generateTokens(user: User, req: Request) {
-    // Generate access token with short lifespan
+  public async refreshAccessToken(oldRefreshToken: string, req: Request) {
+    const tokenDoc = await this.tokenService.findRefreshtoken(oldRefreshToken);
+
+    console.log("tokenDoc", JSON.stringify(tokenDoc, null, 2));
+
+    if (!tokenDoc) {
+      throw new UnauthorizedException("Invalid refresh token");
+    }
+
+    // Verify device fingerprint
+    const currentFingerprint = this.generateDeviceFingerprint(req);
+    if (tokenDoc.meta_data.fingerprint !== currentFingerprint) {
+      // Potential token theft - invalidate entire family
+      await this.invalidateTokenFamily(tokenDoc.meta_data.tokenFamily);
+      throw new UnauthorizedException(
+        "Suspicious activity detected. Log in again.",
+      );
+    }
+
+    const tokens = await this.generateTokens(
+      tokenDoc.user_id,
+      tokenDoc.meta_data.tokenFamily,
+      req,
+    );
+
+    this.tokenService
+      .update(
+        { token: oldRefreshToken },
+        { meta_data: { ...tokenDoc.meta_data, rotated: true } }, // Optional metadata
+      )
+      .catch((error) => {
+        this.logger.error(
+          `Unable to rotate refresh token: ${oldRefreshToken}`,
+          error,
+        );
+      });
+
+    return tokens;
+  }
+
+  public async generateTokens(
+    userId: string,
+    tokenFamilyId: string,
+    req: Request,
+  ): Promise<AuthTokens> {
     const accessToken = this.tokenHelper.generateAccessToken({
-      sub: user.id,
+      sub: userId,
     });
 
     // Generate refresh token
     const deviceFingerprint = this.generateDeviceFingerprint(req);
-    const familyId = randomUUID();
+    const familyId = tokenFamilyId || randomUUID().replace(/-/g, "");
 
-    const refreshToken = await this.tokenService.save({
-      token: randomUUID(),
-      type: TokenType.REFRESH_TOKEN,
-      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-      user_id: user.id,
-      meta_data: {
-        tokenFamily: familyId,
-        deviceId: deviceFingerprint,
-        userAgent: req.headers["user-agent"],
-        fingerprint: deviceFingerprint,
-        lastIpAddress: req.ip,
-        previousTokenId: null, // First token in family
-        used: false,
-      },
-    });
+    const metaData = {
+      tokenFamily: familyId,
+      deviceId: deviceFingerprint,
+      userAgent: req.headers["user-agent"] || "",
+      fingerprint: deviceFingerprint,
+      lastIpAddress: req.ip,
+      previousTokenId: null, // First token in family
+      used: false,
+    };
+
+    const refreshToken = await this.generateRefreshToken(userId, metaData);
 
     return {
       accessToken,
@@ -166,13 +209,25 @@ export class AuthService {
 
   public async logoutAll(userId: string) {
     // Delete all refresh tokens for user
-    await this.tokenService.delete({ userId });
+    await this.tokenService.delete({ user_id: userId });
   }
 
   public async invalidateTokenFamily(familyId: string) {
     // Delete all tokens in the family
     await this.tokenService.delete({ tokenFamily: familyId });
-  }*/
+  }
+
+  private async generateRefreshToken(user_id: string, meta_data: MetaData) {
+    const refreshToken = await this.tokenService.save({
+      token: randomUUID().replace(/-/g, ""),
+      type: TokenType.REFRESH_TOKEN,
+      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      user_id,
+      meta_data,
+    });
+
+    return refreshToken;
+  }
 
   private async findAccountByEmail(email: string) {
     return await this.userRepository.findOne({
@@ -182,7 +237,13 @@ export class AuthService {
   }
 
   private sanitizeUser(user: User): Partial<User> {
-    const { password_hash, created_at, updated_at, last_login, ...sanitizedUser } = user;
+    const {
+      password_hash,
+      created_at,
+      updated_at,
+      last_login,
+      ...sanitizedUser
+    } = user;
     return sanitizedUser;
   }
 
@@ -212,28 +273,29 @@ export class AuthService {
     }
   }
 
-  private generateLoginResponse(user: User): {
-    token: string;
+  private async generateLoginResponse(
+    user: User,
+    req: Request,
+  ): Promise<{
+    tokens: AuthTokens;
     user: Partial<User>;
-  } {
-    const payload = {
-      sub: user.id,
-      // org_sub: orgId,
-    };
+  }> {
+    // tokens
+    const tokens = await this.generateTokens(user.id, "", req);
 
     return {
-      token: this.tokenHelper.generateAccessToken(payload),
+      tokens,
       user: this.sanitizeUser(user),
     };
   }
-/*
+
   private generateDeviceFingerprint(req: Request): string {
     const factors = [
       req.headers["user-agent"],
-      req.headers["accept-language"],
+      // req.headers["accept-language"],
       req.ip,
     ];
 
     return createHash("sha256").update(factors.join("|")).digest("hex");
-  }*/
+  }
 }

@@ -1,4 +1,13 @@
-import { Controller, Post, Body, Res, HttpStatus, UnauthorizedException } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  Body,
+  Res,
+  HttpStatus,
+  UnauthorizedException,
+  UseGuards,
+  Req,
+} from "@nestjs/common";
 import { AuthService } from "../Services/auth.service";
 import {
   SignUpDto,
@@ -8,16 +17,19 @@ import {
   verifyEmailDto,
 } from "../Dtos/auth.dto";
 import { ApiResponse } from "src/Shared/Interfaces/api-response.interface";
-import { Response } from "express";
+import { Request, Response } from "express";
 import {
   ApiTags,
   ApiBody,
   ApiResponse as SwaggerApiResponse,
 } from "@nestjs/swagger";
 import { Public } from "src/Shared/Decorators/custom.decorator";
+import { Throttle, ThrottlerGuard } from "@nestjs/throttler";
+import { CustomThrottlerGuard } from "src/Guards/custom-throttler.guard";
 
 @ApiTags("auth")
 @Controller("auth")
+@UseGuards(CustomThrottlerGuard)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
@@ -28,6 +40,7 @@ export class AuthController {
     status: 201,
     description: "User signed up successfully",
   })
+  @Throttle({ default: { limit: 1, ttl: 60 } }) // 1 request per minute
   async signUp(@Body() signUpDto: SignUpDto): Promise<ApiResponse<{}>> {
     try {
       await this.authService.signUp(signUpDto);
@@ -45,13 +58,18 @@ export class AuthController {
   @Post("login")
   @Public()
   @ApiBody({ type: loginDto })
-  async login(@Body() loginDto: loginDto, @Res() res: Response): Promise<void> {
+  @Throttle({ default: { limit: 5, ttl: 60 } })
+  async login(
+    @Body() loginDto: loginDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<void> {
     try {
       this.validateLoginInput(loginDto);
-      const { token, user } = await this.authService.login(loginDto);
+      const { tokens, user } = await this.authService.login(loginDto, req);
 
       res
-        .cookie("access_token", token, {
+        .cookie("access_token", tokens.accessToken, {
           httpOnly: true, // Prevents client-side JavaScript access
           secure: process.env.NODE_ENV === "production", // Ensures cookies are sent over HTTPS in production
           sameSite: "strict", // Protects against CSRF attacks
@@ -61,7 +79,11 @@ export class AuthController {
         .json({
           status: "success",
           message: "Login successful",
-          data: { user, access_token: token },
+          data: {
+            user,
+            access_token: tokens.accessToken,
+            refresh_token: tokens.refreshToken,
+          },
         });
     } catch (error) {
       throw error;
@@ -118,6 +140,83 @@ export class AuthController {
         message: "Password reset successful",
         data: {},
       };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Post("refresh-token")
+  @Public()
+  async refreshToken(
+    @Req() req: Request,
+    @Body() body: { oldRefreshToken: string },
+    @Res() res: Response,
+  ): Promise<void> {
+    try {
+      const { accessToken, refreshToken } =
+        await this.authService.refreshAccessToken(body.oldRefreshToken, req);
+
+      res
+        .cookie("access_token", accessToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          maxAge: 1000 * 60 * 60,
+        })
+        .status(HttpStatus.OK)
+        .json({
+          status: "success",
+          message: "Token refreshed",
+          data: { accessToken, refreshToken },
+        });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Post("logout")
+  async logout(
+    @Res() res: Response,
+    @Body() body: { refreshToken: string },
+  ): Promise<void> {
+    try {
+      await this.authService.logout(body.refreshToken);
+
+      res
+        .clearCookie("access_token")
+        .status(HttpStatus.OK)
+        .json({
+          status: "success",
+          message: "Logged out successfully",
+          data: {},
+        });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Post("logout-all")
+  async logoutAll(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: { userId: string },
+  ): Promise<void> {
+    try {
+      const userId = req.user.sub;
+      
+      if (req.user.sub !== body.userId) {
+        throw new UnauthorizedException("Unauthorized!");
+      }
+      
+      await this.authService.logoutAll(userId);
+      res
+        .clearCookie("access_token")
+        .status(HttpStatus.OK)
+        .json({
+          status: "success",
+          message: "Logged out of all devices",
+          data: {},
+        });
     } catch (error) {
       throw error;
     }
