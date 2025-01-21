@@ -248,7 +248,11 @@ export class OrganisationService {
 
     // Fetch users associated with the organization
     const userOrganisations = await this.userOrganisationRepository.find({
-      where: { organisation: { id: organisationId }, is_creator: false },
+      where: {
+        organisation: { id: organisationId },
+        is_creator: false,
+        accepted_invitation: true,
+      },
       relations: ["user"],
     });
 
