@@ -3,9 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { LessThan, MoreThanOrEqual, Repository } from "typeorm";
 import { Token } from "../Entities/token.entity";
 import { TokenData, TokenType } from "../Enums/token.enum";
-import {
-  InvalidTokenException,
-} from "src/Shared/Exceptions/app.exceptions";
+import { InvalidTokenException } from "src/Shared/Exceptions/app.exceptions";
 import * as crypto from "crypto";
 import { AppLogger } from "src/Logger/logger.service";
 
@@ -51,22 +49,41 @@ export class TokenService {
     }
 
     // Fire and forget cleanup
-    this.tokenRepository
-      .delete({
-        expires_at: LessThan(new Date()),
-      })
-      .catch((err) => {
-        this.logger.error("Token cleanup failed:", err);
-      });
+    this.delete({
+      expires_at: LessThan(new Date()),
+    }).catch((err) => {
+      this.logger.error("Token cleanup failed:", err);
+    });
 
     return storedToken;
+  }
+
+  async findToken(query: any): Promise<Token | null> {
+    return await this.tokenRepository.findOne(query);
+  }
+
+  async findRefreshtoken(oldRefreshToken: string): Promise<Token | null> {
+    const now = new Date();
+    const gracePeriod = new Date(now.getTime() - 5 * 60 * 1000); // 5 minutes ago
+
+    return await this.tokenRepository
+      .createQueryBuilder("token")
+      .where("token.token = :token", { token: oldRefreshToken })
+      .andWhere("token.type = :type", { type: TokenType.REFRESH_TOKEN })
+      .andWhere("token.meta_data @> :metaData", { metaData: { used: false } }) // JSON containment
+      .andWhere("token.expires_at > :now", { now: gracePeriod})
+      .getOne();
+  }
+
+  async update(query: any, newData: any) {
+    return await this.tokenRepository.update(query, newData);
   }
 
   async save(tokenData: TokenData): Promise<any> {
     return await this.tokenRepository.save(tokenData);
   }
 
-  async delete(tokenId: number): Promise<void> {
-    await this.tokenRepository.delete(tokenId);
+  async delete(query: any): Promise<void> {
+    await this.tokenRepository.delete(query);
   }
 }
