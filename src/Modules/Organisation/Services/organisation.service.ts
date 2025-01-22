@@ -251,7 +251,7 @@ export class OrganisationService {
       where: {
         organisation: { id: organisationId },
         is_creator: false,
-        accepted_invitation: true,
+        // accepted_invitation: true,
       },
       relations: ["user"],
     });
