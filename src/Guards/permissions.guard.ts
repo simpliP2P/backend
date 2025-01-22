@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from "@nestjs/common";
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { UserOrganisationRepository } from "src/Modules/Organisation/Repositories/userOrganisation.repository";
 import { PermissionType } from "src/Modules/Organisation/Enums/userOrganisation.enum";
