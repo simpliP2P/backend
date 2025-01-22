@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext } from "@nestjs/common";
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { UserOrganisationRepository } from "src/Modules/Organisation/Repositories/userOrganisation.repository";
 import { PermissionType } from "src/Modules/Organisation/Enums/userOrganisation.enum";
@@ -38,6 +38,10 @@ export class OrganisationPermissionsGuard implements CanActivate {
     // User is not part of the organisation
     if (!userOrganisation) {
       return false;
+    }
+
+    if (!userOrganisation.accepted_invitation) {
+      throw new UnauthorizedException("User has not accepted the invitation");
     }
 
     /**
