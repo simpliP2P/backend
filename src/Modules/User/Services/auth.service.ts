@@ -128,8 +128,6 @@ export class AuthService {
   public async refreshAccessToken(oldRefreshToken: string, req: Request) {
     const tokenDoc = await this.tokenService.findRefreshtoken(oldRefreshToken);
 
-    console.log("tokenDoc", JSON.stringify(tokenDoc, null, 2));
-
     if (!tokenDoc) {
       throw new UnauthorizedException("Invalid refresh token");
     }
