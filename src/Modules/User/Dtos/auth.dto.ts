@@ -67,14 +67,6 @@ export class SignUpDto {
   @IsOptional()
   phone: string;
 
-  @ApiProperty({
-    description: "Indicates whether the user is verified or not",
-    type: Boolean,
-    required: false,
-  })
-  @IsBoolean()
-  @IsOptional()
-  is_verified: boolean;
 }
 
 export class loginDto {
