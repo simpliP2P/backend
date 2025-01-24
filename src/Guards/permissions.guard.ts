@@ -45,7 +45,7 @@ export class OrganisationPermissionsGuard implements CanActivate {
       return false;
     }
 
-    if (!userOrganisation.accepted_invitation) {
+    if (!userOrganisation.is_creator || !userOrganisation.accepted_invitation) {
       throw new UnauthorizedException("User has not accepted the invitation");
     }
 
