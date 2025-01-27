@@ -5,7 +5,9 @@ import {
   Body,
   Res,
   HttpStatus,
+  Req,
 } from "@nestjs/common";
+import { Request } from "express";
 import { Response } from "express";
 import { GoogleOAuthServices } from "./../Services/googleOauth.service";
 import { HandleCustomerGoogleLoginCallbackInput } from "../Dtos/googleOauth.dto";
@@ -33,6 +35,7 @@ export class GoogleOAuthController {
   async handleCallback(
     @Body() body: HandleCustomerGoogleLoginCallbackInput,
     @Res() res: Response,
+    @Req() req: Request,
   ): Promise<void> {
     try {
       const { code } = body;
@@ -44,6 +47,7 @@ export class GoogleOAuthController {
       const result =
         await this.googleOAuthServices.handleCustomerGoogleSignUpOrLoginCallback(
           { code },
+          req,
         );
 
       res.status(HttpStatus.OK).json({

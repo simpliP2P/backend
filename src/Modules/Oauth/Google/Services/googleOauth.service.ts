@@ -8,13 +8,16 @@ import { CreateGoogleAccountInput } from "src/Modules/User/Types/userTypes";
 import { UserService } from "src/Modules/User/Services/user.service";
 import { TokenHelper } from "src/Shared/Helpers/token.helper";
 import { HandleCustomerGoogleLoginCallbackInput } from "../Dtos/googleOauth.dto";
+import { AuthService } from "src/Modules/User/Services/auth.service";
+import { Request } from "express";
+import { AuthTokens } from "src/Modules/User/Types/authTypes";
 
 @Injectable()
 export class GoogleOAuthServices {
   constructor(
     private readonly googleClientConfig: GoogleClientConfig,
     private readonly userService: UserService,
-    private readonly tokenHelper: TokenHelper,
+    private readonly authService: AuthService,
   ) {}
 
   /**
@@ -24,7 +27,8 @@ export class GoogleOAuthServices {
    */
   public async handleCustomerGoogleSignUpOrLoginCallback(
     data: HandleCustomerGoogleLoginCallbackInput,
-  ): Promise<{ token: string }> {
+    req: Request
+  ): Promise<AuthTokens> {
     try {
       // Step 1: Get tokens from Google API
       const { tokens } = await this.googleClientConfig.googleClient.getToken(
@@ -50,10 +54,11 @@ export class GoogleOAuthServices {
       if (!email || !first_name || !last_name || isVerified === undefined) {
         throw new Error("Invalid Google user data");
       }
+
       // Step 5: Handle account login or creation
       return foundAccount
-        ? this.assignSessionToExistingAccount(foundAccount)
-        : this.createNewCustomerAccount(first_name, last_name, email, isVerified);
+        ? this.assignSessionToExistingAccount(foundAccount, req)
+        : this.createNewCustomerAccount(first_name, last_name, email, isVerified, req);
     } catch (error) {
       throw new Error(
         `Error handling Google sign-up or login callback: ${error.message}`,
@@ -83,7 +88,8 @@ export class GoogleOAuthServices {
     last_name: string,
     email: string,
     is_verified: boolean,
-  ): Promise<{ token: string }> {
+    req: Request
+  ): Promise<AuthTokens> {
     const accountPayload: CreateGoogleAccountInput = {
       first_name,
       last_name,
@@ -96,7 +102,7 @@ export class GoogleOAuthServices {
     const createdAccount =
       await this.userService.createGoogleAccount(accountPayload);
 
-    return this.assignSession(createdAccount);
+    return this.assignSession(createdAccount, req);
   }
 
   /**
@@ -104,24 +110,22 @@ export class GoogleOAuthServices {
    */
   private async assignSessionToExistingAccount(
     account: any,
-  ): Promise<{ token: string }> {
-    return this.assignSession(account);
+    req: Request
+  ): Promise<AuthTokens> {
+    return this.assignSession(account, req);
   }
 
   /**
    * Assigns a session to an account.
    */
-  private async assignSession(account: any): Promise<{ token: string }> {
-    const userId = account._id;
+  private async assignSession(account: any, req: Request): Promise<AuthTokens> {
+    const userId = account.id;
 
-    const token = this.tokenHelper.generateAccessToken({
-      id: userId,
-      role: "user",
-    });
+    const tokens = await this.authService.generateTokens(userId, "", req);
 
     await this.userService.updateLastLogin(userId);
 
-    return { token };
+    return tokens;
   }
 
   /**

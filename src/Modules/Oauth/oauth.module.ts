@@ -5,9 +5,10 @@ import { GoogleClientConfig } from "src/Infrastructure/Oauth/googleOauth.config"
 import { TokenHelper } from "src/Shared/Helpers/token.helper";
 import { UserModule } from "../User/Modules/user.module";
 import { JwtModule } from "@nestjs/jwt";
+import { AuthModule } from "../User/Modules/auth.module";
 
 @Module({
-  imports: [UserModule, JwtModule.register({})],
+  imports: [UserModule, JwtModule.register({}), AuthModule],
   controllers: [GoogleOAuthController],
   providers: [GoogleOAuthServices, GoogleClientConfig, TokenHelper],
 })
