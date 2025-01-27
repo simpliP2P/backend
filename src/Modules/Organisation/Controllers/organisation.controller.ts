@@ -220,15 +220,85 @@ export class OrganisationController {
   async updateUserDetails(
     @Param("organisationId") orgId: string,
     @Param("memberId") userId: string,
-    @Body() reqBody: updateUserDetailsDto
+    @Body() reqBody: updateUserDetailsDto,
   ) {
     try {
-      const member = await this.organisationService.updateUserDetails(userId, orgId, reqBody);
+      const member = await this.organisationService.updateUserDetails(
+        userId,
+        orgId,
+        reqBody,
+      );
 
       return {
         status: "success",
         message: "Updated successfully",
         data: member,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Patch(":organisationId/members/:memberId/deactivate")
+  @SetMetadata("permissions", [PermissionType.OWNER])
+  @UseGuards(OrganisationPermissionsGuard)
+  async deactivateMember(
+    @Param("organisationId") orgId: string,
+    @Param("memberId") userId: string,
+  ) {
+    try {
+      await this.organisationService.deactivateMember(
+        userId,
+        orgId,
+      );
+
+      return {
+        status: "success",
+        message: "Deactivated successfully",
+        data: {},
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Patch(":organisationId/members/:memberId/reactivate")
+  @SetMetadata("permissions", [PermissionType.OWNER])
+  @UseGuards(OrganisationPermissionsGuard)
+  async reactivateMember(
+    @Param("organisationId") orgId: string,
+    @Param("memberId") userId: string,
+  ) {
+    try {
+      await this.organisationService.reactivateMember(
+        userId,
+        orgId,
+      );
+
+      return {
+        status: "success",
+        message: "Reactivated successfully",
+        data: {},
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Delete(":organisationId/members/:memberId")
+  @SetMetadata("permissions", [PermissionType.OWNER])
+  @UseGuards(OrganisationPermissionsGuard)
+  async removeMember(
+    @Param("organisationId") orgId: string,
+    @Param("memberId") userId: string,
+  ) {
+    try {
+      await this.organisationService.removeMember(userId, orgId);
+
+      return {
+        status: "success",
+        message: "Removed successfully",
+        data: {},
       };
     } catch (error) {
       throw error;

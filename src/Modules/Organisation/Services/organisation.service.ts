@@ -314,6 +314,30 @@ export class OrganisationService {
     );
   }
 
+  public async deactivateMember(userId: string, organisationId: string): Promise<void> {
+    await this.userOrganisationRepository.update(
+      { user: { id: userId }, organisation: { id: organisationId } },
+      { deactivated_at: new Date() },
+    );
+  }
+
+  public async reactivateMember(userId: string, organisationId: string): Promise<void> {
+    await this.userOrganisationRepository.update(
+      { user: { id: userId }, organisation: { id: organisationId } },
+      { deactivated_at: null },
+    );
+  }
+
+  public async removeMember(
+    userId: string,
+    organisationId: string,
+  ): Promise<void> {
+    await this.userOrganisationRepository.delete({
+      user: { id: userId },
+      organisation: { id: organisationId },
+    });
+  }
+
   private generateStrongPassword(): string {
     const upperCaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const lowerCaseLetters = "abcdefghijklmnopqrstuvwxyz";

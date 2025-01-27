@@ -57,4 +57,7 @@ export class UserOrganisation extends BaseEntity {
 
   @Column({ default: false })
   accepted_invitation: boolean;
+
+  @Column({ type: "timestamp", nullable: true, default: null })
+  deactivated_at: Date | null;
 }
