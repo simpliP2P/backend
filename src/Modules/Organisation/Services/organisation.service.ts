@@ -57,7 +57,7 @@ export class OrganisationService {
     return await this.organisationRepository.findOne(query);
   }
 
-  async createOrganisation(
+  public async createOrganisation(
     createOrganisationInput: CreateOrganisationInput,
     creatorId: string,
   ): Promise<Organisation> {
@@ -108,7 +108,84 @@ export class OrganisationService {
     return createdOrg;
   }
 
-  async addUserToOrganisation(organisationId: string, data: addUserToOrg) {
+  public async acceptInvitation(data: {
+    token: string;
+    organisationId: string;
+    newPassword: string;
+  }) {
+    const { token, organisationId, newPassword } = data;
+
+    const verifiedToken = await this.tokenService.verifyToken(
+      token,
+      TokenType.ORG_INVITATION,
+    );
+
+    await this.userService.updateAccountUsingVerificationToken(verifiedToken);
+
+    await this.userOrganisationRepository.update(
+      {
+        user: { id: verifiedToken.user_id }, // Ensure this matches your entity relations
+        organisation: { id: organisationId },
+      },
+      { accepted_invitation: true },
+    );
+
+    await this.userService.resetPasswordUsingVerifiedToken(
+      verifiedToken,
+      newPassword,
+      "", // not sending old password hash(edgecase: scenario where user password equals generated password)
+    );
+  }
+
+  public async uploadLogo(orgId: string, file: Express.Multer.File) {
+    // Upload img to cloud
+    const imageUrl = await this.uploadService.uploadImage(file.path);
+
+    const org = await this.findOrganisation({ where: { id: orgId } });
+    if (!org) {
+      throw new Error("Organisation not found");
+    }
+
+    // remove existing img from cloud
+    if (org.logo) {
+      this.uploadService.removeImage(imageUrl);
+    }
+
+    // Save the logo URL to the user entity in DB
+    org.logo = imageUrl;
+    await this.organisationRepository.save(org);
+
+    return imageUrl;
+  }
+
+  public async getOrganisationMetrics(organisationId: string) {
+    const totalSuppliers = await this.supplierService.count({
+      where: { organisation: { id: organisationId } },
+    });
+
+    const totalProducts = await this.productService.count({
+      where: { organisation: { id: organisationId } },
+    });
+
+    // const pendingPurchaseOrders = await this.purchaseOrderService.count({
+    //   where: { organisation: { id: organisationId }, status: "PENDING" },
+    // });
+
+    return {
+      organisationId,
+      metrics: {
+        totalSuppliers,
+        totalProducts,
+        pendingPurchaseOrders: 0,
+      },
+    };
+  }
+
+  /**
+   * Members Management
+   */
+
+  public async addMemberToOrganisation(organisationId: string, data: addUserToOrg) {
     const { email, first_name, last_name, role, permissions } = data;
 
     let createdAccount: User | null = null;
@@ -182,59 +259,7 @@ export class OrganisationService {
     return createdRelation;
   }
 
-  async acceptInvitation(data: {
-    token: string;
-    organisationId: string;
-    newPassword: string;
-  }) {
-    const { token, organisationId, newPassword } = data;
-
-    const verifiedToken = await this.tokenService.verifyToken(
-      token,
-      TokenType.ORG_INVITATION,
-    );
-
-    await this.userService.updateAccountUsingVerificationToken(verifiedToken);
-
-    await this.userOrganisationRepository.update(
-      {
-        user: { id: verifiedToken.user_id }, // Ensure this matches your entity relations
-        organisation: { id: organisationId },
-      },
-      { accepted_invitation: true },
-    );
-
-    await this.userService.resetPasswordUsingVerifiedToken(
-      verifiedToken,
-      newPassword,
-      "", // not sending old password hash(edgecase: scenario where user password equals generated password)
-    );
-  }
-
-  async getOrganisationMetrics(organisationId: string) {
-    const totalSuppliers = await this.supplierService.count({
-      where: { organisation: { id: organisationId } },
-    });
-
-    const totalProducts = await this.productService.count({
-      where: { organisation: { id: organisationId } },
-    });
-
-    // const pendingPurchaseOrders = await this.purchaseOrderService.count({
-    //   where: { organisation: { id: organisationId }, status: "PENDING" },
-    // });
-
-    return {
-      organisationId,
-      metrics: {
-        totalSuppliers,
-        totalProducts,
-        pendingPurchaseOrders: 0,
-      },
-    };
-  }
-
-  async getOrganisationMembers(organisationId: string) {
+  public async getOrganisationMembers(organisationId: string) {
     // Check if the organization exists
     const organisation = await this.organisationRepository.findOne({
       where: { id: organisationId },
@@ -282,28 +307,7 @@ export class OrganisationService {
     };
   }
 
-  public async uploadLogo(orgId: string, file: Express.Multer.File) {
-    // Upload img to cloud
-    const imageUrl = await this.uploadService.uploadImage(file.path);
-
-    const org = await this.findOrganisation({ where: { id: orgId } });
-    if (!org) {
-      throw new Error("Organisation not found");
-    }
-
-    // remove existing img from cloud
-    if (org.logo) {
-      this.uploadService.removeImage(imageUrl);
-    }
-
-    // Save the logo URL to the user entity in DB
-    org.logo = imageUrl;
-    await this.organisationRepository.save(org);
-
-    return imageUrl;
-  }
-
-  public async updateUserDetails(
+  public async updateMemberDetails(
     userId: string,
     organisationId: string,
     data: updateUserDetails,
@@ -314,14 +318,20 @@ export class OrganisationService {
     );
   }
 
-  public async deactivateMember(userId: string, organisationId: string): Promise<void> {
+  public async deactivateMember(
+    userId: string,
+    organisationId: string,
+  ): Promise<void> {
     await this.userOrganisationRepository.update(
       { user: { id: userId }, organisation: { id: organisationId } },
       { deactivated_at: new Date() },
     );
   }
 
-  public async reactivateMember(userId: string, organisationId: string): Promise<void> {
+  public async reactivateMember(
+    userId: string,
+    organisationId: string,
+  ): Promise<void> {
     await this.userOrganisationRepository.update(
       { user: { id: userId }, organisation: { id: organisationId } },
       { deactivated_at: null },

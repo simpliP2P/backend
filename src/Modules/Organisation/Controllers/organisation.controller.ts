@@ -77,29 +77,6 @@ export class OrganisationController {
     }
   }
 
-  @Post(":organisationId/invite-user")
-  @SetMetadata("permissions", [
-    PermissionType.OWNER,
-    PermissionType.MANAGE_USERS,
-  ])
-  @UseGuards(OrganisationPermissionsGuard)
-  async addUserToOrganisation(
-    @Param("organisationId") orgId: string,
-    @Body() userData: addUserToOrgDto,
-  ) {
-    try {
-      await this.organisationService.addUserToOrganisation(orgId, userData);
-
-      return {
-        status: "success",
-        message: "Invitation sent to user successfully",
-        data: {},
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
-
   @Public()
   @Post(":organisationId/accept-invitation")
   async acceptInvitation(
@@ -135,24 +112,6 @@ export class OrganisationController {
         status: "success",
         message: "Metrics fetched successfully",
         data: organisations,
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  @Get(":organisationId/members")
-  @SetMetadata("permissions", [PermissionType.OWNER])
-  @UseGuards(OrganisationPermissionsGuard)
-  async getMembers(@Param("organisationId") orgId: string) {
-    try {
-      const members =
-        await this.organisationService.getOrganisationMembers(orgId);
-
-      return {
-        status: "success",
-        message: "Members fetched successfully",
-        data: members,
       };
     } catch (error) {
       throw error;
@@ -214,16 +173,60 @@ export class OrganisationController {
     }
   }
 
+  /**
+   * Member routes
+   */
+  @Post(":organisationId/invite-member")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_USERS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async addMemberToOrganisation(
+    @Param("organisationId") orgId: string,
+    @Body() userData: addUserToOrgDto,
+  ) {
+    try {
+      await this.organisationService.addMemberToOrganisation(orgId, userData);
+
+      return {
+        status: "success",
+        message: "Invitation sent to user successfully",
+        data: {},
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get(":organisationId/members")
+  @SetMetadata("permissions", [PermissionType.OWNER])
+  @UseGuards(OrganisationPermissionsGuard)
+  async getMembers(@Param("organisationId") orgId: string) {
+    try {
+      const members =
+        await this.organisationService.getOrganisationMembers(orgId);
+
+      return {
+        status: "success",
+        message: "Members fetched successfully",
+        data: members,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Patch(":organisationId/members/:memberId")
   @SetMetadata("permissions", [PermissionType.OWNER])
   @UseGuards(OrganisationPermissionsGuard)
-  async updateUserDetails(
+  async updateMemberDetails(
     @Param("organisationId") orgId: string,
     @Param("memberId") userId: string,
     @Body() reqBody: updateUserDetailsDto,
   ) {
     try {
-      const member = await this.organisationService.updateUserDetails(
+      const member = await this.organisationService.updateMemberDetails(
         userId,
         orgId,
         reqBody,
@@ -247,10 +250,7 @@ export class OrganisationController {
     @Param("memberId") userId: string,
   ) {
     try {
-      await this.organisationService.deactivateMember(
-        userId,
-        orgId,
-      );
+      await this.organisationService.deactivateMember(userId, orgId);
 
       return {
         status: "success",
@@ -270,10 +270,7 @@ export class OrganisationController {
     @Param("memberId") userId: string,
   ) {
     try {
-      await this.organisationService.reactivateMember(
-        userId,
-        orgId,
-      );
+      await this.organisationService.reactivateMember(userId, orgId);
 
       return {
         status: "success",

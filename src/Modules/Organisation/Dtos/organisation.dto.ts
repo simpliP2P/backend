@@ -2,6 +2,7 @@ import {
   ArrayNotEmpty,
   IsArray,
   IsEmail,
+  IsOptional,
   IsString,
   Matches,
   MinLength,
@@ -11,6 +12,7 @@ import {
   ValidatorConstraintInterface,
 } from "class-validator";
 import { PermissionType } from "../Enums/userOrganisation.enum";
+import { Type } from "class-transformer";
 
 export class CreateOrganisationDto {
   @IsString()
@@ -41,18 +43,36 @@ class IsValidPermission implements ValidatorConstraintInterface {
   }
 }
 
+@ValidatorConstraint({ name: "AtLeastOne", async: false })
+class AtLeastOneConstraint implements ValidatorConstraintInterface {
+  validate(_: any, args: ValidationArguments) {
+    const object = args.object as Record<string, any>;
+    return !!(object.role || object.permissions);
+  }
+
+  defaultMessage(args: ValidationArguments) {
+    return `At least one of the following properties must be provided: ${args.constraints.join(", ")}`;
+  }
+}
+
 export class updateUserDetailsDto {
+  @IsOptional()
   @IsString()
   @MinLength(2)
-  role: string;
+  role?: string;
 
+  @IsOptional()
   @IsArray()
   @ArrayNotEmpty()
   @Validate(IsValidPermission, { each: true })
-  permissions: string[];
+  @Type(() => String)
+  permissions?: string[];
+
+  @Validate(AtLeastOneConstraint, ["role", "permissions"])
+  _atLeastOne?: any;
 }
 
-export class addUserToOrgDto extends updateUserDetailsDto {
+export class addUserToOrgDto {
   @IsString()
   @MinLength(3)
   first_name: string;
@@ -63,6 +83,15 @@ export class addUserToOrgDto extends updateUserDetailsDto {
 
   @IsEmail()
   email: string;
+
+  @IsString()
+  @MinLength(2)
+  role: string;
+
+  @IsArray()
+  @ArrayNotEmpty()
+  @Validate(IsValidPermission, { each: true })
+  permissions: string[];
 }
 
 export class acceptInvitationDto {
