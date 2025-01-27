@@ -129,8 +129,6 @@ export class AuthService {
   public async refreshAccessToken(oldRefreshToken: string, req: Request) {
     const tokenDoc = await this.tokenService.findRefreshtoken(oldRefreshToken);
 
-    console.log("tokenDoc", JSON.stringify(tokenDoc));
-
     if (!tokenDoc) {
       throw new UnauthorizedException("Invalid refresh token");
     }
@@ -192,8 +190,8 @@ export class AuthService {
     const refreshToken = await this.generateRefreshToken(userId, metaData);
 
     return {
-      accessToken,
-      refreshToken: refreshToken.token,
+      access_token: accessToken,
+      refresh_token: refreshToken.token,
     };
   }
 

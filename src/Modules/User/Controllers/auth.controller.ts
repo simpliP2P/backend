@@ -69,7 +69,7 @@ export class AuthController {
       const { tokens, user } = await this.authService.login(loginDto, req);
 
       res
-        .cookie("access_token", tokens.accessToken, {
+        .cookie("access_token", tokens.access_token, {
           httpOnly: true, // Prevents client-side JavaScript access
           secure: process.env.NODE_ENV === "production", // Ensures cookies are sent over HTTPS in production
           sameSite: "strict", // Protects against CSRF attacks
@@ -81,8 +81,8 @@ export class AuthController {
           message: "Login successful",
           data: {
             user,
-            access_token: tokens.accessToken,
-            refresh_token: tokens.refreshToken,
+            access_token: tokens.access_token,
+            refresh_token: tokens.refresh_token,
           },
         });
     } catch (error) {
@@ -153,11 +153,11 @@ export class AuthController {
     @Res() res: Response,
   ): Promise<void> {
     try {
-      const { accessToken, refreshToken } =
+      const { access_token, refresh_token } =
         await this.authService.refreshAccessToken(body.oldRefreshToken, req);
 
       res
-        .cookie("access_token", accessToken, {
+        .cookie("access_token", access_token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "strict",
@@ -167,7 +167,7 @@ export class AuthController {
         .json({
           status: "success",
           message: "Token refreshed",
-          data: { accessToken, refreshToken },
+          data: { access_token, refresh_token },
         });
     } catch (error) {
       throw error;
