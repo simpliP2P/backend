@@ -20,5 +20,6 @@ import { AppLogger } from "src/Logger/logger.service";
   ],
   controllers: [AuthController],
   providers: [AuthService, ClientHelper, AppLogger],
+  exports: [AuthService],
 })
 export class AuthModule {}
