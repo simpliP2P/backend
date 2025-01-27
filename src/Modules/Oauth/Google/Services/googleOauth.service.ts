@@ -6,7 +6,7 @@ import {
 import { ProviderType } from "src/Modules/User/Enums/user.enum";
 import { CreateGoogleAccountInput } from "src/Modules/User/Types/userTypes";
 import { UserService } from "src/Modules/User/Services/user.service";
-import { TokenHelper } from "src/Shared/Helpers/token.helper";
+
 import { HandleCustomerGoogleLoginCallbackInput } from "../Dtos/googleOauth.dto";
 import { AuthService } from "src/Modules/User/Services/auth.service";
 import { Request } from "express";
