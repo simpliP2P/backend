@@ -20,6 +20,7 @@ import { AppLogger } from "src/Logger/logger.service";
 import { randomUUID, createHash } from "crypto";
 import { Request } from "express";
 import { AuthTokens } from "../Types/authTypes";
+import { randomBytes } from "crypto";
 
 @Injectable()
 export class AuthService {
@@ -216,8 +217,10 @@ export class AuthService {
   }
 
   private async generateRefreshToken(user_id: string, meta_data: MetaData) {
+    const token = randomBytes(40).toString("hex");
+    
     const refreshToken = await this.tokenService.save({
-      token: randomUUID().replace(/-/g, ""),
+      token,
       type: TokenType.REFRESH_TOKEN,
       expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
       user_id,

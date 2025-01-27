@@ -20,7 +20,7 @@ export class TokenService {
     type: TokenType,
     mins?: number,
   ): Promise<string> {
-    const token = crypto.randomBytes(32).toString("hex");
+    const token = crypto.randomBytes(40).toString("hex");
 
     const tokenData = {
       token,
