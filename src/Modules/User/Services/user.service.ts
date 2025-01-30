@@ -20,6 +20,7 @@ import { compare, hash } from "bcrypt";
 import { Token } from "src/Modules/Token/Entities/token.entity";
 import { ProviderType } from "../Enums/user.enum";
 import { TokenService } from "src/Modules/Token/Services/token.service";
+import { SanitizedUser } from "../Types/authTypes";
 
 @Injectable()
 export class UserService {
@@ -154,7 +155,7 @@ export class UserService {
     await this.tokenService.delete(verifiedToken.id);
   }
 
-  public async getUserProfile(userId: string): Promise<any> {
+  public async getUserProfile(userId: string): Promise<SanitizedUser> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ["userOrganisations", "userOrganisations.organisation"],
@@ -163,6 +164,7 @@ export class UserService {
         first_name: true,
         last_name: true,
         email: true,
+        phone: true,
         profile_picture: true,
         userOrganisations: {
           id: true,
@@ -181,16 +183,19 @@ export class UserService {
       throw new NotFoundException("User not found");
     }
 
-    // Format the response
     return {
       id: user.id,
-      name: `${user.first_name} ${user.last_name}`,
+      first_name: user.first_name,
+      last_name: user.last_name,
       email: user.email,
+      phone: user.phone,
       profile_picture: user.profile_picture,
-      organisations: user.userOrganisations.map((uo) => ({
-        id: uo.organisation.id,
+      user_organisations: user.userOrganisations.map((uo) => ({
+        org_id: uo.organisation.id,
         name: uo.organisation.name,
+        logo: uo.organisation.logo,
         role: uo.role,
+        permissions: uo.permissions,
         is_creator: uo.is_creator,
       })),
     };
