@@ -19,7 +19,11 @@ import { Repository } from "typeorm";
 import { AppLogger } from "src/Logger/logger.service";
 import { randomUUID, createHash } from "crypto";
 import { Request } from "express";
-import { AuthTokens } from "../Types/authTypes";
+import {
+  AuthTokens,
+  SanitizedUser,
+  SanitizedUserOrganisation,
+} from "../Types/authTypes";
 import { randomBytes } from "crypto";
 
 @Injectable()
@@ -56,7 +60,7 @@ export class AuthService {
   public async login(
     loginDto: loginDto,
     req: Request,
-  ): Promise<{ tokens: AuthTokens; user: Partial<User> }> {
+  ): Promise<{ tokens: AuthTokens; user: SanitizedUser }> {
     // Find and validate user
     const user = await this.findAccountByEmail(loginDto.email);
 
@@ -218,7 +222,7 @@ export class AuthService {
 
   private async generateRefreshToken(user_id: string, meta_data: MetaData) {
     const token = randomBytes(40).toString("hex");
-    
+
     const refreshToken = await this.tokenService.save({
       token,
       type: TokenType.REFRESH_TOKEN,
@@ -233,19 +237,36 @@ export class AuthService {
   private async findAccountByEmail(email: string) {
     return await this.userRepository.findOne({
       where: { email },
-      relations: ["userOrganisations"],
+      relations: ["userOrganisations", "userOrganisations.organisation"],
     });
   }
 
-  private sanitizeUser(user: User): Partial<User> {
+  private sanitizeUser(user: User): SanitizedUser {
     const {
       password_hash,
       created_at,
       updated_at,
+      deleted_at,
+      is_active,
+      is_verified,
+      verified_at,
       last_login,
+      userOrganisations,
       ...sanitizedUser
     } = user;
-    return sanitizedUser;
+    let sanitizedUserOrgs: SanitizedUserOrganisation[] = [];
+
+    sanitizedUserOrgs = userOrganisations.map((userOrg) => ({
+      org_id: userOrg.organisation.id,
+      role: userOrg.role,
+      permissions: userOrg.permissions,
+      is_creator: userOrg.is_creator,
+      accepted_invitation: userOrg.is_creator
+        ? undefined
+        : userOrg.accepted_invitation,
+    }));
+    
+    return { ...sanitizedUser, user_organisations: sanitizedUserOrgs };
   }
 
   private async validateUserStatus(user: User | null): Promise<User> {
@@ -279,7 +300,7 @@ export class AuthService {
     req: Request,
   ): Promise<{
     tokens: AuthTokens;
-    user: Partial<User>;
+    user: SanitizedUser;
   }> {
     // tokens
     const tokens = await this.generateTokens(user.id, "", req);
