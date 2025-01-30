@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { PurchaseRequisition } from "../Entities/purchaseRequisition.entity";
 import { Organisation } from "src/Modules/Organisation/Entities/organisation.entity";
-import { ApprovalStatus } from "../Enums/purchaseRequisition.enum";
+import { PurchaseRequisitionStatus } from "../Enums/purchaseRequisition.enum";
 
 @Injectable()
 export class PurchaseRequisitionService {
@@ -14,7 +14,7 @@ export class PurchaseRequisitionService {
     private readonly organisationRepository: Repository<Organisation>,
   ) {}
 
-  async createPurchaseRequisition(
+  public async createPurchaseRequisition(
     organisationId: string,
     data: Partial<PurchaseRequisition>,
   ): Promise<PurchaseRequisition> {
@@ -34,10 +34,10 @@ export class PurchaseRequisitionService {
     return this.purchaseRequisitionRepository.save(newRequisition);
   }
 
-  async updateApprovalDetails(
+  public async updateApprovalDetails(
     requisitionId: string,
     approvalData: {
-      approval_status: ApprovalStatus;
+      status: PurchaseRequisitionStatus;
       approved_by: any;
       approval_justification: string;
     },
@@ -50,14 +50,14 @@ export class PurchaseRequisitionService {
       throw new NotFoundException("Purchase Requisition not found");
     }
 
-    requisition.approval_status = approvalData.approval_status;
+    requisition.status = approvalData.status;
     requisition.approved_by = approvalData.approved_by;
     requisition.approval_justification = approvalData.approval_justification;
 
     return this.purchaseRequisitionRepository.save(requisition);
   }
 
-  async count(query: any) {
+  public async count(query: any) {
     return this.purchaseRequisitionRepository.count(query);
   }
 }
