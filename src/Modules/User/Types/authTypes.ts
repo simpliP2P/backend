@@ -5,7 +5,9 @@ export interface AuthTokens {
 
 export interface SanitizedUserOrganisation {
     org_id: string;
-    role: string;
+    name: string;
+    logo: string;
+    role: string; // User's role in the organisation
     permissions: string[];
     is_creator: boolean;
     accepted_invitation?: boolean;
@@ -18,7 +20,6 @@ export interface SanitizedUser {
     email: string;
     phone: string;
     profile_picture: string;
-    role: string;
-    provider: string;
+    provider?: string;
     user_organisations: SanitizedUserOrganisation[];
 }
