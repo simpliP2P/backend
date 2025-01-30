@@ -1,7 +1,9 @@
 import {
   ArrayNotEmpty,
   IsArray,
+  IsDate,
   IsEmail,
+  IsObject,
   IsOptional,
   IsString,
   Matches,
@@ -105,4 +107,41 @@ export class acceptInvitationDto {
       "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
   })
   newPassword: string;
+}
+
+export class DeliveryTimeline {
+  @IsDate()
+  start_date: Date;
+
+  @IsDate()
+  end_date: Date;
+}
+
+export class createRequisitionDto {
+  @IsString()
+  department: string;
+
+  @IsEmail()
+  contact_info: string;
+
+  @IsString()
+  requestor_name: string;
+
+  @IsString()
+  request_description: string;
+
+  @IsString()
+  quantity: string;
+
+  @IsString()
+  estimated_cost: string;
+
+  @IsString()
+  justification: string;
+
+  @IsString()
+  status: string;
+
+  @IsObject()
+  delivery_timeline: DeliveryTimeline;
 }

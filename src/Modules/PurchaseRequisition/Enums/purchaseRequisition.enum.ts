@@ -1,5 +1,7 @@
-export enum ApprovalStatus {
+export enum PurchaseRequisitionStatus {
+  SAVED_FOR_LATER = "SAVED_FOR_LATER",
   PENDING = "PENDING",
   APPROVED = "APPROVED",
   REJECTED = "REJECTED",
+  REQUEST_MODIFICATION = "REQUEST_MODIFICATION",
 }

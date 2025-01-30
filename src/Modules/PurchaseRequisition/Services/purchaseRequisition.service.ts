@@ -57,7 +57,27 @@ export class PurchaseRequisitionService {
     return this.purchaseRequisitionRepository.save(requisition);
   }
 
+  // returns: purchase requisition saved for later
+  public async getSavedPurchaseRequisitions(
+    userId: string,
+    organisationId: string,
+  ) {
+    return await this.getPurchaseRequisitions({
+      where: {
+        created_by: userId,
+        organisation_id: organisationId,
+        status: PurchaseRequisitionStatus.SAVED_FOR_LATER,
+      },
+    });
+  }
+
+  public async getPurchaseRequisitions(
+    query: any,
+  ): Promise<PurchaseRequisition[]> {
+    return await this.purchaseRequisitionRepository.find(query);
+  }
+
   public async count(query: any) {
-    return this.purchaseRequisitionRepository.count(query);
+    return await this.purchaseRequisitionRepository.count(query);
   }
 }

@@ -17,7 +17,8 @@ import {
   IsEnum,
   IsOptional,
 } from "class-validator";
-import { ApprovalStatus } from "../Enums/purchaseRequisition.enum";
+import { PurchaseRequisitionStatus } from "../Enums/purchaseRequisition.enum";
+import { DeliveryTimeline } from "../Types/purchaseRequisition.dto";
 
 @Entity("purchase_requisitions")
 export class PurchaseRequisition extends BaseEntity {
@@ -61,9 +62,9 @@ export class PurchaseRequisition extends BaseEntity {
   @Column()
   justification: string;
 
-  @IsEnum(ApprovalStatus)
-  @Column({ default: ApprovalStatus.PENDING })
-  approval_status: ApprovalStatus;
+  @IsEnum(PurchaseRequisitionStatus)
+  @Column({ default: PurchaseRequisitionStatus.PENDING })
+  status: PurchaseRequisitionStatus;
 
   @IsOptional()
   @ManyToOne(() => User, { nullable: true })
@@ -75,10 +76,8 @@ export class PurchaseRequisition extends BaseEntity {
   @Column({ nullable: true })
   approval_justification: string;
 
-  @IsNotEmpty()
-  @IsString()
-  @Column({ default: "NEW" }) // NEW, PROCESSING, COMPLETED
-  status: string;
+  @Column({ type: "jsonb" })
+  delivery_timeline: DeliveryTimeline;
 
   @ManyToOne(() => Organisation, (org) => org.purchaseRequisitions)
   @JoinColumn({ name: "organisation_id" }) // Explicit foreign key
