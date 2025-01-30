@@ -258,7 +258,9 @@ export class AuthService {
 
     sanitizedUserOrgs = userOrganisations.map((userOrg) => ({
       org_id: userOrg.organisation.id,
+      name: userOrg.organisation.name,
       role: userOrg.role,
+      logo: userOrg.organisation.logo,
       permissions: userOrg.permissions,
       is_creator: userOrg.is_creator,
       accepted_invitation: userOrg.is_creator
