@@ -185,7 +185,10 @@ export class OrganisationService {
    * Members Management
    */
 
-  public async addMemberToOrganisation(organisationId: string, data: addUserToOrg) {
+  public async addMemberToOrganisation(
+    organisationId: string,
+    data: addUserToOrg,
+  ) {
     const { email, first_name, last_name, role, permissions } = data;
 
     let createdAccount: User | null = null;
@@ -259,7 +262,18 @@ export class OrganisationService {
     return createdRelation;
   }
 
-  public async getOrganisationMembers(organisationId: string) {
+  public async getOrganisationMembers(
+    organisationId: string,
+    page: number = 1,
+    pageSize: number = 10,
+  ) {
+    let _page = page;
+    let _pageSize = pageSize;
+    if (isNaN(page) || page < 1) _page = 1;
+    if (isNaN(pageSize) || pageSize < 1) _pageSize = 10;
+
+    const skip = (_page - 1) * _pageSize; // Calculate the offset
+
     // Check if the organization exists
     const organisation = await this.organisationRepository.findOne({
       where: { id: organisationId },
@@ -272,14 +286,17 @@ export class OrganisationService {
     }
 
     // Fetch users associated with the organization
-    const userOrganisations = await this.userOrganisationRepository.find({
-      where: {
-        organisation: { id: organisationId },
-        is_creator: false,
-        // accepted_invitation: true,
-      },
-      relations: ["user"],
-    });
+    const [userOrganisations, total] =
+      await this.userOrganisationRepository.findAndCount({
+        where: {
+          organisation: { id: organisationId },
+          is_creator: false,
+          // accepted_invitation: true,
+        },
+        take: _pageSize,
+        skip, 
+        relations: ["user"],
+      });
 
     // Map the results to return user details along with their roles and permissions
     const users = userOrganisations.map((userOrg) => ({
@@ -304,6 +321,12 @@ export class OrganisationService {
         address: organisation.address,
       },
       users,
+      metadata: {
+        total,
+        page: _page,
+        pageSize: _pageSize,
+        totalPages: Math.ceil(total / _pageSize),
+      },
     };
   }
 

@@ -32,7 +32,7 @@ import {
 } from "src/Modules/Supplier/Dtos/supplier.dto";
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchaseRequisition.entity";
 import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchaseRequisition.service";
-import { ApprovalStatus } from "src/Modules/PurchaseRequisition/Enums/purchaseRequisition.enum";
+import { PurchaseRequisitionStatus } from "src/Modules/PurchaseRequisition/Enums/purchaseRequisition.enum";
 import { User } from "src/Modules/User/Entities/user.entity";
 import { ProductService } from "src/Modules/Product/Services/product.service";
 import {
@@ -203,15 +203,22 @@ export class OrganisationController {
   @Get(":organisationId/members")
   @SetMetadata("permissions", [PermissionType.OWNER])
   @UseGuards(OrganisationPermissionsGuard)
-  async getMembers(@Param("organisationId") orgId: string) {
+  async getMembers(
+    @Param("organisationId") orgId: string,
+    @Query("page") page: number,
+    @Query("pageSize") pageSize: number,
+  ) {
     try {
-      const members =
-        await this.organisationService.getOrganisationMembers(orgId);
+      const data = await this.organisationService.getOrganisationMembers(
+        orgId,
+        page,
+        pageSize,
+      );
 
       return {
         status: "success",
         message: "Members fetched successfully",
-        data: members,
+        data,
       };
     } catch (error) {
       throw error;
@@ -470,6 +477,70 @@ export class OrganisationController {
     }
   }
 
+  @Post(":organisationId/requisitions/saved")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_PURCHASE_REQUISITIONS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async saveForLater(
+    @Param("organisationId") organisationId: string,
+    @Body() data: Partial<PurchaseRequisition>,
+    @Req() req: Request,
+  ) {
+    try {
+      const userId = req.user.sub;
+
+      if (!userId) return;
+
+      if (data.status !== PurchaseRequisitionStatus.SAVED_FOR_LATER) {
+        throw new BadRequestException("Invalid status");
+      }
+
+      const purchaseRequisition =
+        await this.purchaseRequisitionService.createPurchaseRequisition(
+          organisationId,
+          { ...data, created_by: { id: userId } as User },
+        );
+
+      return {
+        status: "success",
+        message: "Purchase requisition saved successfully",
+        data: purchaseRequisition,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get(":organisationId/requisitions/saved")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_PURCHASE_REQUISITIONS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async getRequisitionsSavedForLater(
+    @Param("organisationId") organisationId: string,
+    @Req() req: Request,
+  ) {
+    try {
+      const userId = req.user.sub;
+
+      const savedRequisitions =
+        await this.purchaseRequisitionService.getSavedPurchaseRequisitions(
+          userId,
+          organisationId,
+        );
+
+      return {
+        status: "success",
+        message: "Saved requisitions fetched successfully.",
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Patch(":organisationId/requisitions/:id/approval")
   @SetMetadata("permissions", [
     PermissionType.OWNER,
@@ -481,7 +552,7 @@ export class OrganisationController {
     @Req() req: Request,
     @Body()
     approvalData: {
-      approval_status: ApprovalStatus;
+      status: PurchaseRequisitionStatus;
       approval_justification: string;
     },
   ) {
