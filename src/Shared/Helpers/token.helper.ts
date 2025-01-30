@@ -30,23 +30,6 @@ export class TokenHelper {
     return this.verifyToken(token, secret);
   }
 
-  public generateResetToken(payload: any): string {
-    const secret =
-      this.config.get<string>("tokenSecrets.resetToken.secret") ||
-      this.defaultSecret;
-    const expiresIn =
-      this.config.get<string>("tokenSecrets.resetToken.expiresIn") ||
-      this.defaultExpiresIn;
-    return this.generateToken(payload, secret, expiresIn);
-  }
-
-  public verifyResetToken(token: string): any {
-    const secret =
-      this.config.get<string>("tokenSecrets.resetToken.secret") ||
-      this.defaultSecret;
-    return this.verifyToken(token, secret);
-  }
-
   public generateAccessToken(payload: any): string {
     const secret =
       this.config.get<string>("tokenSecrets.accessToken.secret") ||
@@ -60,24 +43,6 @@ export class TokenHelper {
   public verifyAccessToken(token: string): any {
     const secret =
       this.config.get<string>("tokenSecrets.accessToken.secret") ||
-      this.defaultSecret;
-    return this.verifyToken(token, secret);
-  }
-
-  public generateNewsLetterSubscriptionToken(email: string): string {
-    const secret =
-      this.config.get<string>("tokenSecrets.newsletterSubscription.secret") ||
-      this.defaultSecret;
-    const expiresIn =
-      this.config.get<string>(
-        "tokenSecrets.newsletterSubscription.expiresIn",
-      ) || this.defaultExpiresIn;
-    return this.generateToken({ email }, secret, expiresIn);
-  }
-
-  public verifyNewsLetterSubscriptionToken(token: string): any {
-    const secret =
-      this.config.get<string>("tokenSecrets.newsletterSubscription.secret") ||
       this.defaultSecret;
     return this.verifyToken(token, secret);
   }
@@ -100,24 +65,5 @@ export class TokenHelper {
         throw new Error("Token verification failed.");
       }
     }
-  }
-
-  public setTokenCookie(res: Response, token: string): void {
-    const isProduction = this.config.get<boolean>("isAppInProduction");
-    res.cookie("auth_token", token, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: "strict",
-      maxAge: 3600000, // 1 hour
-    });
-  }
-
-  public clearTokenCookie(res: Response): void {
-    const isProduction = this.config.get<boolean>("isAppInProduction");
-    res.clearCookie("auth_token", {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: "strict",
-    });
   }
 }
