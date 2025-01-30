@@ -5,7 +5,7 @@ import { CloudinaryConfig } from "src/Config/cloudinaryClient.config";
 export class UploadService {
   constructor(private readonly cloudinaryConfig: CloudinaryConfig) {}
 
-  async uploadImage(filePath: string): Promise<any> {
+  async uploadImage(filePath: string): Promise<string> {
     try {
       const { secure_url } =
         await this.cloudinaryConfig.cloudinary.uploader.upload(filePath);

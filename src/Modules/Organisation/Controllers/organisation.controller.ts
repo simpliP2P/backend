@@ -45,6 +45,7 @@ import { diskStorage } from "multer";
 import { join } from "path";
 import { existsSync, unlink } from "fs";
 import { AppLogger } from "src/Logger/logger.service";
+import { ApiResponse } from "src/Shared/Interfaces/api-response.interface";
 
 @Controller("organisations")
 export class OrganisationController {
@@ -143,7 +144,7 @@ export class OrganisationController {
     @Param("organisationId") orgId: string,
     @UploadedFile() file: Express.Multer.File,
     @Req() req: any,
-  ): Promise<any> {
+  ): Promise<ApiResponse<{ url: string }>> {
     try {
       if (!file) {
         throw new BadRequestException("No file uploaded");

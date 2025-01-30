@@ -71,15 +71,15 @@ export class TokenService {
       .where("token.token = :token", { token: oldRefreshToken })
       .andWhere("token.type = :type", { type: TokenType.REFRESH_TOKEN })
       .andWhere("token.meta_data @> :metaData", { metaData: { used: false } }) // JSON containment
-      .andWhere("token.expires_at > :now", { now: gracePeriod})
+      .andWhere("token.expires_at > :now", { now: gracePeriod })
       .getOne();
   }
 
-  async update(query: any, newData: any) {
-    return await this.tokenRepository.update(query, newData);
+  async update(query: any, newData: any): Promise<void> {
+    await this.tokenRepository.update(query, newData);
   }
 
-  async save(tokenData: TokenData): Promise<any> {
+  async save(tokenData: TokenData): Promise<Token> {
     return await this.tokenRepository.save(tokenData);
   }
 

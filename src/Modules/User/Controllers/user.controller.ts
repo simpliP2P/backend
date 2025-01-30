@@ -14,14 +14,19 @@ import { join } from "path";
 import { existsSync, unlink } from "fs";
 import { AppLogger } from "src/Logger/logger.service";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
+import { ApiResponse } from "src/Shared/Interfaces/api-response.interface";
+import { SanitizedUser } from "../Types/authTypes";
 
 @ApiTags("user")
 @Controller("users")
 export class UserController {
-  constructor(private readonly userService: UserService, private readonly logger: AppLogger) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly logger: AppLogger,
+  ) {}
 
   @Get("me")
-  async getProfile(@Req() req: any): Promise<any> {
+  async getProfile(@Req() req: any): Promise<ApiResponse<SanitizedUser>> {
     const userId = req.user.sub;
     const user = await this.userService.getUserProfile(userId);
     return {
@@ -53,7 +58,7 @@ export class UserController {
   async uploadProfilePicture(
     @UploadedFile() file: Express.Multer.File,
     @Req() req: any,
-  ): Promise<any> {
+  ): Promise<ApiResponse<{ url: string }>> {
     try {
       if (!file) {
         throw new BadRequestException("No file uploaded");
