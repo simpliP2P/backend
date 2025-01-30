@@ -291,7 +291,6 @@ export class OrganisationService {
         where: {
           organisation: { id: organisationId },
           is_creator: false,
-          // accepted_invitation: true,
         },
         take: _pageSize,
         skip, 
@@ -307,6 +306,7 @@ export class OrganisationService {
       phone: userOrg.user.phone,
       role: userOrg.role,
       permissions: userOrg.permissions,
+      accepted_invitation: userOrg.accepted_invitation,
       profile_picture: userOrg.user.profile_picture,
       last_login: userOrg.user.last_login,
       online_status:
