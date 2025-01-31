@@ -16,6 +16,6 @@ export class BaseEntity extends TypeORMBaseEntity {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({ select: false })
   deleted_at?: Date;
 }
