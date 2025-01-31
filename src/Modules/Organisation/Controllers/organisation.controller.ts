@@ -599,14 +599,12 @@ export class OrganisationController {
   async getRequisitionById(
     @Param("organisationId") organisationId: string,
     @Param("requisitionId") requisitionId: string,
-    @Req() req: Request,
   ) {
     try {
-      const userId = req.user.sub;
 
       const requisition =
         await this.purchaseRequisitionService.getPurchaseRequisitionById(
-          userId,
+          // userId,
           organisationId,
           requisitionId,
         );
