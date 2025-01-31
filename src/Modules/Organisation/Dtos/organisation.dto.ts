@@ -3,6 +3,8 @@ import {
   IsArray,
   IsDate,
   IsEmail,
+  IsEnum,
+  IsNumber,
   IsObject,
   IsOptional,
   IsString,
@@ -15,6 +17,7 @@ import {
 } from "class-validator";
 import { PermissionType } from "../Enums/userOrganisation.enum";
 import { Type } from "class-transformer";
+import { PurchaseRequisitionStatus } from "src/Modules/PurchaseRequisition/Enums/purchaseRequisition.enum";
 
 export class CreateOrganisationDto {
   @IsString()
@@ -117,7 +120,7 @@ export class DeliveryTimeline {
   end_date: Date;
 }
 
-export class createRequisitionDto {
+export class CreatePurchaseRequisitionDto {
   @IsString()
   department: string;
 
@@ -130,17 +133,18 @@ export class createRequisitionDto {
   @IsString()
   request_description: string;
 
-  @IsString()
-  quantity: string;
+  @IsNumber()
+  quantity: number;
 
-  @IsString()
-  estimated_cost: string;
+  @IsNumber()
+  estimated_cost: number;
 
   @IsString()
   justification: string;
 
   @IsString()
-  status: string;
+  @IsEnum(PurchaseRequisitionStatus)
+  status: PurchaseRequisitionStatus;
 
   @IsObject()
   delivery_timeline: DeliveryTimeline;
