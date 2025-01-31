@@ -20,6 +20,7 @@ import {
   addUserToOrgDto,
   CreateOrganisationDto,
   CreatePurchaseRequisitionDto,
+  SavePurchaseRequisitionDto,
   updateUserDetailsDto,
 } from "../Dtos/organisation.dto";
 import { Request } from "express";
@@ -529,7 +530,7 @@ export class OrganisationController {
   @UseGuards(OrganisationPermissionsGuard)
   async saveForLater(
     @Param("organisationId") organisationId: string,
-    @Body() data: CreatePurchaseRequisitionDto,
+    @Body() data: SavePurchaseRequisitionDto,
     @Req() req: Request,
   ) {
     try {
@@ -601,7 +602,6 @@ export class OrganisationController {
     @Param("requisitionId") requisitionId: string,
   ) {
     try {
-
       const requisition =
         await this.purchaseRequisitionService.getPurchaseRequisitionById(
           // userId,

@@ -142,10 +142,15 @@ export class CreatePurchaseRequisitionDto {
   @IsString()
   justification: string;
 
+  @IsObject()
+  delivery_timeline: DeliveryTimeline;
+}
+
+/**
+ * SAVE FOR LATER DTO
+ */
+export class SavePurchaseRequisitionDto extends CreatePurchaseRequisitionDto {
   @IsString()
   @IsEnum(PurchaseRequisitionStatus)
   status: PurchaseRequisitionStatus;
-
-  @IsObject()
-  delivery_timeline: DeliveryTimeline;
 }
