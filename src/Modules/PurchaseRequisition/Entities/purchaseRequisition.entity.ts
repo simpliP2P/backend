@@ -83,7 +83,7 @@ export class PurchaseRequisition extends BaseEntity {
   @JoinColumn({ name: "organisation_id" }) // Explicit foreign key
   organisation: Organisation;
 
-  @ManyToOne(() => User, (user) => user.purchaseRequisitions, { eager: true })
+  @ManyToOne(() => User, (user) => user.purchaseRequisitions)
   @JoinColumn({ name: "created_by" }) // Reference to the User who created the PR
   created_by: User;
 
