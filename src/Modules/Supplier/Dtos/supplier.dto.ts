@@ -1,4 +1,3 @@
-import { PartialType } from "@nestjs/swagger";
 import {
   IsString,
   IsEmail,
@@ -6,6 +5,7 @@ import {
   IsNumber,
   Min,
   Max,
+  IsObject,
 } from "class-validator";
 
 export class CreateSupplierDto {
@@ -34,6 +34,12 @@ export class CreateSupplierDto {
   @IsOptional()
   rating?: number;
 
+  @IsOptional()
+  bank_details: {
+    bank_name: string;
+    account_number: number;
+    account_name: string;
+  }
 }
 
 export class UpdateSupplierDto {

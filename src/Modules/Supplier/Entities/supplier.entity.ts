@@ -3,6 +3,7 @@ import { Organisation } from "src/Modules/Organisation/Entities/organisation.ent
 import { IsEmail } from "class-validator";
 import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchaseOrder.entity";
 import { BaseEntity } from "src/Common/entities/base.entity";
+import { BankDetails } from "../Types/supplierTypes";
 
 @Entity("suppliers")
 export class Supplier extends BaseEntity {
@@ -24,6 +25,9 @@ export class Supplier extends BaseEntity {
 
   @Column({ type: "decimal", precision: 2, scale: 1, default: 0.0 })
   rating: number;
+
+  @Column({ type: "jsonb", nullable: true })
+  bank_details: BankDetails;
 
   @ManyToOne(() => Organisation, { nullable: false, onDelete: "CASCADE" })
   @JoinColumn({ name: "organisation_id" })
