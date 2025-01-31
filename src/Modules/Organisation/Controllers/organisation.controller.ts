@@ -19,6 +19,7 @@ import {
   acceptInvitationDto,
   addUserToOrgDto,
   CreateOrganisationDto,
+  CreatePurchaseRequisitionDto,
   updateUserDetailsDto,
 } from "../Dtos/organisation.dto";
 import { Request } from "express";
@@ -81,13 +82,13 @@ export class OrganisationController {
   @Public()
   @Post(":organisationId/accept-invitation")
   async acceptInvitation(
-    @Param("organisationId") orgId: string,
+    @Param("organisationId") organisationId: string,
     @Body() reqBody: acceptInvitationDto,
   ) {
     try {
       await this.organisationService.acceptInvitation({
         token: reqBody.token,
-        organisationId: orgId,
+        organisationId: organisationId,
         newPassword: reqBody.newPassword,
       });
 
@@ -104,10 +105,10 @@ export class OrganisationController {
   @Get(":organisationId/dashboard")
   @SetMetadata("permissions", [PermissionType.ORG_MEMBER])
   @UseGuards(OrganisationPermissionsGuard)
-  async dashboard(@Param("organisationId") orgId: string) {
+  async dashboard(@Param("organisationId") organisationId: string) {
     try {
       const organisations =
-        await this.organisationService.getOrganisationMetrics(orgId);
+        await this.organisationService.getOrganisationMetrics(organisationId);
 
       return {
         status: "success",
@@ -141,7 +142,7 @@ export class OrganisationController {
     }),
   )
   async uploadLogo(
-    @Param("organisationId") orgId: string,
+    @Param("organisationId") organisationId: string,
     @UploadedFile() file: Express.Multer.File,
     @Req() req: any,
   ): Promise<ApiResponse<{ url: string }>> {
@@ -150,7 +151,10 @@ export class OrganisationController {
         throw new BadRequestException("No file uploaded");
       }
 
-      const url = await this.organisationService.uploadLogo(orgId, file);
+      const url = await this.organisationService.uploadLogo(
+        organisationId,
+        file,
+      );
 
       // Delete the local file after processing
       const filePath = join("../../uploads", file.filename);
@@ -184,11 +188,14 @@ export class OrganisationController {
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async addMemberToOrganisation(
-    @Param("organisationId") orgId: string,
+    @Param("organisationId") organisationId: string,
     @Body() userData: addUserToOrgDto,
   ) {
     try {
-      await this.organisationService.addMemberToOrganisation(orgId, userData);
+      await this.organisationService.addMemberToOrganisation(
+        organisationId,
+        userData,
+      );
 
       return {
         status: "success",
@@ -204,13 +211,13 @@ export class OrganisationController {
   @SetMetadata("permissions", [PermissionType.OWNER])
   @UseGuards(OrganisationPermissionsGuard)
   async getMembers(
-    @Param("organisationId") orgId: string,
+    @Param("organisationId") organisationId: string,
     @Query("page") page: number,
     @Query("pageSize") pageSize: number,
   ) {
     try {
       const data = await this.organisationService.getOrganisationMembers(
-        orgId,
+        organisationId,
         page,
         pageSize,
       );
@@ -229,14 +236,14 @@ export class OrganisationController {
   @SetMetadata("permissions", [PermissionType.OWNER])
   @UseGuards(OrganisationPermissionsGuard)
   async updateMemberDetails(
-    @Param("organisationId") orgId: string,
+    @Param("organisationId") organisationId: string,
     @Param("memberId") userId: string,
     @Body() reqBody: updateUserDetailsDto,
   ) {
     try {
       const member = await this.organisationService.updateMemberDetails(
         userId,
-        orgId,
+        organisationId,
         reqBody,
       );
 
@@ -254,11 +261,11 @@ export class OrganisationController {
   @SetMetadata("permissions", [PermissionType.OWNER])
   @UseGuards(OrganisationPermissionsGuard)
   async deactivateMember(
-    @Param("organisationId") orgId: string,
+    @Param("organisationId") organisationId: string,
     @Param("memberId") userId: string,
   ) {
     try {
-      await this.organisationService.deactivateMember(userId, orgId);
+      await this.organisationService.deactivateMember(userId, organisationId);
 
       return {
         status: "success",
@@ -274,11 +281,11 @@ export class OrganisationController {
   @SetMetadata("permissions", [PermissionType.OWNER])
   @UseGuards(OrganisationPermissionsGuard)
   async reactivateMember(
-    @Param("organisationId") orgId: string,
+    @Param("organisationId") organisationId: string,
     @Param("memberId") userId: string,
   ) {
     try {
-      await this.organisationService.reactivateMember(userId, orgId);
+      await this.organisationService.reactivateMember(userId, organisationId);
 
       return {
         status: "success",
@@ -294,11 +301,11 @@ export class OrganisationController {
   @SetMetadata("permissions", [PermissionType.OWNER])
   @UseGuards(OrganisationPermissionsGuard)
   async removeMember(
-    @Param("organisationId") orgId: string,
+    @Param("organisationId") organisationId: string,
     @Param("memberId") userId: string,
   ) {
     try {
-      await this.organisationService.removeMember(userId, orgId);
+      await this.organisationService.removeMember(userId, organisationId);
 
       return {
         status: "success",
@@ -320,13 +327,13 @@ export class OrganisationController {
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async addSupplierToOrganisation(
-    @Param("organisationId") orgId: string,
+    @Param("organisationId") organisationId: string,
     @Body() reqBody: CreateSupplierDto,
   ) {
     try {
       const supplier = await this.supplierService.addSupplierToOrganisation(
         reqBody,
-        orgId,
+        organisationId,
       );
 
       return {
@@ -346,13 +353,17 @@ export class OrganisationController {
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async getAllSuppliers(
-    @Param("organisationId") orgId: string,
+    @Param("organisationId") organisationId: string,
     @Query("page") page: number,
     @Query("pageSize") pageSize: number,
   ) {
     try {
       const { data, metadata } =
-        await this.supplierService.findAllByOrganisation(orgId, page, pageSize);
+        await this.supplierService.findAllByOrganisation(
+          organisationId,
+          page,
+          pageSize,
+        );
 
       return {
         status: "success",
@@ -372,13 +383,13 @@ export class OrganisationController {
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async getSupplierById(
-    @Param("organisationId") orgId: string,
+    @Param("organisationId") organisationId: string,
     @Param("supplierId") supplierId: string,
   ) {
     try {
       const supplier = await this.supplierService.findOneByOrganisation(
         supplierId,
-        orgId,
+        organisationId,
       );
 
       return {
@@ -398,14 +409,14 @@ export class OrganisationController {
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async updateSupplier(
-    @Param("organisationId") orgId: string,
+    @Param("organisationId") organisationId: string,
     @Param("supplierId") supplierId: string,
     @Body() reqBody: UpdateSupplierDto,
   ) {
     try {
       const supplier = await this.supplierService.updateOrganisationSupplier(
         supplierId,
-        orgId,
+        organisationId,
         reqBody,
       );
 
@@ -426,11 +437,11 @@ export class OrganisationController {
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async deleteSupplier(
-    @Param("organisationId") orgId: string,
+    @Param("organisationId") organisationId: string,
     @Param("supplierId") supplierId: string,
   ) {
     try {
-      await this.supplierService.removeSupplier(supplierId, orgId);
+      await this.supplierService.removeSupplier(supplierId, organisationId);
 
       return {
         status: "success",
@@ -453,7 +464,7 @@ export class OrganisationController {
   @UseGuards(OrganisationPermissionsGuard)
   async createRequisition(
     @Param("organisationId") organisationId: string,
-    @Body() data: Partial<PurchaseRequisition>,
+    @Body() data: CreatePurchaseRequisitionDto,
     @Req() req: Request,
   ) {
     try {
@@ -477,6 +488,39 @@ export class OrganisationController {
     }
   }
 
+  @Get(":organisationId/requisitions")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_PURCHASE_REQUISITIONS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async getRequisitions(
+    @Param("organisationId") organisationId: string,
+    @Query("page") page: number,
+    @Query("pageSize") pageSize: number,
+    @Req() req: Request,
+  ) {
+    try {
+      const userId = req.user.sub;
+
+      const savedRequisitions =
+        await this.purchaseRequisitionService.getAllPurchaseRequisitions(
+          page,
+          pageSize,
+          userId,
+          organisationId,
+        );
+
+      return {
+        status: "success",
+        message: "Requisitions fetched successfully.",
+        data: { requisitions: savedRequisitions },
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Post(":organisationId/requisitions/saved")
   @SetMetadata("permissions", [
     PermissionType.OWNER,
@@ -485,7 +529,7 @@ export class OrganisationController {
   @UseGuards(OrganisationPermissionsGuard)
   async saveForLater(
     @Param("organisationId") organisationId: string,
-    @Body() data: Partial<PurchaseRequisition>,
+    @Body() data: CreatePurchaseRequisitionDto,
     @Req() req: Request,
   ) {
     try {
@@ -506,7 +550,7 @@ export class OrganisationController {
       return {
         status: "success",
         message: "Purchase requisition saved successfully",
-        data: purchaseRequisition,
+        data: { purchase_requisition: purchaseRequisition },
       };
     } catch (error) {
       throw error;
@@ -521,13 +565,17 @@ export class OrganisationController {
   @UseGuards(OrganisationPermissionsGuard)
   async getRequisitionsSavedForLater(
     @Param("organisationId") organisationId: string,
+    @Query("page") page: number,
+    @Query("pageSize") pageSize: number,
     @Req() req: Request,
-  ) {
+  ): Promise<ApiResponse<{ requisitions: PurchaseRequisition[] }>> {
     try {
       const userId = req.user.sub;
 
       const savedRequisitions =
         await this.purchaseRequisitionService.getSavedPurchaseRequisitions(
+          page,
+          pageSize,
           userId,
           organisationId,
         );
@@ -535,6 +583,38 @@ export class OrganisationController {
       return {
         status: "success",
         message: "Saved requisitions fetched successfully.",
+        data: { requisitions: savedRequisitions },
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get(":organisationId/requisitions/:requisitionId")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_PURCHASE_REQUISITIONS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async getRequisitionById(
+    @Param("organisationId") organisationId: string,
+    @Param("requisitionId") requisitionId: string,
+    @Req() req: Request,
+  ) {
+    try {
+      const userId = req.user.sub;
+
+      const requisition =
+        await this.purchaseRequisitionService.getPurchaseRequisitionById(
+          userId,
+          organisationId,
+          requisitionId,
+        );
+
+      return {
+        status: "success",
+        message: "Requisitions fetched successfully.",
+        data: { requisition },
       };
     } catch (error) {
       throw error;
