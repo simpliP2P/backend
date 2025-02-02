@@ -12,7 +12,7 @@ export class SuppliersService {
     private supplierRepository: Repository<Supplier>,
   ) {}
 
-  async addSupplierToOrganisation(
+  public async addSupplierToOrganisation(
     createSupplierDto: CreateSupplierDto,
     organisationId: string,
   ) {
@@ -30,7 +30,7 @@ export class SuppliersService {
     }
   }
 
-  async findAllByOrganisation(
+  public async findAllByOrganisation(
     organisationId: string,
     page: number = 1,
     pageSize: number = 10,
@@ -59,7 +59,7 @@ export class SuppliersService {
     };
   }
 
-  async findOneByOrganisation(id: string, organisationId: string) {
+  public async findOneByOrganisation(id: string, organisationId: string) {
     const supplier = await this.findOne({
       where: {
         id,
@@ -74,11 +74,11 @@ export class SuppliersService {
     return supplier;
   }
 
-  async findOne(query: any) {
+  public async findOne(query: any) {
     return await this.supplierRepository.findOne(query);
   }
 
-  async updateOrganisationSupplier(
+  public async updateOrganisationSupplier(
     supplierId: string,
     organisationId: string,
     updateSupplierDto: UpdateSupplierDto,
@@ -100,7 +100,7 @@ export class SuppliersService {
     return updatedSupplier;
   }
 
-  async removeSupplier(supplierId: string, organisationId: string) {
+  public async removeSupplier(supplierId: string, organisationId: string) {
     const supplier = await this.findOneByOrganisation(
       supplierId,
       organisationId,
@@ -113,7 +113,7 @@ export class SuppliersService {
     await this.supplierRepository.remove(supplier);
   }
 
-  async count(query: any) {
+  public async count(query: any) {
     return await this.supplierRepository.count(query);
   }
 }
