@@ -76,8 +76,8 @@ export class PurchaseRequisition extends BaseEntity {
   @Column({ nullable: true })
   approval_justification: string;
 
-  @Column({ type: "jsonb" })
-  delivery_timeline: DeliveryTimeline;
+  @Column({ type: "date" })
+  needed_by_date: Date;
 
   @ManyToOne(() => Organisation, (org) => org.purchaseRequisitions)
   @JoinColumn({ name: "organisation_id" }) // Explicit foreign key

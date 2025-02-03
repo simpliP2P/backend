@@ -1,11 +1,9 @@
 import {
   ArrayNotEmpty,
   IsArray,
-  IsDate,
   IsEmail,
   IsEnum,
   IsNumber,
-  IsObject,
   IsOptional,
   IsString,
   Matches,
@@ -112,14 +110,6 @@ export class acceptInvitationDto {
   newPassword: string;
 }
 
-export class DeliveryTimeline {
-  @IsDate()
-  start_date: Date;
-
-  @IsDate()
-  end_date: Date;
-}
-
 export class CreatePurchaseRequisitionDto {
   @IsString()
   department: string;
@@ -142,8 +132,8 @@ export class CreatePurchaseRequisitionDto {
   @IsString()
   justification: string;
 
-  @IsObject()
-  delivery_timeline: DeliveryTimeline;
+  @IsString()
+  needed_by_date: Date;
 }
 
 /**
