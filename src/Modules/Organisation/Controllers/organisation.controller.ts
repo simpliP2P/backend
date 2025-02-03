@@ -340,7 +340,7 @@ export class OrganisationController {
       return {
         status: "success",
         message: "Created supplier successfully",
-        data: { ...supplier },
+        data: { supplier },
       };
     } catch (error) {
       throw error;
@@ -473,7 +473,7 @@ export class OrganisationController {
 
       if (!userId) return;
 
-      const purchaseRequisition =
+      const requisition =
         await this.purchaseRequisitionService.createPurchaseRequisition(
           organisationId,
           { ...data, created_by: { id: userId } as User },
@@ -482,7 +482,7 @@ export class OrganisationController {
       return {
         status: "success",
         message: "Purchase requisition created successfully",
-        data: purchaseRequisition,
+        data: { requisition },
       };
     } catch (error) {
       throw error;
