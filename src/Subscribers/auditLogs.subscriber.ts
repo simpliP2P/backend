@@ -147,8 +147,12 @@ export class AuditSubscriber implements EntitySubscriberInterface {
   private shouldLog(
     event: InsertEvent<any> | UpdateEvent<any> | RemoveEvent<any>,
   ): boolean {
-    return ["purchase_requisitions", "purchase_orders", "suppliers"].includes(
-      event.metadata.tableName,
-    );
+    return [
+      "purchase_requisitions",
+      "purchase_orders",
+      "suppliers",
+      "user_organisations",
+      "products",
+    ].includes(event.metadata.tableName);
   }
 }
