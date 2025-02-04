@@ -32,11 +32,14 @@ export class AuditLogsService {
       relations: ["user"],
       select: {
         user: {
-            id: true,
-            first_name: true,
-            last_name: true,
-        }
-      }
+          id: true,
+          first_name: true,
+          last_name: true,
+          userOrganisations: {
+            role: true,
+          },
+        },
+      },
     });
 
     return {
@@ -68,12 +71,15 @@ export class AuditLogsService {
       },
       take: _pageSize,
       skip,
-      relations: ["user"],
+      relations: ["user", "user.userOrganisations"],
       select: {
         user: {
           id: true,
           first_name: true,
           last_name: true,
+          userOrganisations: {
+            role: true,
+          },
         },
       },
     });
@@ -115,6 +121,9 @@ export class AuditLogsService {
           id: true,
           first_name: true,
           last_name: true,
+          userOrganisations: {
+            role: true,
+          },
         },
       },
     });
