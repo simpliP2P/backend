@@ -16,8 +16,8 @@ import { SuppliersModule } from "src/Modules/Supplier/Modules/supplier.module";
 import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchaseRequisition.service";
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchaseRequisition.entity";
 import { ProductModule } from "src/Modules/Product/Modules/product.module";
-import { UploadService } from "src/Modules/Upload/Services/upload.service";
 import { UploadModule } from "src/Modules/Upload/upload.module";
+import { AuditLogsModule } from "src/Modules/AuditLogs/Modules/auditLogs.module";
 // import { PurchaseOrderModule } from "src/Modules/PurchaseOrder/Modules/purchaseOrder.module";
 
 @Module({
@@ -29,6 +29,7 @@ import { UploadModule } from "src/Modules/Upload/upload.module";
     SuppliersModule,
     ProductModule,
     UploadModule,
+    AuditLogsModule,
     // PurchaseOrderModule
   ],
   controllers: [OrganisationController],

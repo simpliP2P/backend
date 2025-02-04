@@ -48,6 +48,7 @@ import { join } from "path";
 import { existsSync, unlink } from "fs";
 import { AppLogger } from "src/Logger/logger.service";
 import { ApiResponse } from "src/Shared/Interfaces/api-response.interface";
+import { AuditLogsService } from "src/Modules/AuditLogs/Services/auditLogs.service";
 
 @Controller("organisations")
 export class OrganisationController {
@@ -56,6 +57,8 @@ export class OrganisationController {
     private readonly supplierService: SuppliersService,
     private readonly purchaseRequisitionService: PurchaseRequisitionService,
     private readonly productService: ProductService,
+    private readonly auditLogsService: AuditLogsService,
+
     private readonly logger: AppLogger,
   ) {}
 
@@ -173,6 +176,62 @@ export class OrganisationController {
         status: "success",
         message: "logo uploaded successfully",
         data: { url },
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Audit logs routes
+   */
+  @Get(":organisationId/audit-logs")
+  @SetMetadata("permissions", [PermissionType.OWNER])
+  @UseGuards(OrganisationPermissionsGuard)
+  async getAuditLogs(
+    @Param("organisationId") organisationId: string,
+    @Query("page") page: number,
+    @Query("pageSize") pageSize: number,
+  ) {
+    try {
+      const data = await this.auditLogsService.getAllAuditLogsByOrganisation(
+        organisationId,
+        page,
+        pageSize,
+      );
+
+      return {
+        status: "success",
+        message: "Audit logs fetched successfully",
+        data,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get(":organisationId/audit-logs/:userId")
+  @SetMetadata("permissions", [PermissionType.ORG_MEMBER])
+  @UseGuards(OrganisationPermissionsGuard)
+  async getAuditLogsByUser(
+    @Req() req: Request,
+    @Param("organisationId") organisationId: string,
+    @Query("page") page: number,
+    @Query("pageSize") pageSize: number,
+  ) {
+    try {
+      const userId = req.user.sub;
+      const data = await this.auditLogsService.getAllAuditLogsByUser(
+        organisationId,
+        userId,
+        page,
+        pageSize,
+      );
+
+      return {
+        status: "success",
+        message: "Audit logs fetched successfully",
+        data: { data },
       };
     } catch (error) {
       throw error;
@@ -626,6 +685,7 @@ export class OrganisationController {
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async updateApproval(
+    @Param("organisationId") organisationId: string,
     @Param("id") requisitionId: string,
     @Req() req: Request,
     @Body()
@@ -639,6 +699,7 @@ export class OrganisationController {
 
       await this.purchaseRequisitionService.updateApprovalDetails(
         requisitionId,
+        organisationId,
         { ...approvalData, approved_by: userId },
       );
 

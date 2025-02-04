@@ -11,6 +11,8 @@ import { AppLogger } from "./Logger/logger.service";
 import { OAuthModule } from "./Modules/Oauth/oauth.module";
 import { CloudinaryConfig } from "./Config/cloudinaryClient.config";
 import { OrganisationModule } from "./Modules/Organisation/Modules/organisation.module";
+import { APP_INTERCEPTOR } from "@nestjs/core";
+import { RequestContextInterceptor } from "./Interceptors/request-context.interceptor";
 
 @Module({
   // Declares external modules that this module depends on
@@ -28,7 +30,15 @@ import { OrganisationModule } from "./Modules/Organisation/Modules/organisation.
   // Defines the controllers for this module.
   controllers: [AppController],
   // Declares the services that are available in this module
-  providers: [AppService, AppLogger, CloudinaryConfig],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RequestContextInterceptor,
+    },
+    AppService,
+    AppLogger,
+    CloudinaryConfig,
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
