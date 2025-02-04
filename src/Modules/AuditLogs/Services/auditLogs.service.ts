@@ -29,7 +29,7 @@ export class AuditLogsService {
       },
       take: _pageSize,
       skip,
-      relations: ["user"],
+      relations: ["user", "user.userOrganisations"],
       select: {
         user: {
           id: true,
@@ -115,7 +115,7 @@ export class AuditLogsService {
       },
       take: _pageSize,
       skip,
-      relations: ["user"],
+      relations: ["user", "user.userOrganisations"],
       select: {
         user: {
           id: true,
