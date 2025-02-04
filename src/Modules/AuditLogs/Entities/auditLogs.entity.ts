@@ -11,8 +11,8 @@ import {
 
 @Entity("audit_logs")
 export class AuditLog {
-  @PrimaryGeneratedColumn("uuid")
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @ManyToOne(() => Organisation, (org) => org.userOrganisations)
   @JoinColumn({ name: "organisation_id" })

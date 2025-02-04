@@ -2,7 +2,7 @@ import { Organisation } from "src/Modules/Organisation/Entities/organisation.ent
 import { User } from "src/Modules/User/Entities/user.entity";
 
 export interface AuditLog {
-    id: string;
+    id: number;
     organisation: Partial<Organisation>;
     user: Partial<User>;
     entity_type: string;
