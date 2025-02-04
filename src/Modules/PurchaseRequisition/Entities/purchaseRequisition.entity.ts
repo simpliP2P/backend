@@ -18,7 +18,6 @@ import {
   IsOptional,
 } from "class-validator";
 import { PurchaseRequisitionStatus } from "../Enums/purchaseRequisition.enum";
-import { DeliveryTimeline } from "../Types/purchaseRequisition.dto";
 
 @Entity("purchase_requisitions")
 export class PurchaseRequisition extends BaseEntity {

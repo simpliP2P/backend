@@ -78,6 +78,7 @@ export class PurchaseRequisitionService {
 
   public async updateApprovalDetails(
     requisitionId: string,
+    organisationId: string,
     approvalData: {
       status: PurchaseRequisitionStatus;
       approved_by: any;
@@ -85,7 +86,7 @@ export class PurchaseRequisitionService {
     },
   ): Promise<PurchaseRequisition> {
     const requisition = await this.purchaseRequisitionRepository.findOne({
-      where: { id: requisitionId },
+      where: { id: requisitionId, organisation: { id: organisationId } },
     });
 
     if (!requisition) {
@@ -135,4 +136,27 @@ export class PurchaseRequisitionService {
   public async count(query: any) {
     return await this.purchaseRequisitionRepository.count(query);
   }
+
+  /*
+  private async generatePrNumber(tenantCode: string) {
+    const now = new Date();
+    const yy = String(now.getFullYear()).slice(-2); // Get last two digits of the year (e.g., "25" for 2025)
+    const mm = String(now.getMonth() + 1).padStart(2, "0"); // Month as 01, 02, ..., 12
+
+    // Find the latest PR number for the tenant in the same month
+    const lastPr = await PurchaseRequisition.findOne({
+      where: {
+        prNumber: `PR-${tenantCode}-${yy}${mm}-%`, // Pattern match
+      },
+      order: { created_at: "DESC" },
+    });
+
+    let sequence = 1;
+    if (lastPr) {
+      const lastSeq = lastPr.prNumber.split("-").pop(); // Extract last sequence number
+      sequence = parseInt(lastSeq || "0", 10) + 1;
+    }
+
+    return `PR-${tenantCode}-${yy}${mm}-${String(sequence).padStart(3, "0")}`;
+  }*/
 }
