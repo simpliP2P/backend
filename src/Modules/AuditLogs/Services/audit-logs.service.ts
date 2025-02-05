@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { AuditLog } from "../Entities/auditLogs.entity";
+import { AuditLog } from "../Entities/audit-logs.entity";
 import { MoreThan, Repository } from "typeorm";
-import { AuditLogResponse } from "../Types/auditLogsTypes";
+import { AuditLogResponse } from "../Types/audit-logsTypes";
 
 @Injectable()
 export class AuditLogsService {

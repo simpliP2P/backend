@@ -9,8 +9,8 @@ import {
 } from "@nestjs/common";
 import { Request } from "express";
 import { Response } from "express";
-import { GoogleOAuthServices } from "./../Services/googleOauth.service";
-import { HandleCustomerGoogleLoginCallbackInput } from "../Dtos/googleOauth.dto";
+import { GoogleOAuthServices } from "../Services/google-oauth.service";
+import { HandleCustomerGoogleLoginCallbackInput } from "../Dtos/google-oauth.dto";
 import { Public } from "src/Shared/Decorators/custom.decorator";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 @Controller("auth/google")

@@ -7,7 +7,7 @@ import { ProviderType } from "src/Modules/User/Enums/user.enum";
 import { CreateGoogleAccountInput } from "src/Modules/User/Types/userTypes";
 import { UserService } from "src/Modules/User/Services/user.service";
 
-import { HandleCustomerGoogleLoginCallbackInput } from "../Dtos/googleOauth.dto";
+import { HandleCustomerGoogleLoginCallbackInput } from "../Dtos/google-oauth.dto";
 import { AuthService } from "src/Modules/User/Services/auth.service";
 import { Request } from "express";
 import { AuthTokens } from "src/Modules/User/Types/authTypes";
@@ -27,7 +27,7 @@ export class GoogleOAuthServices {
    */
   public async handleCustomerGoogleSignUpOrLoginCallback(
     data: HandleCustomerGoogleLoginCallbackInput,
-    req: Request
+    req: Request,
   ): Promise<AuthTokens> {
     try {
       // Step 1: Get tokens from Google API
@@ -58,7 +58,13 @@ export class GoogleOAuthServices {
       // Step 5: Handle account login or creation
       return foundAccount
         ? this.assignSessionToExistingAccount(foundAccount, req)
-        : this.createNewCustomerAccount(first_name, last_name, email, isVerified, req);
+        : this.createNewCustomerAccount(
+            first_name,
+            last_name,
+            email,
+            isVerified,
+            req,
+          );
     } catch (error) {
       throw new Error(
         `Error handling Google sign-up or login callback: ${error.message}`,
@@ -88,7 +94,7 @@ export class GoogleOAuthServices {
     last_name: string,
     email: string,
     is_verified: boolean,
-    req: Request
+    req: Request,
   ): Promise<AuthTokens> {
     const accountPayload: CreateGoogleAccountInput = {
       first_name,
@@ -110,7 +116,7 @@ export class GoogleOAuthServices {
    */
   private async assignSessionToExistingAccount(
     account: any,
-    req: Request
+    req: Request,
   ): Promise<AuthTokens> {
     return this.assignSession(account, req);
   }

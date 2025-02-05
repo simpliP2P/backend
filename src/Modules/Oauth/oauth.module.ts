@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
-import { GoogleOAuthServices } from "./Google/Services/googleOauth.service";
-import { GoogleOAuthController } from "./Google/Controllers/googleOauth.controller";
+import { GoogleOAuthServices } from "./Google/Services/google-oauth.service";
+import { GoogleOAuthController } from "./Google/Controllers/google-oauth.controller";
 import { GoogleClientConfig } from "src/Infrastructure/Oauth/googleOauth.config";
 import { TokenHelper } from "src/Shared/Helpers/token.helper";
 import { UserModule } from "../User/Modules/user.module";
