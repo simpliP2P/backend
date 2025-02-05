@@ -93,10 +93,4 @@ export class PurchaseRequisition extends BaseEntity {
   @OneToMany(() => PurchaseOrder, (po) => po.purchase_requisition)
   purchaseOrders: PurchaseOrder[];
 
-  // Automatically generate PR Number before inserting
-  @BeforeInsert()
-  generatePrNumber() {
-    const timestamp = new Date().toISOString().replace(/[-:.TZ]/g, "");
-    this.prNumber = `PR-${timestamp}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
-  }
 }

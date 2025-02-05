@@ -5,14 +5,14 @@ import { PurchaseRequisition } from "../Entities/purchase-requisition.entity";
 import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
 import { PurchaseItemService } from "src/Modules/PurchaseItem/Services/purchase-item.service";
 import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
+import { OrganisationService } from "src/Modules/Organisation/Services/organisation.service";
 
 @Injectable()
 export class PurchaseRequisitionService {
   constructor(
     @InjectRepository(PurchaseRequisition)
     private readonly purchaseRequisitionRepository: Repository<PurchaseRequisition>,
-
-    private readonly purchaseItemService: PurchaseItemService,
+    private readonly organisationService: OrganisationService,
   ) {}
 
   public async createPurchaseRequisition(
@@ -24,6 +24,7 @@ export class PurchaseRequisitionService {
         // 1️⃣ Create the requisition
         const requisition = this.purchaseRequisitionRepository.create({
           ...data,
+          prNumber: await this.generatePrNumber(organisationId),
           organisation: { id: organisationId },
         });
 
@@ -71,7 +72,7 @@ export class PurchaseRequisitionService {
       },
       take: _pageSize,
       skip,
-      relations: ["created_by"],
+      relations: ["created_by", "items"],
       select: {
         created_by: {
           first_name: true,
@@ -93,7 +94,7 @@ export class PurchaseRequisitionService {
         id: requisitionId,
         status: Not(PurchaseRequisitionStatus.SAVED_FOR_LATER),
       },
-      relations: ["created_by"],
+      relations: ["created_by", "items"],
       select: {
         created_by: {
           first_name: true,
@@ -164,19 +165,19 @@ export class PurchaseRequisitionService {
     return await this.purchaseRequisitionRepository.count(query);
   }
 
-  /*
-  private async generatePrNumber(tenantCode: string) {
+  private async generatePrNumber(organisationId: string) {
+    const tenantCode = this.organisationService.generateHashFromId(organisationId);
     const now = new Date();
     const yy = String(now.getFullYear()).slice(-2); // Get last two digits of the year (e.g., "25" for 2025)
     const mm = String(now.getMonth() + 1).padStart(2, "0"); // Month as 01, 02, ..., 12
 
-    // Find the latest PR number for the tenant in the same month
-    const lastPr = await PurchaseRequisition.findOne({
-      where: {
-        prNumber: `PR-${tenantCode}-${yy}${mm}-%`, // Pattern match
-      },
-      order: { created_at: "DESC" },
-    });
+    const lastPr = await this.purchaseRequisitionRepository
+      .createQueryBuilder("pr")
+      .where("pr.prNumber LIKE :pattern", {
+        pattern: `PR-${tenantCode}-${yy}${mm}-%`,
+      })
+      .orderBy("pr.created_at", "DESC")
+      .getOne();
 
     let sequence = 1;
     if (lastPr) {
@@ -185,5 +186,5 @@ export class PurchaseRequisitionService {
     }
 
     return `PR-${tenantCode}-${yy}${mm}-${String(sequence).padStart(3, "0")}`;
-  }*/
+  }
 }
