@@ -49,11 +49,16 @@ import { existsSync, unlink } from "fs";
 import { AppLogger } from "src/Logger/logger.service";
 import { ApiResponse } from "src/Shared/Interfaces/api-response.interface";
 import { AuditLogsService } from "src/Modules/AuditLogs/Services/auditLogs.service";
+import { OrganisationDepartmentService } from "../Services/organisation-department.service";
+import { OrganisationBranchService } from "../Services/organisation-branch.service";
+import { CreateDepartmentDto } from "../Dtos/organisation-department.dto";
 
 @Controller("organisations")
 export class OrganisationController {
   constructor(
     private readonly organisationService: OrganisationService,
+    private readonly organisationDepartmentService: OrganisationDepartmentService,
+    private readonly organisationBranchService: OrganisationBranchService,
     private readonly supplierService: SuppliersService,
     private readonly purchaseRequisitionService: PurchaseRequisitionService,
     private readonly productService: ProductService,
@@ -232,6 +237,92 @@ export class OrganisationController {
         status: "success",
         message: "Audit logs fetched successfully",
         data: { data },
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Departments routes
+   */
+  @Post(":organisationId/departments")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_DEPARTMENTS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async createDepartment(
+    @Param("organisationId") organisationId: string,
+    @Body() data: CreateDepartmentDto,
+  ) {
+    try {
+      const department =
+        await this.organisationDepartmentService.createDepartment({
+          ...data,
+          organisation_id: organisationId,
+        });
+
+      return {
+        status: "success",
+        message: "Department created successfully",
+        data: department,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get(":organisationId/departments")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_DEPARTMENTS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async getDepartments(
+    @Param("organisationId") organisationId: string,
+    @Query("page") page: number,
+    @Query("pageSize") pageSize: number,
+  ) {
+    try {
+      const department =
+        await this.organisationDepartmentService.getDepartmentsByOrganisation(
+          organisationId,
+          page,
+          pageSize,
+        );
+
+      return {
+        status: "success",
+        message: "Department fetched successfully",
+        data: department,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get(":organisationId/departments/:departmentId")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_DEPARTMENTS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async getDepartmentById(
+    @Param("organisationId") organisationId: string,
+    @Param("departmentId") departmentId: string,
+  ) {
+    try {
+      const department =
+        await this.organisationDepartmentService.getDepartmentById(
+          organisationId,
+          departmentId,
+        );
+
+      return {
+        status: "success",
+        message: "Department fetched successfully",
+        data: department,
       };
     } catch (error) {
       throw error;
