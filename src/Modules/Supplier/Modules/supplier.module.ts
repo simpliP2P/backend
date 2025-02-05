@@ -3,7 +3,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 // import { SuppliersController } from "../Controllers/supplier.controller";
 import { SuppliersService } from "../Services/supplier.service";
 import { Supplier } from "../Entities/supplier.entity";
-import { UserOrganisationRepository } from "src/Modules/Organisation/Repositories/userOrganisation.repository";
+import { UserOrganisationRepository } from "src/Modules/Organisation/Repositories/user-organisation.repository";
 
 @Module({
   imports: [TypeOrmModule.forFeature([Supplier])],
