@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Product } from "../Entities/product.entity";
 import { CreateProductDto, UpdateProductDto } from "../Dtos/product.dto";
+import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 
 @Injectable()
 export class ProductService {
@@ -16,6 +17,15 @@ export class ProductService {
     organisationId: string,
     createProductDto: CreateProductDto,
   ): Promise<Product> {
+    const foundProduct = await this.productRepository.findOne({
+      where: {
+        name: createProductDto.name,
+        organisation: { id: organisationId },
+      },
+    });
+
+    if (foundProduct) throw new BadRequestException(`Product already exists.`);
+
     const product = this.productRepository.create({
       ...createProductDto,
       organisation: { id: organisationId },

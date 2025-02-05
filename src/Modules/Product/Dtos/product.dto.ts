@@ -26,6 +26,10 @@ export class CreateProductDto {
   @IsString()
   @IsOptional()
   productCode?: string;
+
+  @IsString()
+  @IsOptional()
+  image_url: string;
 }
 
 export class UpdateProductDto {

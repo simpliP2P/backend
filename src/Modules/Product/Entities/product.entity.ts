@@ -9,7 +9,7 @@ import {
 } from "typeorm";
 import { BaseEntity } from "src/Common/entities/base.entity";
 import { Organisation } from "src/Modules/Organisation/Entities/organisation.entity";
-import { PurchaseOrderItem } from "src/Modules/PurchaseOrderItem/Entities/purchaseOrderItem.entity";
+import { PurchaseOrderItem } from "src/Modules/PurchaseOrderItem/Entities/purchase-order-item.entity";
 import { IsOptional } from "class-validator";
 
 @Entity("products")
@@ -35,6 +35,9 @@ export class Product extends BaseEntity {
   @Column({ unique: true, nullable: true })
   @IsOptional()
   productCode: string;
+
+  @Column({ nullable: true })
+  image_url: string;
 
   @ManyToOne(() => Organisation, (org) => org.products)
   @JoinColumn({ name: "organisation_id" })
