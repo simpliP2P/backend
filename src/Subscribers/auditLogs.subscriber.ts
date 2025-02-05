@@ -35,7 +35,11 @@ export class AuditSubscriber implements EntitySubscriberInterface {
         entity_id: event.entity?.id ?? "",
         action: "CREATE",
         changed_fields: filteredFields,
-        description: `Created new ${event.metadata.tableName.replace("_", " ")} (${event.entity.id})`,
+        description: `Created new ${
+          event.metadata.tableName
+            .replace(/_/g, " ") // Replace underscores with spaces
+            .replace(/(s|es)$/, "") // Remove trailing "s" or "es"
+        } (${event.entity.id})`,
         created_at: new Date(),
       });
       
@@ -113,7 +117,11 @@ export class AuditSubscriber implements EntitySubscriberInterface {
         entity_id: event.databaseEntity.id,
         action: "DELETE",
         previous_values: event.databaseEntity, // Store deleted data
-        description: `Deleted ${event.metadata.tableName.replace("_", " ")} (${event.databaseEntity.id})`,
+        description: `Deleted ${
+          event.metadata.tableName
+            .replace(/_/g, " ") // Replace underscores with spaces
+            .replace(/(s|es)$/, "") // Remove trailing "s" or "es"
+        } (${event.databaseEntity.id})`,
         created_at: new Date(),
       });
       
@@ -153,6 +161,8 @@ export class AuditSubscriber implements EntitySubscriberInterface {
       "suppliers",
       "user_organisations",
       "products",
+      "organisation_departments",
+      "organisation_branches",
     ].includes(event.metadata.tableName);
   }
 }
