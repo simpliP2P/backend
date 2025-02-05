@@ -5,9 +5,9 @@ import {
   UpdateEvent,
   RemoveEvent,
 } from "typeorm";
-import { AuditLog } from "../Modules/AuditLogs/Entities/auditLogs.entity";
+import { AuditLog } from "../Modules/AuditLogs/Entities/audit-logs.entity";
 import { RequestContext } from "src/Shared/Helpers/requestContext.helper"; // Get the user performing the action
-import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchaseRequisition.entity";
+import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
 
 @EventSubscriber()
 export class AuditSubscriber implements EntitySubscriberInterface {
@@ -42,7 +42,6 @@ export class AuditSubscriber implements EntitySubscriberInterface {
         } (${event.entity.id})`,
         created_at: new Date(),
       });
-      
     } catch (error) {
       console.log("Error inserting into audit_logs table:", error?.message);
     }
@@ -124,10 +123,8 @@ export class AuditSubscriber implements EntitySubscriberInterface {
         } (${event.databaseEntity.id})`,
         created_at: new Date(),
       });
-      
     } catch (error) {
       console.log("Error inserting into audit_logs table:", error?.message);
-      
     }
   }
 

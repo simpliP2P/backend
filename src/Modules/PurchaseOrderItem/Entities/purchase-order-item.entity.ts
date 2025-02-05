@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne } from "typeorm";
-import { PurchaseOrder } from "../../PurchaseOrder/Entities/purchaseOrder.entity";
+import { PurchaseOrder } from "../../PurchaseOrder/Entities/purchase-order.entity";
 import { Product } from "src/Modules/Product/Entities/product.entity";
 import { BaseEntity } from "src/Common/entities/base.entity";
 
