@@ -52,6 +52,7 @@ import { AuditLogsService } from "src/Modules/AuditLogs/Services/auditLogs.servi
 import { OrganisationDepartmentService } from "../Services/organisation-department.service";
 import { OrganisationBranchService } from "../Services/organisation-branch.service";
 import { CreateDepartmentDto } from "../Dtos/organisation-department.dto";
+import { CreateBranchDto } from "../Dtos/organisation-branch.dto";
 
 @Controller("organisations")
 export class OrganisationController {
@@ -318,6 +319,90 @@ export class OrganisationController {
           organisationId,
           departmentId,
         );
+
+      return {
+        status: "success",
+        message: "Department fetched successfully",
+        data: department,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Branches routes
+   */
+  @Post(":organisationId/branches")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_DEPARTMENTS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async createBranch(
+    @Param("organisationId") organisationId: string,
+    @Body() data: CreateBranchDto,
+  ) {
+    try {
+      const branch = await this.organisationBranchService.createBranch({
+        ...data,
+        organisationId,
+      });
+
+      return {
+        status: "success",
+        message: "Branch created successfully",
+        data: branch,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get(":organisationId/branches")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_DEPARTMENTS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async getBranches(
+    @Param("organisationId") organisationId: string,
+    @Query("page") page: number,
+    @Query("pageSize") pageSize: number,
+  ) {
+    try {
+      const branch =
+        await this.organisationBranchService.getBranchesByOrganisation(
+          organisationId,
+          page,
+          pageSize,
+        );
+
+      return {
+        status: "success",
+        message: "Department fetched successfully",
+        data: branch,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get(":organisationId/branches/:branchId")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_DEPARTMENTS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async getBranchById(
+    @Param("organisationId") organisationId: string,
+    @Param("branchId") branchId: string,
+  ) {
+    try {
+      const department = await this.organisationBranchService.getBranchById(
+        organisationId,
+        branchId,
+      );
 
       return {
         status: "success",
