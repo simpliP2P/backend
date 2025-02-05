@@ -1,9 +1,10 @@
 import { Organisation } from "src/Modules/Organisation/Entities/organisation.entity";
 import { Supplier } from "src/Modules/Supplier/Entities/supplier.entity";
 import { Column, Entity, ManyToOne, OneToMany, JoinColumn } from "typeorm";
-import { PurchaseOrderItem } from "../../PurchaseOrderItem/Entities/purchaseOrderItem.entity";
-import { PurchaseRequisition } from "../../PurchaseRequisition/Entities/purchaseRequisition.entity";
+// import { PurchaseOrderItem } from "../../PurchaseOrderItem/Entities/purchaseOrderItem.entity";
+import { PurchaseRequisition } from "../../PurchaseRequisition/Entities/purchase-requisition.entity";
 import { BaseEntity } from "src/Common/entities/base.entity";
+import { PurchaseOrderItem } from "src/Modules/PurchaseOrderItem/Entities/purchase-order-item.entity";
 
 @Entity("purchase_orders")
 export class PurchaseOrder extends BaseEntity {
@@ -28,6 +29,6 @@ export class PurchaseOrder extends BaseEntity {
   items: PurchaseOrderItem[];
 
   @ManyToOne(() => PurchaseRequisition, { nullable: true })
-  @JoinColumn({ name: "purchase_requisition_id" })
+  @JoinColumn({ name: "pr_id" })
   purchase_requisition: PurchaseRequisition;
 }

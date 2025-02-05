@@ -1,26 +1,53 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Not, Repository } from "typeorm";
-import { PurchaseRequisition } from "../Entities/purchaseRequisition.entity";
-import { PurchaseRequisitionStatus } from "../Enums/purchaseRequisition.enum";
+import { PurchaseRequisition } from "../Entities/purchase-requisition.entity";
+import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
+import { PurchaseItemService } from "src/Modules/PurchaseItem/Services/purchase-item.service";
+import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 
 @Injectable()
 export class PurchaseRequisitionService {
   constructor(
     @InjectRepository(PurchaseRequisition)
     private readonly purchaseRequisitionRepository: Repository<PurchaseRequisition>,
+
+    private readonly purchaseItemService: PurchaseItemService,
   ) {}
 
   public async createPurchaseRequisition(
     organisationId: string,
     data: Partial<PurchaseRequisition>,
   ): Promise<PurchaseRequisition> {
-    const newRequisition = this.purchaseRequisitionRepository.create({
-      ...data,
-      organisation: { id: organisationId },
-    });
+    return await this.purchaseRequisitionRepository.manager.transaction(
+      async (transactionalEntityManager) => {
+        // 1️⃣ Create the requisition
+        const requisition = this.purchaseRequisitionRepository.create({
+          ...data,
+          organisation: { id: organisationId },
+        });
 
-    return this.purchaseRequisitionRepository.save(newRequisition);
+        await transactionalEntityManager.save(requisition);
+
+        // 2️⃣ Insert the purchase items in bulk
+        const items = data.items;
+        if ((items ?? []).length > 0) {
+          const purchaseItems = (items ?? []).map((item) => ({
+            ...item,
+            purchase_requisition: requisition, // Assign saved requisition
+          }));
+
+          await transactionalEntityManager
+            .createQueryBuilder()
+            .insert()
+            .into(PurchaseItem)
+            .values(purchaseItems)
+            .execute();
+        }
+
+        return requisition;
+      },
+    );
   }
 
   public async getAllPurchaseRequisitions(

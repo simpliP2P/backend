@@ -2,7 +2,7 @@ import { DataSource } from "typeorm";
 import * as AppConfig from "../Config/app.config";
 import * as dotenv from "dotenv";
 import { join } from "path";
-import { AuditSubscriber } from "src/Subscribers/auditLogs.subscriber";
+import { AuditSubscriber } from "src/Subscribers/audit-logs.subscriber";
 
 dotenv.config();
 const dbConfig = AppConfig.default().database;

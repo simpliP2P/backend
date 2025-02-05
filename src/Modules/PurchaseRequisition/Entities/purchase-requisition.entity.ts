@@ -1,6 +1,6 @@
 import { BaseEntity } from "src/Common/entities/base.entity";
 import { Organisation } from "src/Modules/Organisation/Entities/organisation.entity";
-import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchaseOrder.entity";
+import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order.entity";
 import { User } from "src/Modules/User/Entities/user.entity"; // Import User entity
 import {
   Column,
@@ -17,7 +17,8 @@ import {
   IsEnum,
   IsOptional,
 } from "class-validator";
-import { PurchaseRequisitionStatus } from "../Enums/purchaseRequisition.enum";
+import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
+import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 
 @Entity("purchase_requisitions")
 export class PurchaseRequisition extends BaseEntity {
@@ -77,6 +78,9 @@ export class PurchaseRequisition extends BaseEntity {
 
   @Column({ type: "date" })
   needed_by_date: Date;
+
+  @OneToMany(() => PurchaseItem, (item) => item.purchase_requisition)
+  items: PurchaseItem[];
 
   @ManyToOne(() => Organisation, (org) => org.purchaseRequisitions)
   @JoinColumn({ name: "organisation_id" }) // Explicit foreign key

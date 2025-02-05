@@ -8,7 +8,7 @@ import {
   IsStrongPassword,
 } from "class-validator";
 import { BaseEntity } from "src/Common/entities/base.entity";
-import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchaseRequisition.entity";
+import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
 import { UserOrganisation } from "src/Modules/Organisation/Entities/user-organisation.entity";
 
 @Entity("users")

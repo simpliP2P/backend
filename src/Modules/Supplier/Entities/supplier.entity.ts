@@ -1,9 +1,9 @@
 import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from "typeorm";
 import { Organisation } from "src/Modules/Organisation/Entities/organisation.entity";
 import { IsEmail } from "class-validator";
-import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchaseOrder.entity";
+import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order.entity";
 import { BaseEntity } from "src/Common/entities/base.entity";
-import { BankDetails } from "../Types/supplierTypes";
+import { BankDetails, SupplierMetadata } from "../Types/supplierTypes";
 
 @Entity("suppliers")
 export class Supplier extends BaseEntity {
@@ -28,6 +28,9 @@ export class Supplier extends BaseEntity {
 
   @Column({ type: "jsonb", nullable: true })
   bank_details: BankDetails;
+
+  @Column({ type: "jsonb", nullable: true })
+  meta_data: SupplierMetadata;
 
   @ManyToOne(() => Organisation, { nullable: false, onDelete: "CASCADE" })
   @JoinColumn({ name: "organisation_id" })

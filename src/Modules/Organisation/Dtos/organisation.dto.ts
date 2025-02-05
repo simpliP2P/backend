@@ -15,7 +15,9 @@ import {
 } from "class-validator";
 import { PermissionType } from "../Enums/user-organisation.enum";
 import { Type } from "class-transformer";
-import { PurchaseRequisitionStatus } from "src/Modules/PurchaseRequisition/Enums/purchaseRequisition.enum";
+import { PurchaseRequisitionStatus } from "src/Modules/PurchaseRequisition/Enums/purchase-requisition.enum";
+import { CreatePurchaseItemDto } from "src/Modules/PurchaseItem/Dtos/purchase-item.dto";
+import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 
 export class CreateOrganisationDto {
   @IsString()
@@ -134,6 +136,9 @@ export class CreatePurchaseRequisitionDto {
 
   @IsString()
   needed_by_date: Date;
+
+  @IsArray()
+  items: PurchaseItem[];
 }
 
 /**

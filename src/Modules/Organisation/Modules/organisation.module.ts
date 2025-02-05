@@ -11,16 +11,18 @@ import { MailModule } from "src/Modules/Mail/mail.module";
 import { UserOrganisationRepository } from "../Repositories/user-organisation.repository";
 import { AppLogger } from "src/Logger/logger.service";
 import { SuppliersModule } from "src/Modules/Supplier/Modules/supplier.module";
-import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchaseRequisition.service";
-import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchaseRequisition.entity";
+import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchase-requisition.service";
+import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
 import { ProductModule } from "src/Modules/Product/Modules/product.module";
 import { UploadModule } from "src/Modules/Upload/upload.module";
-import { AuditLogsModule } from "src/Modules/AuditLogs/Modules/auditLogs.module";
+import { AuditLogsModule } from "src/Modules/AuditLogs/Modules/audit-logs.module";
 import { OrganisationDepartmentService } from "../Services/organisation-department.service";
 import { OrganisationBranchService } from "../Services/organisation-branch.service";
 import { OrganisationBranch } from "../Entities/organisation-branch.entity";
 import { OrganisationDepartment } from "../Entities/organisation-department.entity";
 import { User } from "src/Modules/User/Entities/user.entity";
+import { PurchaseItemService } from "src/Modules/PurchaseItem/Services/purchase-item.service";
+import { PurchaseItemModule } from "src/Modules/PurchaseItem/Modules/purchase-item.module";
 // import { PurchaseOrderModule } from "src/Modules/PurchaseOrder/Modules/purchaseOrder.module";
 
 @Module({
@@ -40,6 +42,7 @@ import { User } from "src/Modules/User/Entities/user.entity";
     ProductModule,
     UploadModule,
     AuditLogsModule,
+    PurchaseItemModule,
     // PurchaseOrderModule
   ],
   controllers: [OrganisationController],

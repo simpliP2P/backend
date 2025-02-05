@@ -32,9 +32,9 @@ import {
   CreateSupplierDto,
   UpdateSupplierDto,
 } from "src/Modules/Supplier/Dtos/supplier.dto";
-import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchaseRequisition.entity";
-import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchaseRequisition.service";
-import { PurchaseRequisitionStatus } from "src/Modules/PurchaseRequisition/Enums/purchaseRequisition.enum";
+import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
+import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchase-requisition.service";
+import { PurchaseRequisitionStatus } from "src/Modules/PurchaseRequisition/Enums/purchase-requisition.enum";
 import { User } from "src/Modules/User/Entities/user.entity";
 import { ProductService } from "src/Modules/Product/Services/product.service";
 import {
@@ -48,7 +48,7 @@ import { join } from "path";
 import { existsSync, unlink } from "fs";
 import { AppLogger } from "src/Logger/logger.service";
 import { ApiResponse } from "src/Shared/Interfaces/api-response.interface";
-import { AuditLogsService } from "src/Modules/AuditLogs/Services/auditLogs.service";
+import { AuditLogsService } from "src/Modules/AuditLogs/Services/audit-logs.service";
 import { OrganisationDepartmentService } from "../Services/organisation-department.service";
 import { OrganisationBranchService } from "../Services/organisation-branch.service";
 import { CreateDepartmentDto } from "../Dtos/organisation-department.dto";
