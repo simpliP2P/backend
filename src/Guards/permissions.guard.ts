@@ -5,8 +5,8 @@ import {
   ForbiddenException,
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { UserOrganisationRepository } from "src/Modules/Organisation/Repositories/userOrganisation.repository";
-import { PermissionType } from "src/Modules/Organisation/Enums/userOrganisation.enum";
+import { PermissionType } from "src/Modules/Organisation/Enums/user-organisation.enum";
+import { UserOrganisationRepository } from "src/Modules/Organisation/Repositories/user-organisation.repository";
 
 @Injectable()
 export class OrganisationPermissionsGuard implements CanActivate {

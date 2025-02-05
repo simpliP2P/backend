@@ -13,7 +13,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from "class-validator";
-import { PermissionType } from "../Enums/userOrganisation.enum";
+import { PermissionType } from "../Enums/user-organisation.enum";
 import { Type } from "class-transformer";
 import { PurchaseRequisitionStatus } from "src/Modules/PurchaseRequisition/Enums/purchaseRequisition.enum";
 

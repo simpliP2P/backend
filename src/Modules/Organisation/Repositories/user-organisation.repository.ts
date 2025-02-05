@@ -1,5 +1,5 @@
 import { DataSource, Repository } from "typeorm";
-import { UserOrganisation } from "../Entities/organisation.entity"; // Import the UserOrganisation entity
+import { UserOrganisation } from "../Entities/user-organisation.entity";
 import { Injectable } from "@nestjs/common";
 
 // Extending Repository to create a custom repository
@@ -22,9 +22,8 @@ export class UserOrganisationRepository extends Repository<UserOrganisation> {
         },
         relations: ["user", "organisation"],
       });
-  
+
       return result ?? undefined;
-      
     } catch (error) {
       throw error;
     }
@@ -45,5 +44,4 @@ export class UserOrganisationRepository extends Repository<UserOrganisation> {
     });
     return this.save(userOrganisation);
   }
-
 }

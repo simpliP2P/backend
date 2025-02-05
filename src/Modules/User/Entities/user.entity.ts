@@ -1,9 +1,4 @@
-import {
-  Entity,
-  Column,
-  BeforeInsert,
-  OneToMany,
-} from "typeorm";
+import { Entity, Column, BeforeInsert, OneToMany } from "typeorm";
 import { UserRole, ProviderType } from "../Enums/user.enum";
 import {
   IsOptional,
@@ -12,9 +7,9 @@ import {
   IsEmail,
   IsStrongPassword,
 } from "class-validator";
-import { UserOrganisation } from "src/Modules/Organisation/Entities/organisation.entity";
 import { BaseEntity } from "src/Common/entities/base.entity";
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchaseRequisition.entity";
+import { UserOrganisation } from "src/Modules/Organisation/Entities/user-organisation.entity";
 
 @Entity("users")
 export class User extends BaseEntity {

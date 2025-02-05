@@ -1,9 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import {
-  Organisation,
-  UserOrganisation,
-} from "../Entities/organisation.entity";
+import { Organisation } from "../Entities/organisation.entity";
+import { UserOrganisation } from "../Entities/user-organisation.entity";
 import { FindOneOptions, Repository } from "typeorm";
 import {
   addUserToOrg,
@@ -12,7 +10,7 @@ import {
   updateUserDetails,
 } from "../Types/organisationTypes";
 import { UserService } from "src/Modules/User/Services/user.service";
-import { PermissionType } from "../Enums/userOrganisation.enum";
+import { PermissionType } from "../Enums/user-organisation.enum";
 import { User } from "src/Modules/User/Entities/user.entity";
 import {
   BadRequestException,
@@ -37,8 +35,10 @@ export class OrganisationService {
   constructor(
     @InjectRepository(Organisation)
     private organisationRepository: Repository<Organisation>,
+
     @InjectRepository(UserOrganisation)
     private userOrganisationRepository: Repository<UserOrganisation>,
+
     private readonly userService: UserService,
     private readonly emailService: EmailServices,
     private readonly tokenService: TokenService,
@@ -293,7 +293,7 @@ export class OrganisationService {
           is_creator: false,
         },
         take: _pageSize,
-        skip, 
+        skip,
         relations: ["user"],
       });
 

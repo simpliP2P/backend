@@ -1,11 +1,4 @@
-import {
-  Entity,
-  Column,
-  ManyToOne,
-  OneToMany,
-  JoinColumn,
-  BeforeInsert,
-} from "typeorm";
+import { Entity, Column, OneToMany, BeforeInsert } from "typeorm";
 import { MinLength, IsNotEmpty } from "class-validator";
 import { User } from "src/Modules/User/Entities/user.entity";
 import { Supplier } from "src/Modules/Supplier/Entities/supplier.entity";
@@ -14,6 +7,9 @@ import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/pu
 import { BaseEntity } from "src/Common/entities/base.entity";
 import { Product } from "src/Modules/Product/Entities/product.entity";
 import { createHash } from "crypto";
+import { UserOrganisation } from "./user-organisation.entity";
+import { OrganisationBranch } from "./organisation-branch.entity";
+import { OrganisationDepartment } from "./organisation-department.entity";
 
 @Entity("organisations")
 export class Organisation extends BaseEntity {
@@ -46,6 +42,15 @@ export class Organisation extends BaseEntity {
   @OneToMany(() => PurchaseRequisition, (pr) => pr.organisation)
   purchaseRequisitions: PurchaseRequisition[];
 
+  @OneToMany(() => OrganisationBranch, (branch) => branch.organisation)
+  branches: OrganisationBranch[];
+
+  @OneToMany(
+    () => OrganisationDepartment,
+    (department) => department.organisation,
+  )
+  departments: OrganisationDepartment[];
+
   @BeforeInsert()
   generateTenantCode() {
     if (!this.tenant_code) {
@@ -57,30 +62,4 @@ export class Organisation extends BaseEntity {
     const hash = createHash("sha256").update(this.id).digest("hex");
     return parseInt(hash.substring(0, 10), 16).toString(36).substring(0, 8); // Convert hex to base36
   }
-}
-
-@Entity("user_organisations")
-export class UserOrganisation extends BaseEntity {
-  @ManyToOne(() => User, (user) => user.userOrganisations)
-  @JoinColumn({ name: "user_id" })
-  user: User;
-
-  @ManyToOne(() => Organisation, (org) => org.userOrganisations)
-  @JoinColumn({ name: "organisation_id" })
-  organisation: Organisation;
-
-  @Column({ type: "varchar", nullable: true, name: "organisation_role" })
-  role: string;
-
-  @Column({ type: "json", nullable: true })
-  permissions: string[]; // Array of permissions like ["VIEW_REPORTS", "MANAGE_ORDERS"]
-
-  @Column({ default: false })
-  is_creator: boolean;
-
-  @Column({ default: false })
-  accepted_invitation: boolean;
-
-  @Column({ type: "timestamp", nullable: true, default: null })
-  deactivated_at: Date | null;
 }

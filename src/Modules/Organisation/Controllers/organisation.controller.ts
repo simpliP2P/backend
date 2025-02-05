@@ -25,7 +25,7 @@ import {
 } from "../Dtos/organisation.dto";
 import { Request } from "express";
 import { OrganisationPermissionsGuard } from "src/Guards/permissions.guard";
-import { PermissionType } from "../Enums/userOrganisation.enum";
+import { PermissionType } from "../Enums/user-organisation.enum";
 import { Public } from "src/Shared/Decorators/custom.decorator";
 import { SuppliersService } from "src/Modules/Supplier/Services/supplier.service";
 import {
