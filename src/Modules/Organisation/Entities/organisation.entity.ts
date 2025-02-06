@@ -18,7 +18,7 @@ export class Organisation extends BaseEntity {
   @Column({ type: "varchar", unique: true })
   name: string;
 
-  @Column({ type: "varchar", unique: true })
+  @Column({ type: "varchar", unique: true, nullable: true })
   tenant_code: string;
 
   @Column({ type: "varchar" })
