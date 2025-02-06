@@ -8,7 +8,6 @@ import {
 } from "../Dtos/purchase-item.dto";
 import { PurchaseItemStatus } from "../Enums/purchase-item.enum";
 
-
 @Injectable()
 export class PurchaseItemService {
   constructor(
@@ -25,8 +24,9 @@ export class PurchaseItemService {
     return await this.purchaseItemRepo.save(newItem);
   }
 
-  async getAllPurchaseItems(): Promise<PurchaseItem[]> {
+  async getAllPurchaseItems(query: any): Promise<PurchaseItem[]> {
     return await this.purchaseItemRepo.find({
+      where: query,
       relations: ["purchase_requisition", "purchase_order", "product"],
     });
   }

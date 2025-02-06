@@ -23,6 +23,9 @@ export class PurchaseItem extends BaseEntity {
   @Column({ type: "varchar", nullable: true }) // For items not in inventory
   item_name: string | null;
 
+  @Column({ type: "decimal", precision: 10, scale: 2 }) // For items not in inventory
+  unit_price: number;
+
   @Column({ type: "varchar", nullable: true }) // For items not in inventory
   image_url: string | null;
 

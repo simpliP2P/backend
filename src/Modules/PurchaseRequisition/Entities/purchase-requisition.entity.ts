@@ -82,6 +82,10 @@ export class PurchaseRequisition extends BaseEntity {
   @OneToMany(() => PurchaseItem, (item) => item.purchase_requisition)
   items: PurchaseItem[];
 
+  @IsString()
+  @Column({ default: "NGN" })
+  currency: string;
+
   @ManyToOne(() => Organisation, (org) => org.purchaseRequisitions)
   @JoinColumn({ name: "organisation_id" }) // Explicit foreign key
   organisation: Organisation;
@@ -92,5 +96,4 @@ export class PurchaseRequisition extends BaseEntity {
 
   @OneToMany(() => PurchaseOrder, (po) => po.purchase_requisition)
   purchaseOrders: PurchaseOrder[];
-
 }

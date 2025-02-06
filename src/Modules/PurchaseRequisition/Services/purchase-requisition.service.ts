@@ -3,7 +3,6 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Not, Repository } from "typeorm";
 import { PurchaseRequisition } from "../Entities/purchase-requisition.entity";
 import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
-import { PurchaseItemService } from "src/Modules/PurchaseItem/Services/purchase-item.service";
 import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 import { OrganisationService } from "src/Modules/Organisation/Services/organisation.service";
 
@@ -62,9 +61,9 @@ export class PurchaseRequisitionService {
     if (isNaN(page) || page < 1) _page = 1;
     if (isNaN(pageSize) || pageSize < 1) _pageSize = 10;
 
-    const skip = (_page - 1) * _pageSize; // Calculate the offset
+    const skip = (_page - 1) * _pageSize;
 
-    const requisitions = await this.getPurchaseRequisitions({
+    const [requisitions, total] = await this.purchaseRequisitionRepository.findAndCount({
       where: {
         created_by: { id: userId },
         organisation: { id: organisationId },
@@ -81,7 +80,15 @@ export class PurchaseRequisitionService {
       },
     });
 
-    return requisitions;
+    return {
+      requisitions,
+      metadata: {
+        total,
+        page: _page,
+        pageSize: _pageSize,
+        totalPages: Math.ceil(total / _pageSize),
+      },
+    };
   }
 
   public async getPurchaseRequisitionById(
@@ -159,6 +166,12 @@ export class PurchaseRequisitionService {
     query: any,
   ): Promise<PurchaseRequisition[]> {
     return await this.purchaseRequisitionRepository.find(query);
+  }
+
+  public async getPurchaseRequisition(
+    query: any,
+  ): Promise<PurchaseRequisition | null> {
+    return await this.purchaseRequisitionRepository.findOne(query);
   }
 
   public async count(query: any) {
