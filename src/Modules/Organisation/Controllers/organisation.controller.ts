@@ -53,6 +53,8 @@ import { OrganisationDepartmentService } from "../Services/organisation-departme
 import { OrganisationBranchService } from "../Services/organisation-branch.service";
 import { CreateDepartmentDto } from "../Dtos/organisation-department.dto";
 import { CreateBranchDto } from "../Dtos/organisation-branch.dto";
+import { CreatePurchaseOrderDto } from "src/Modules/PurchaseOrder/Dtos/purchase-order.dto";
+import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
 
 @Controller("organisations")
 export class OrganisationController {
@@ -64,6 +66,7 @@ export class OrganisationController {
     private readonly purchaseRequisitionService: PurchaseRequisitionService,
     private readonly productService: ProductService,
     private readonly auditLogsService: AuditLogsService,
+    private readonly purchaseOrderService: PurchaseOrderService,
 
     private readonly logger: AppLogger,
   ) {}
@@ -739,7 +742,7 @@ export class OrganisationController {
     try {
       const userId = req.user.sub;
 
-      const savedRequisitions =
+      const data =
         await this.purchaseRequisitionService.getAllPurchaseRequisitions(
           page,
           pageSize,
@@ -750,7 +753,7 @@ export class OrganisationController {
       return {
         status: "success",
         message: "Requisitions fetched successfully.",
-        data: { requisitions: savedRequisitions },
+        data,
       };
     } catch (error) {
       throw error;
@@ -883,6 +886,94 @@ export class OrganisationController {
         status: "success",
         message: "Purchase requisition updated successfully",
         data: {},
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Purchase Order routes
+   */
+  @Post(":organisationId/orders")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_PURCHASE_ORDERS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async createOrder(
+    @Param("organisationId") organisationId: string,
+    @Body() data: CreatePurchaseOrderDto,
+    @Req() req: Request,
+  ) {
+    try {
+      const userId = req.user.sub;
+
+      if (!userId) return;
+
+      const order = await this.purchaseOrderService.create(organisationId, {
+        ...data,
+        created_by: { id: userId } as User,
+      });
+
+      return {
+        status: "success",
+        message: "Purchase order created successfully",
+        data: order,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get(":organisationId/orders")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_PURCHASE_ORDERS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async getOrders(
+    @Param("organisationId") organisationId: string,
+    @Query("page") page: number,
+    @Query("pageSize") pageSize: number,
+  ) {
+    try {
+      const orders = await this.purchaseOrderService.getOrganisationOrders(
+        organisationId,
+        page,
+        pageSize,
+      );
+
+      return {
+        status: "success",
+        message: "Orders fetched successfully",
+        data: orders,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get(":organisationId/orders/:orderId")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_PURCHASE_ORDERS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async getOrderById(
+    @Param("organisationId") organisationId: string,
+    @Param("orderId") orderId: string,
+  ) {
+    try {
+      const order = await this.purchaseOrderService.getOrganisationOrderById(
+        organisationId,
+        orderId,
+      );
+
+      return {
+        status: "success",
+        message: "Order fetched successfully",
+        data: { order },
       };
     } catch (error) {
       throw error;

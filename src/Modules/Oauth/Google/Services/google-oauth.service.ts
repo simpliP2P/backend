@@ -4,13 +4,13 @@ import {
   TokenPayload,
 } from "../../../../Infrastructure/Oauth/googleOauth.config";
 import { ProviderType } from "src/Modules/User/Enums/user.enum";
-import { CreateGoogleAccountInput } from "src/Modules/User/Types/userTypes";
+import { CreateGoogleAccountInput } from "src/Modules/User/Types/user.types";
 import { UserService } from "src/Modules/User/Services/user.service";
 
 import { HandleCustomerGoogleLoginCallbackInput } from "../Dtos/google-oauth.dto";
 import { AuthService } from "src/Modules/User/Services/auth.service";
 import { Request } from "express";
-import { AuthTokens } from "src/Modules/User/Types/authTypes";
+import { AuthTokens } from "src/Modules/User/Types/auth.types";
 
 @Injectable()
 export class GoogleOAuthServices {

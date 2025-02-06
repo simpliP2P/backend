@@ -21,9 +21,10 @@ import { OrganisationBranchService } from "../Services/organisation-branch.servi
 import { OrganisationBranch } from "../Entities/organisation-branch.entity";
 import { OrganisationDepartment } from "../Entities/organisation-department.entity";
 import { User } from "src/Modules/User/Entities/user.entity";
-import { PurchaseItemService } from "src/Modules/PurchaseItem/Services/purchase-item.service";
 import { PurchaseItemModule } from "src/Modules/PurchaseItem/Modules/purchase-item.module";
-// import { PurchaseOrderModule } from "src/Modules/PurchaseOrder/Modules/purchaseOrder.module";
+import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
+import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order.entity";
+import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 
 @Module({
   imports: [
@@ -34,6 +35,8 @@ import { PurchaseItemModule } from "src/Modules/PurchaseItem/Modules/purchase-it
       OrganisationBranch,
       UserOrganisation,
       PurchaseRequisition,
+      PurchaseOrder,
+      PurchaseItem,
     ]),
     UserModule,
     TokenModule,
@@ -43,7 +46,6 @@ import { PurchaseItemModule } from "src/Modules/PurchaseItem/Modules/purchase-it
     UploadModule,
     AuditLogsModule,
     PurchaseItemModule,
-    // PurchaseOrderModule
   ],
   controllers: [OrganisationController],
   providers: [
@@ -53,6 +55,7 @@ import { PurchaseItemModule } from "src/Modules/PurchaseItem/Modules/purchase-it
     ClientHelper,
     UserOrganisationRepository,
     AppLogger,
+    PurchaseOrderService,
     PurchaseRequisitionService,
   ],
   exports: [OrganisationService],

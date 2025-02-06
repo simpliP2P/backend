@@ -4,7 +4,7 @@ import { render } from "ejs";
 import { BrevoEmailService } from "../../../Infrastructure/Brevo/brevoMail";
 import { AppLogger } from "src/Logger/logger.service";
 import { Injectable } from "@nestjs/common";
-import { emailInvitationData } from "src/Modules/Organisation/Types/organisationTypes";
+import { emailInvitationData } from "src/Modules/Organisation/Types/organisation.types";
 
 @Injectable()
 export class EmailServices {

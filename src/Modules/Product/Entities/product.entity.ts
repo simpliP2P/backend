@@ -9,8 +9,8 @@ import {
 } from "typeorm";
 import { BaseEntity } from "src/Common/entities/base.entity";
 import { Organisation } from "src/Modules/Organisation/Entities/organisation.entity";
-import { PurchaseOrderItem } from "src/Modules/PurchaseOrderItem/Entities/purchase-order-item.entity";
 import { IsOptional } from "class-validator";
+import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 
 @Entity("products")
 export class Product extends BaseEntity {
@@ -43,8 +43,8 @@ export class Product extends BaseEntity {
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
 
-  @OneToMany(() => PurchaseOrderItem, (poi) => poi.product)
-  purchaseOrderItems: PurchaseOrderItem[];
+  @OneToMany(() => PurchaseItem, (poi) => poi.product)
+  purchaseOrderItems: PurchaseItem[];
 
   @BeforeInsert()
   @BeforeUpdate()
