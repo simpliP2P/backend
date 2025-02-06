@@ -3,12 +3,12 @@ import { BaseEntity } from "src/Common/entities/base.entity";
 import { Product } from "src/Modules/Product/Entities/product.entity";
 import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order.entity";
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
-import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
+import { BeforeInsert, Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { PurchaseItemStatus } from "../Enums/purchase-item.enum";
 
 @Entity("purchase_items")
 export class PurchaseItem extends BaseEntity {
-  @ManyToOne(() => PurchaseRequisition, (pr) => pr.items, { nullable: true })
+  @ManyToOne(() => PurchaseRequisition, (pr) => pr.items, { onDelete: "RESTRICT" })
   @JoinColumn({ name: "purchase_requisition_id" })
   purchase_requisition: PurchaseRequisition;
 
@@ -21,7 +21,10 @@ export class PurchaseItem extends BaseEntity {
   product: Product;
 
   @Column({ type: "varchar", nullable: true }) // For items not in inventory
-  item_name: string;
+  item_name: string | null;
+
+  @Column({ type: "varchar", nullable: true }) // For items not in inventory
+  image_url: string | null;
 
   @Column({ type: "int", default: 0 }) // PR quantity
   pr_quantity: number;
@@ -32,4 +35,13 @@ export class PurchaseItem extends BaseEntity {
   @IsEnum(PurchaseItemStatus)
   @Column({ type: "varchar", default: PurchaseItemStatus.PENDING })
   status: PurchaseItemStatus;
+
+  @BeforeInsert()
+  checkProductId() {
+    if (this.product) {
+      // If product_id is set, item_name and image_url should be null
+      this.item_name = null;
+      this.image_url = null;
+    }
+  }
 }

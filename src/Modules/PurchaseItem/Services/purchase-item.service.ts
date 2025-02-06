@@ -3,10 +3,11 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { PurchaseItem } from "../Entities/purchase-item.entity";
 import {
-  CreatePurchaseItemDto,
+  PurchaseItemDto,
   UpdatePurchaseItemDto,
 } from "../Dtos/purchase-item.dto";
 import { PurchaseItemStatus } from "../Enums/purchase-item.enum";
+
 
 @Injectable()
 export class PurchaseItemService {
@@ -15,11 +16,11 @@ export class PurchaseItemService {
     private readonly purchaseItemRepo: Repository<PurchaseItem>,
   ) {}
 
-  async insertBulkPurchaseItems(items: CreatePurchaseItemDto[]): Promise<void> {
-    await this.purchaseItemRepo.insert(items); 
+  async insertBulkPurchaseItems(items: PurchaseItemDto[]): Promise<void> {
+    await this.purchaseItemRepo.insert(items);
   }
 
-  async createPurchaseItem(data: CreatePurchaseItemDto): Promise<PurchaseItem> {
+  async createPurchaseItem(data: PurchaseItemDto): Promise<PurchaseItem> {
     const newItem = this.purchaseItemRepo.create(data);
     return await this.purchaseItemRepo.save(newItem);
   }

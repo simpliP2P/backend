@@ -1,7 +1,7 @@
 import { IsEnum, IsInt, IsOptional, IsString } from "class-validator";
 import { PurchaseItemStatus } from "../Enums/purchase-item.enum";
 
-export class CreatePurchaseItemDto {
+export class PurchaseItemDto {
   @IsOptional()
   purchase_requisition_id?: string;
 
@@ -22,8 +22,17 @@ export class CreatePurchaseItemDto {
   @IsInt()
   po_quantity?: number;
 
+  @IsString()
+  image_url: string;
+
   @IsEnum(PurchaseItemStatus)
   status: PurchaseItemStatus;
+}
+export class CreatePurchaseItemDto {
+  @IsString()
+  pr_id: string;
+
+  item: PurchaseItemDto;
 }
 
 export class UpdatePurchaseItemDto {
