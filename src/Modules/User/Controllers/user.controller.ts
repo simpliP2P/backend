@@ -15,7 +15,7 @@ import { existsSync, unlink } from "fs";
 import { AppLogger } from "src/Logger/logger.service";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 import { ApiResponse } from "src/Shared/Interfaces/api-response.interface";
-import { SanitizedUser } from "../Types/authTypes";
+import { SanitizedUser } from "../Types/auth.types";
 
 @ApiTags("user")
 @Controller("users")

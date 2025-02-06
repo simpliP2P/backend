@@ -23,7 +23,7 @@ import {
   AuthTokens,
   SanitizedUser,
   SanitizedUserOrganisation,
-} from "../Types/authTypes";
+} from "../Types/auth.types";
 import { randomBytes } from "crypto";
 
 @Injectable()
@@ -267,7 +267,7 @@ export class AuthService {
         ? undefined
         : userOrg.accepted_invitation,
     }));
-    
+
     return { ...sanitizedUser, user_organisations: sanitizedUserOrgs };
   }
 

@@ -14,13 +14,13 @@ import {
 import {
   CreateGoogleAccountInput,
   CreateLocalAccountInput,
-} from "../Types/userTypes";
+} from "../Types/user.types";
 import { UploadService } from "src/Modules/Upload/Services/upload.service";
 import { compare, hash } from "bcrypt";
 import { Token } from "src/Modules/Token/Entities/token.entity";
 import { ProviderType } from "../Enums/user.enum";
 import { TokenService } from "src/Modules/Token/Services/token.service";
-import { SanitizedUser } from "../Types/authTypes";
+import { SanitizedUser } from "../Types/auth.types";
 
 @Injectable()
 export class UserService {

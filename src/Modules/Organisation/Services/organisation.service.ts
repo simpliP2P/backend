@@ -8,7 +8,7 @@ import {
   baseEmailInvitationData,
   CreateOrganisationInput,
   updateUserDetails,
-} from "../Types/organisationTypes";
+} from "../Types/organisation.types";
 import { UserService } from "src/Modules/User/Services/user.service";
 import { PermissionType } from "../Enums/user-organisation.enum";
 import { User } from "src/Modules/User/Entities/user.entity";

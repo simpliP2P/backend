@@ -3,7 +3,7 @@ import { Organisation } from "src/Modules/Organisation/Entities/organisation.ent
 import { IsEmail } from "class-validator";
 import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order.entity";
 import { BaseEntity } from "src/Common/entities/base.entity";
-import { BankDetails, SupplierMetadata } from "../Types/supplierTypes";
+import { BankDetails, SupplierMetadata } from "../Types/supplier.types";
 
 @Entity("suppliers")
 export class Supplier extends BaseEntity {
