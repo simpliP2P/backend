@@ -13,6 +13,7 @@ import { CloudinaryConfig } from "./Config/cloudinaryClient.config";
 import { OrganisationModule } from "./Modules/Organisation/Modules/organisation.module";
 import { APP_INTERCEPTOR } from "@nestjs/core";
 import { RequestContextInterceptor } from "./Interceptors/request-context.interceptor";
+import { CommentModule } from "./Modules/Comments/Modules/comment.module";
 
 @Module({
   // Declares external modules that this module depends on
@@ -26,6 +27,7 @@ import { RequestContextInterceptor } from "./Interceptors/request-context.interc
     AuthModule,
     OAuthModule,
     OrganisationModule,
+    CommentModule,
   ],
   // Defines the controllers for this module.
   controllers: [AppController],
