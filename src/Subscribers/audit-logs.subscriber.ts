@@ -6,7 +6,7 @@ import {
   RemoveEvent,
 } from "typeorm";
 import { AuditLog } from "../Modules/AuditLogs/Entities/audit-logs.entity";
-import { RequestContext } from "src/Shared/Helpers/requestContext.helper"; // Get the user performing the action
+import { RequestContext } from "src/Shared/Helpers/request-context.helper"; // Get the user performing the action
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
 
 @EventSubscriber()

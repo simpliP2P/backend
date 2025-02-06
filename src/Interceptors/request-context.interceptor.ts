@@ -5,7 +5,7 @@ import {
   NestInterceptor,
 } from "@nestjs/common";
 import { Request } from "express";
-import { RequestContext } from "src/Shared/Helpers/requestContext.helper";
+import { RequestContext } from "src/Shared/Helpers/request-context.helper";
 
 @Injectable()
 export class RequestContextInterceptor implements NestInterceptor {
@@ -14,8 +14,11 @@ export class RequestContextInterceptor implements NestInterceptor {
     const user = request.user; // Extract user from JWT
     const orgId = request.params.organisationId; // Extract organisation ID from URL
 
-    return RequestContext.run({ userId: user?.sub, organisationId: orgId }, async () => {
-      return next.handle();
-    });
+    return RequestContext.run(
+      { userId: user?.sub, organisationId: orgId },
+      async () => {
+        return next.handle();
+      },
+    );
   }
 }
