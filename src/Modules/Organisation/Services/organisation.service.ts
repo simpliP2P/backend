@@ -302,6 +302,7 @@ export class OrganisationService {
       online_status:
         userOrg.user.last_login &&
         this.onlineStatus(userOrg.user.last_login.toISOString()),
+      deactivated_at: userOrg.deactivated_at,
     }));
 
     return {
@@ -321,10 +322,32 @@ export class OrganisationService {
         organisation: { id: organisationId },
         user: { id: userId },
       },
-      relations: ["user"]
+      relations: ["user"],
+      select: {
+        user: {
+          id: true,
+          first_name: true,
+          last_name: true,
+          email: true,
+          profile_picture: true,
+          last_login: true,
+        },
+      },
     });
 
-    return member;
+    if (!member) {
+      throw new NotFoundException("Member not found");
+    }
+
+    const { user, ...otherDetails } = member;
+
+    return {
+      ...otherDetails,
+      ...user,
+      online_status:
+        member.user.last_login &&
+        this.onlineStatus(member.user.last_login.toISOString()),
+    };
   }
 
   public async updateMemberDetails(
