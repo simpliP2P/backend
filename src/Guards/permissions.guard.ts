@@ -32,7 +32,7 @@ export class OrganisationPermissionsGuard implements CanActivate {
 
     // Assuming the organisation ID is passed in the request params or body
     const organisationId =
-      request.params.organisationId || request.body.organisationId;
+      request.params.organisationId || request.body.organisationId || request.headers.oid;
 
     const userOrganisation =
       await this.userOrganisationRepository.findByUserAndOrganisation(
