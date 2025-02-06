@@ -290,8 +290,8 @@ export class OrganisationService {
     // Map the results to return user details along with their roles and permissions
     const users = userOrganisations.map((userOrg) => ({
       id: userOrg.user.id,
-      firstName: userOrg.user.first_name,
-      lastName: userOrg.user.last_name,
+      first_name: userOrg.user.first_name,
+      last_name: userOrg.user.last_name,
       email: userOrg.user.email,
       phone: userOrg.user.phone,
       role: userOrg.role,
