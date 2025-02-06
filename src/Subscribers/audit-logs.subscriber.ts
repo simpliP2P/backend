@@ -160,6 +160,7 @@ export class AuditSubscriber implements EntitySubscriberInterface {
       "products",
       "organisation_departments",
       "organisation_branches",
+      "comments",
     ].includes(event.metadata.tableName);
   }
 }
