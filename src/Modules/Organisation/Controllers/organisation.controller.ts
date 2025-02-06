@@ -471,6 +471,29 @@ export class OrganisationController {
     }
   }
 
+  @Get(":organisationId/members/:memberId")
+  @SetMetadata("permissions", [PermissionType.OWNER])
+  @UseGuards(OrganisationPermissionsGuard)
+  async getMemberById(
+    @Param("organisationId") organisationId: string,
+    @Param("memberId") memberId: string,
+  ) {
+    try {
+      const member = await this.organisationService.getOrganisationMember(
+        organisationId,
+        memberId,
+      );
+
+      return {
+        status: "success",
+        message: "Member fetched successfully",
+        data: {member},
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Patch(":organisationId/members/:memberId")
   @SetMetadata("permissions", [PermissionType.OWNER])
   @UseGuards(OrganisationPermissionsGuard)

@@ -275,17 +275,6 @@ export class OrganisationService {
 
     const skip = (_page - 1) * _pageSize; // Calculate the offset
 
-    // Check if the organization exists
-    const organisation = await this.organisationRepository.findOne({
-      where: { id: organisationId },
-    });
-
-    if (!organisation) {
-      throw new NotFoundException(
-        `Organisation with ID ${organisationId} not found`,
-      );
-    }
-
     // Fetch users associated with the organization
     const [userOrganisations, total] =
       await this.userOrganisationRepository.findAndCount({
@@ -316,11 +305,6 @@ export class OrganisationService {
     }));
 
     return {
-      organisation: {
-        id: organisation.id,
-        name: organisation.name,
-        address: organisation.address,
-      },
       users,
       metadata: {
         total,
@@ -329,6 +313,18 @@ export class OrganisationService {
         totalPages: Math.ceil(total / _pageSize),
       },
     };
+  }
+
+  public async getOrganisationMember(organisationId: string, userId: string) {
+    const member = await this.userOrganisationRepository.findOne({
+      where: {
+        organisation: { id: organisationId },
+        user: { id: userId },
+      },
+      relations: ["user"]
+    });
+
+    return member;
   }
 
   public async updateMemberDetails(
