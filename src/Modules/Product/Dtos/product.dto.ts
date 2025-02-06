@@ -41,7 +41,6 @@ export class UpdateProductDto {
   @IsOptional()
   description?: string;
 
-  @IsDecimal()
   @IsOptional()
   unitPrice?: number;
 
