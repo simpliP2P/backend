@@ -30,6 +30,7 @@ import { ProductService } from "src/Modules/Product/Services/product.service";
 import { UploadService } from "src/Modules/Upload/Services/upload.service";
 import { ConfigService } from "@nestjs/config";
 import { createHash } from "crypto";
+import { AuditLogsService } from "src/Modules/AuditLogs/Services/audit-logs.service";
 
 @Injectable()
 export class OrganisationService {
@@ -50,6 +51,7 @@ export class OrganisationService {
     private readonly clientHelper: ClientHelper,
     private readonly logger: AppLogger,
     private readonly configService: ConfigService,
+    private readonly auditLogService: AuditLogsService,
   ) {}
 
   public async findOrganisation(
@@ -365,20 +367,64 @@ export class OrganisationService {
     userId: string,
     organisationId: string,
   ): Promise<void> {
-    await this.userOrganisationRepository.update(
-      { user: { id: userId }, organisation: { id: organisationId } },
-      { deactivated_at: new Date() },
-    );
+    const updateResult = await this.userOrganisationRepository
+      .createQueryBuilder()
+      .update(UserOrganisation)
+      .set({ deactivated_at: new Date() })
+      .where("user_id = :userId AND organisation_id = :organisationId", {
+        userId,
+        organisationId,
+      })
+      .returning(
+        `
+        id, user_id, organisation_id, deactivated_at,
+        (SELECT json_build_object('id', u.id, 'email', u.email)
+        FROM users u
+        WHERE u.id = user_id) AS user
+      `,
+      )
+      .execute();
+
+    if (updateResult.affected && updateResult.affected > 0) {
+      await this.auditLogService.logUpdate(
+        "user_organisations",
+        userId,
+        `Deactivated account with email ${updateResult.raw[0].user_id.email}`,
+        { deactivated_at: new Date() },
+      );
+    }
   }
 
   public async reactivateMember(
     userId: string,
     organisationId: string,
   ): Promise<void> {
-    await this.userOrganisationRepository.update(
-      { user: { id: userId }, organisation: { id: organisationId } },
-      { deactivated_at: null },
-    );
+    const updateResult = await this.userOrganisationRepository
+      .createQueryBuilder()
+      .update(UserOrganisation)
+      .set({ deactivated_at: null })
+      .where("user_id = :userId AND organisation_id = :organisationId", {
+        userId,
+        organisationId,
+      })
+      .returning(
+        `
+        id, user_id, organisation_id, deactivated_at,
+        (SELECT json_build_object('id', u.id, 'email', u.email)
+        FROM users u
+        WHERE u.id = user_id) AS user
+      `,
+      )
+      .execute();
+
+    if (updateResult.affected && updateResult.affected > 0) {
+      await this.auditLogService.logUpdate(
+        "user_organisations",
+        userId,
+        `Reactivated account with email ${updateResult.raw[0].user_id.email}`,
+        { deactivated_at: null },
+      );
+    }
   }
 
   public async removeMember(

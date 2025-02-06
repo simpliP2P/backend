@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { AuditLog } from "../Entities/audit-logs.entity";
 import { MoreThan, Repository } from "typeorm";
 import { AuditLogResponse } from "../Types/audit-logs.types";
+import { RequestContext } from "src/Shared/Helpers/request-context.helper";
 
 @Injectable()
 export class AuditLogsService {
@@ -10,6 +11,28 @@ export class AuditLogsService {
     @InjectRepository(AuditLog)
     private readonly auditLogRepository: Repository<AuditLog>,
   ) {}
+
+  public async logUpdate(
+    entityType: string,
+    entityId: string,
+    description: string,
+    changedFields: Record<string, any> = {},
+  ): Promise<void> {
+    try {
+      await this.auditLogRepository.save({
+        organisation: { id: RequestContext.getOrganisationId() || "" },
+        user: { id: RequestContext.getUserId() || "" },
+        entity_type: entityType,
+        entity_id: entityId,
+        action: "UPDATE",
+        changed_fields: changedFields,
+        description,
+        created_at: new Date(),
+      });
+    } catch (error) {
+      console.error("Error inserting into audit_logs table:", error?.message);
+    }
+  }
 
   public async getAllAuditLogs(
     page: number,
