@@ -1,3 +1,4 @@
+import { IsEmail, IsOptional, IsString } from "class-validator";
 import { ProviderType, UserRole } from "../Enums/user.enum";
 
 export class UserProfileDto {
@@ -13,4 +14,22 @@ export class UserProfileDto {
   last_login?: Date;
   verified_at?: Date;
   is_active: boolean;
+}
+
+export class UpdateUserProfileDto {
+  @IsString()
+  @IsOptional()
+  first_name?: string;
+  
+  @IsString()
+  @IsOptional()
+  last_name?: string;
+
+  @IsEmail()
+  @IsOptional()
+  email?: string;
+
+  @IsString()
+  @IsOptional()
+  phone?: string;
 }

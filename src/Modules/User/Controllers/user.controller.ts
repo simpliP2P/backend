@@ -1,7 +1,9 @@
 import {
+  Body,
   Controller,
   Get,
   Post,
+  Put,
   Req,
   UploadedFile,
   UseInterceptors,
@@ -16,6 +18,8 @@ import { AppLogger } from "src/Logger/logger.service";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 import { ApiResponse } from "src/Shared/Interfaces/api-response.interface";
 import { SanitizedUser } from "../Types/auth.types";
+import { UpdateUserProfileDto } from "../Dtos/user.dto";
+import { Request } from "express";
 
 @ApiTags("user")
 @Controller("users")
@@ -32,6 +36,21 @@ export class UserController {
     return {
       status: "success",
       message: "User profile retrieved successfully",
+      data: user,
+    };
+  }
+
+  @Put("me")
+  async updateProfile(
+    @Body() data: UpdateUserProfileDto,
+    @Req() req: Request,
+  ): Promise<ApiResponse<SanitizedUser>> {
+    const userId = req.user.sub;
+    const user = await this.userService.updateAccount(userId, data);
+
+    return {
+      status: "success",
+      message: "User profile updated successfully",
       data: user,
     };
   }

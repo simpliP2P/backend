@@ -76,6 +76,30 @@ export class UserService {
     return await this.userRepository.save(user);
   }
 
+  public async updateAccount(
+    userId: string,
+    data: Partial<User>,
+  ): Promise<SanitizedUser> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+
+    // Merge new data into the existing user object
+    this.userRepository.merge(user, data);
+
+    // Save the updated user
+    const updatedUser = await this.userRepository.save(user);
+
+    console.log(updatedUser);
+
+    // Exclude password hash before returning
+    const { password_hash, ...sanitizedUser } = updatedUser;
+
+    return sanitizedUser;
+  }
+
   public async uploadProfilePicture(
     userId: string,
     file: Express.Multer.File,
