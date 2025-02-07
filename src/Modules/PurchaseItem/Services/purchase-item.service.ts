@@ -19,12 +19,16 @@ export class PurchaseItemService {
     await this.purchaseItemRepo.insert(items);
   }
 
-  async createPurchaseItem(data: PurchaseItemDto): Promise<PurchaseItem> {
+  async createPurchaseItem(
+    organisationId: string,
+    data: PurchaseItemDto,
+  ): Promise<PurchaseItem> {
     const newItem = this.purchaseItemRepo.create({
       ...data,
       purchase_requisition: { id: data.pr_id },
       product: { id: data.product_id },
       purchase_order: { id: data.purchase_order_id },
+      organisation: { id: organisationId },
     });
     return await this.purchaseItemRepo.save(newItem);
   }
@@ -36,39 +40,52 @@ export class PurchaseItemService {
     });
   }
 
-  async getPurchaseItemById(id: string): Promise<PurchaseItem> {
+  async getPurchaseItemById(
+    organisationId: string,
+    itemId: string,
+  ): Promise<PurchaseItem> {
     const item = await this.purchaseItemRepo.findOne({
-      where: { id },
+      where: { id: itemId },
       relations: ["purchase_requisition", "purchase_order", "product"],
     });
     if (!item)
-      throw new NotFoundException(`Purchase item with ID ${id} not found.`);
+      throw new NotFoundException(`Purchase item with ID ${itemId} not found.`);
     return item;
   }
 
   async updatePurchaseItem(
-    id: string,
+    organisationId: string,
+    itemId: string,
     data: UpdatePurchaseItemDto,
   ): Promise<PurchaseItem> {
-    const item = await this.getPurchaseItemById(id);
+    const item = await this.getPurchaseItemById(organisationId, itemId);
     Object.assign(item, data);
     return await this.purchaseItemRepo.save(item);
   }
 
-  async deletePurchaseItem(id: string): Promise<void> {
-    const result = await this.purchaseItemRepo.delete(id);
+  async deletePurchaseItem(organisationId: string, id: string): Promise<void> {
+    const result = await this.purchaseItemRepo.delete({
+      id,
+      organisation: { id: organisationId },
+    });
     if (result.affected === 0)
       throw new NotFoundException(`Purchase item with ID ${id} not found.`);
   }
 
-  async approvePurchaseItem(id: string): Promise<PurchaseItem> {
-    return await this.updatePurchaseItem(id, {
+  async approvePurchaseItem(
+    organisationId: string,
+    id: string,
+  ): Promise<PurchaseItem> {
+    return await this.updatePurchaseItem(id, organisationId, {
       status: PurchaseItemStatus.APPROVED,
     });
   }
 
-  async rejectPurchaseItem(id: string): Promise<PurchaseItem> {
-    return await this.updatePurchaseItem(id, {
+  async rejectPurchaseItem(
+    organisationId: string,
+    id: string,
+  ): Promise<PurchaseItem> {
+    return await this.updatePurchaseItem(id, organisationId, {
       status: PurchaseItemStatus.REJECTED,
     });
   }

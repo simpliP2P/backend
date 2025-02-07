@@ -21,5 +21,5 @@ export interface SanitizedUser {
     phone: string;
     profile_picture: string;
     provider?: string;
-    user_organisations: SanitizedUserOrganisation[];
+    user_organisations?: SanitizedUserOrganisation[];
 }

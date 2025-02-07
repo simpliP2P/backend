@@ -5,10 +5,13 @@ import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
 import { BeforeInsert, Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { PurchaseItemStatus } from "../Enums/purchase-item.enum";
+import { Organisation } from "src/Modules/Organisation/Entities/organisation.entity";
 
 @Entity("purchase_items")
 export class PurchaseItem extends BaseEntity {
-  @ManyToOne(() => PurchaseRequisition, (pr) => pr.items, { onDelete: "RESTRICT" })
+  @ManyToOne(() => PurchaseRequisition, (pr) => pr.items, {
+    onDelete: "RESTRICT",
+  })
   @JoinColumn({ name: "purchase_requisition_id" })
   purchase_requisition: PurchaseRequisition;
 
@@ -38,6 +41,10 @@ export class PurchaseItem extends BaseEntity {
   @IsEnum(PurchaseItemStatus)
   @Column({ type: "varchar", default: PurchaseItemStatus.PENDING })
   status: PurchaseItemStatus;
+
+  @ManyToOne(() => Organisation, (org) => org.purchaseRequisitions)
+  @JoinColumn({ name: "organisation_id" })
+  organisation: Organisation;
 
   @BeforeInsert()
   checkProductId() {
