@@ -1,14 +1,17 @@
-import { IsEnum, IsInt, IsOptional, IsString } from "class-validator";
+import { IsEnum, IsInt, IsNumber, IsOptional, IsString, IsUUID } from "class-validator";
 import { PurchaseItemStatus } from "../Enums/purchase-item.enum";
 
 export class PurchaseItemDto {
-  @IsOptional()
-  purchase_requisition_id?: string;
+  // @IsOptional()
+  @IsUUID()
+  pr_id: string;
 
   @IsOptional()
+  @IsUUID()
   purchase_order_id?: string;
 
   @IsOptional()
+  @IsUUID()
   product_id?: string;
 
   @IsOptional()
@@ -18,13 +21,18 @@ export class PurchaseItemDto {
   @IsInt()
   pr_quantity: number;
 
+  @IsNumber()
+  unit_price: number;
+
   @IsOptional()
   @IsInt()
   po_quantity?: number;
 
+  @IsOptional()
   @IsString()
   image_url: string;
 
+  @IsOptional()
   @IsEnum(PurchaseItemStatus)
   status: PurchaseItemStatus;
 }

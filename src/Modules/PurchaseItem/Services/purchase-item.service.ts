@@ -20,7 +20,12 @@ export class PurchaseItemService {
   }
 
   async createPurchaseItem(data: PurchaseItemDto): Promise<PurchaseItem> {
-    const newItem = this.purchaseItemRepo.create(data);
+    const newItem = this.purchaseItemRepo.create({
+      ...data,
+      purchase_requisition: { id: data.pr_id },
+      product: { id: data.product_id },
+      purchase_order: { id: data.purchase_order_id },
+    });
     return await this.purchaseItemRepo.save(newItem);
   }
 
