@@ -1,4 +1,5 @@
 export enum PurchaseRequisitionStatus {
+  INITIALIZED = "INITIALIZED",
   SAVED_FOR_LATER = "SAVED_FOR_LATER",
   PENDING = "PENDING",
   APPROVED = "APPROVED",

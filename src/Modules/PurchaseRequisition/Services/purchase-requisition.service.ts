@@ -14,6 +14,39 @@ export class PurchaseRequisitionService {
     private readonly organisationService: OrganisationService,
   ) {}
 
+  public async checkForUnCompletedRequisition(userId: string) {
+    return await this.purchaseRequisitionRepository.findOne({
+      where: {
+        created_by: { id: userId },
+        status: PurchaseRequisitionStatus.INITIALIZED,
+      },
+    });
+  }
+
+  public async initializePurchaseRequisition(
+    userId: string,
+    data: { organisationId: string; branchId: string; departmentId: string },
+  ): Promise<string> {
+    const requisition = this.purchaseRequisitionRepository.create({
+      prNumber: await this.generatePrNumber(data.organisationId),
+      organisation: { id: data.organisationId },
+      created_by: { id: userId },
+      branch: { id: data.branchId },
+      department: { id: data.departmentId },
+      status: PurchaseRequisitionStatus.INITIALIZED,
+    });
+
+    const insertResult = await this.purchaseRequisitionRepository
+      .createQueryBuilder()
+      .insert()
+      .into(PurchaseRequisition)
+      .values(requisition)
+      .returning("*")
+      .execute();
+
+    return insertResult.raw[0].prNumber;
+  }
+
   public async createPurchaseRequisition(
     organisationId: string,
     data: Partial<PurchaseRequisition>,
@@ -25,6 +58,7 @@ export class PurchaseRequisitionService {
           ...data,
           prNumber: await this.generatePrNumber(organisationId),
           organisation: { id: organisationId },
+          // department: { name: data.department },
         });
 
         await transactionalEntityManager.save(requisition);
@@ -63,22 +97,23 @@ export class PurchaseRequisitionService {
 
     const skip = (_page - 1) * _pageSize;
 
-    const [requisitions, total] = await this.purchaseRequisitionRepository.findAndCount({
-      where: {
-        created_by: { id: userId },
-        organisation: { id: organisationId },
-        status: Not(PurchaseRequisitionStatus.SAVED_FOR_LATER),
-      },
-      take: _pageSize,
-      skip,
-      relations: ["created_by", "items"],
-      select: {
-        created_by: {
-          first_name: true,
-          id: true,
+    const [requisitions, total] =
+      await this.purchaseRequisitionRepository.findAndCount({
+        where: {
+          created_by: { id: userId },
+          organisation: { id: organisationId },
+          status: Not(PurchaseRequisitionStatus.SAVED_FOR_LATER),
         },
-      },
-    });
+        take: _pageSize,
+        skip,
+        relations: ["created_by", "items"],
+        select: {
+          created_by: {
+            first_name: true,
+            id: true,
+          },
+        },
+      });
 
     return {
       requisitions,
@@ -179,7 +214,8 @@ export class PurchaseRequisitionService {
   }
 
   private async generatePrNumber(organisationId: string) {
-    const tenantCode = this.organisationService.generateHashFromId(organisationId);
+    const tenantCode =
+      this.organisationService.generateHashFromId(organisationId);
     const now = new Date();
     const yy = String(now.getFullYear()).slice(-2); // Get last two digits of the year (e.g., "25" for 2025)
     const mm = String(now.getMonth() + 1).padStart(2, "0"); // Month as 01, 02, ..., 12

@@ -8,7 +8,6 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
-  BeforeInsert,
 } from "typeorm";
 import {
   IsNotEmpty,
@@ -19,6 +18,8 @@ import {
 } from "class-validator";
 import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
 import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
+import { OrganisationBranch } from "src/Modules/Organisation/Entities/organisation-branch.entity";
+import { OrganisationDepartment } from "src/Modules/Organisation/Entities/organisation-department.entity";
 
 @Entity("purchase_requisitions")
 export class PurchaseRequisition extends BaseEntity {
@@ -27,39 +28,38 @@ export class PurchaseRequisition extends BaseEntity {
   @Column()
   prNumber: string;
 
-  @IsNotEmpty()
-  @IsString()
-  @Column()
-  department: string;
+  @ManyToOne(() => OrganisationDepartment)
+  @JoinColumn({ name: "department_id" })
+  department: OrganisationDepartment;
 
   @IsNotEmpty()
   @IsString()
-  @Column()
+  @Column({ default: "N/A" })
   contact_info: string;
 
   @IsNotEmpty()
   @IsString()
-  @Column()
+  @Column({ default: "N/A" })
   requestor_name: string;
 
   @IsNotEmpty()
   @IsString()
-  @Column()
+  @Column({ default: "N/A" })
   request_description: string;
 
   @IsNotEmpty()
   @IsNumber()
-  @Column()
+  @Column({ default: 0 })
   quantity: number;
 
   @IsNotEmpty()
   @IsNumber()
-  @Column()
+  @Column({ default: 0 })
   estimated_cost: number;
 
   @IsNotEmpty()
   @IsString()
-  @Column()
+  @Column({ default: "N/A" })
   justification: string;
 
   @IsEnum(PurchaseRequisitionStatus)
@@ -76,7 +76,7 @@ export class PurchaseRequisition extends BaseEntity {
   @Column({ nullable: true })
   approval_justification: string;
 
-  @Column({ type: "date" })
+  @Column({ type: "date", default: null })
   needed_by_date: Date;
 
   @OneToMany(() => PurchaseItem, (item) => item.purchase_requisition)
@@ -87,11 +87,15 @@ export class PurchaseRequisition extends BaseEntity {
   currency: string;
 
   @ManyToOne(() => Organisation, (org) => org.purchaseRequisitions)
-  @JoinColumn({ name: "organisation_id" }) // Explicit foreign key
+  @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
 
+  @ManyToOne(() => OrganisationBranch)
+  @JoinColumn({ name: "branch_id" })
+  branch: OrganisationBranch;
+
   @ManyToOne(() => User, (user) => user.purchaseRequisitions)
-  @JoinColumn({ name: "created_by" }) // Reference to the User who created the PR
+  @JoinColumn({ name: "created_by" })
   created_by: User;
 
   @OneToMany(() => PurchaseOrder, (po) => po.purchase_requisition)
