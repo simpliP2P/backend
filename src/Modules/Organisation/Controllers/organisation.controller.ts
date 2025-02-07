@@ -566,9 +566,13 @@ export class OrganisationController {
   async reactivateCategory(
     @Param("organisationId") organisationId: string,
     @Param("categoryId") categoryId: string,
+    @Req() req: Request,
   ) {
     try {
+      const userId = req.user.sub;
+
       await this.organisationCategoryService.reactivateCategory(
+        userId,
         organisationId,
         categoryId,
       );

@@ -73,7 +73,6 @@ export class OrganisationCategoryService {
       .returning("id, name")
       .execute();
 
-    console.log("results", updateResult.raw[0]);
 
     if (updateResult.affected && updateResult.affected > 0) {
       const user = await this.userService.findAccount({ where: { id: userId } });
@@ -89,31 +88,30 @@ export class OrganisationCategoryService {
 
   public async reactivateCategory(
     userId: string,
+    categoryId: string,
     organisationId: string,
   ): Promise<void> {
     const updateResult = await this.categoryRepo
       .createQueryBuilder()
       .update(OrganisationCategory)
       .set({ deactivated_at: null })
-      .where("organisation_id = :organisationId", {
+      .where("id = :categoryId AND organisation_id = :organisationId", {
+        categoryId,
         organisationId,
       })
-      .returning(
-        `
-          id, name, user_id, organisation_id, deactivated_at,
-          (SELECT json_build_object('id', u.id, 'name', CONCAT(u.first_name, ' ', u.last_name), 'email', u.email)
-          FROM users u
-          WHERE u.id = ${userId}) AS user
-        `,
-      )
+      .returning("id, name")
       .execute();
 
     if (updateResult.affected && updateResult.affected > 0) {
-      await this.auditLogService.logUpdate(
+      const user = await this.userService.findAccount({
+        where: { id: userId },
+      });
+
+      this.auditLogService.logUpdate(
         "organisation_categories",
         updateResult.raw[0].id,
-        `${updateResult.raw[0].user_id.email} reactivated ${updateResult.raw[0].name} category`,
-        { deactivated_at: new Date() },
+        `${user?.email} deactivated ${updateResult.raw[0].name} category`,
+        { deactivated_at: null },
       );
     }
   }
