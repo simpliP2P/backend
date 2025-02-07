@@ -1,6 +1,5 @@
 import { Entity, Column, OneToMany, BeforeInsert } from "typeorm";
 import { MinLength, IsNotEmpty } from "class-validator";
-import { User } from "src/Modules/User/Entities/user.entity";
 import { Supplier } from "src/Modules/Supplier/Entities/supplier.entity";
 import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order.entity";
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
@@ -10,6 +9,7 @@ import { createHash } from "crypto";
 import { UserOrganisation } from "./user-organisation.entity";
 import { OrganisationBranch } from "./organisation-branch.entity";
 import { OrganisationDepartment } from "./organisation-department.entity";
+import { OrganisationCategory } from "./organisation-category.entity";
 
 @Entity("organisations")
 export class Organisation extends BaseEntity {
@@ -50,6 +50,9 @@ export class Organisation extends BaseEntity {
     (department) => department.organisation,
   )
   departments: OrganisationDepartment[];
+
+  @OneToMany(() => OrganisationCategory, (category) => category.organisation)
+  categories: OrganisationCategory[];
 
   @BeforeInsert()
   generateTenantCode() {

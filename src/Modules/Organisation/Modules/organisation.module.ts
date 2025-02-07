@@ -25,6 +25,7 @@ import { PurchaseItemModule } from "src/Modules/PurchaseItem/Modules/purchase-it
 import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
 import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order.entity";
 import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
+import { OrganisationCategoryModule } from "./organisation-category.module";
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.en
     UploadModule,
     AuditLogsModule,
     PurchaseItemModule,
+    OrganisationCategoryModule,
   ],
   controllers: [OrganisationController],
   providers: [

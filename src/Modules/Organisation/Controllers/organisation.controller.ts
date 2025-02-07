@@ -55,6 +55,8 @@ import { CreateDepartmentDto } from "../Dtos/organisation-department.dto";
 import { CreateBranchDto } from "../Dtos/organisation-branch.dto";
 import { CreatePurchaseOrderDto } from "src/Modules/PurchaseOrder/Dtos/purchase-order.dto";
 import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
+import { OrganisationCategoryService } from "../Services/organisation-category.service";
+import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 
 @Controller("organisations")
 export class OrganisationController {
@@ -62,6 +64,7 @@ export class OrganisationController {
     private readonly organisationService: OrganisationService,
     private readonly organisationDepartmentService: OrganisationDepartmentService,
     private readonly organisationBranchService: OrganisationBranchService,
+    private readonly organisationCategoryService: OrganisationCategoryService,
     private readonly supplierService: SuppliersService,
     private readonly purchaseRequisitionService: PurchaseRequisitionService,
     private readonly productService: ProductService,
@@ -418,6 +421,169 @@ export class OrganisationController {
   }
 
   /**
+   * Category routes
+   */
+  @Post(":organisationId/categories")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async createCategory(
+    @Param("organisationId") organisationId: string,
+    @Body() data: { name: string },
+  ) {
+    try {
+      const category = await this.organisationCategoryService.createCategory({
+        organisationId: organisationId,
+        name: data.name,
+      });
+
+      return {
+        status: "success",
+        message: "Category created successfully",
+        data: category,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get(":organisationId/categories")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.ORG_MEMBER,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async getCategories(
+    @Param("organisationId") organisationId: string,
+    @Query("page") page: number,
+    @Query("pageSize") pageSize: number,
+  ) {
+    try {
+      const data = await this.organisationCategoryService.getCategoriesByOrganisation(
+        organisationId,
+        page,
+        pageSize,
+      );
+
+      return {
+        status: "success",
+        message: "Categories fetched successfully",
+        data,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get(":organisationId/categories/:categoryId")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.ORG_MEMBER,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async getCategoryById(
+    @Param("organisationId") organisationId: string,
+    @Param("categoryId") categoryId: string,
+  ) {
+    try {
+      const category = await this.organisationCategoryService.getCategoryById(
+        organisationId,
+        categoryId,
+      );
+
+      return {
+        status: "success",
+        message: "Category fetched successfully",
+        data: category,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Put(":organisationId/categories/:categoryId")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async editCategory(
+    @Param("organisationId") organisationId: string,
+    @Param("categoryId") categoryId: string,
+    @Body() data: { name: string },
+  ) {
+    try {
+      const category = await this.organisationCategoryService.editCategory(
+        organisationId,
+        categoryId,
+        data,
+      );
+
+      return {
+        status: "success",
+        message: "Category updated successfully",
+        data: category,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Patch(":organisationId/categories/:categoryId/deactivate")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async deactivateCategory(
+    @Param("organisationId") organisationId: string,
+    @Param("categoryId") categoryId: string,
+    @Req() req: Request,
+  ) {
+    try {
+      const userId = req.user.sub;
+
+      await this.organisationCategoryService.deactivateCategory(
+        userId,
+        categoryId,
+        organisationId,
+      );
+
+      return {
+        status: "success",
+        message: "Category deactivated successfully",
+        data: {},
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Patch(":organisationId/categories/:categoryId/reactivate")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async reactivateCategory(
+    @Param("organisationId") organisationId: string,
+    @Param("categoryId") categoryId: string,
+  ) {
+    try {
+      await this.organisationCategoryService.reactivateCategory(
+        organisationId,
+        categoryId,
+      );
+
+      return {
+        status: "success",
+        message: "Category reactivated successfully",
+        data: {},
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
    * Member routes
    */
   @Post(":organisationId/invite-member")
@@ -737,7 +903,7 @@ export class OrganisationController {
       const requisition =
         await this.purchaseRequisitionService.createPurchaseRequisition(
           organisationId,
-          { ...data, created_by: { id: userId } as User },
+          { ...data, created_by: { id: userId } as User, items: data.items.map(item => ({ ...item, purchase_requisition: {} as PurchaseRequisition })) as PurchaseItem[] },
         );
 
       return {
