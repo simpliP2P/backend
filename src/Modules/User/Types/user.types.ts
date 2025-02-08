@@ -12,6 +12,8 @@ export class CreateLocalAccountInput {
   last_name: string;
   email: string;
   password: string;
+  branch?: { id: string };
+  department?: { id: string };
 }
 export class CreateGoogleAccountInput {
   @IsString()
@@ -36,7 +38,7 @@ export class CreateGoogleAccountInput {
 
 export interface UpdateUserAccountInput {
   first_name: string;
-  last_name: string; 
+  last_name: string;
 }
 
 export interface ForgetCustomerPasswordInput {

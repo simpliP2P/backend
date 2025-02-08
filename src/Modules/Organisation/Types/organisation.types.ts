@@ -15,6 +15,8 @@ export interface addUserToOrg {
   email: string;
   role: string;
   permissions: string[];
+  branch_id?: string;
+  department_id?: string;
 }
 
 export interface baseEmailInvitationData {

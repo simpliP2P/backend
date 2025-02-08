@@ -207,18 +207,29 @@ export class OrganisationService {
     organisationId: string,
     data: addUserToOrg,
   ) {
-    const { email, first_name, last_name, role, permissions } = data;
+    const {
+      email,
+      first_name,
+      last_name,
+      role,
+      permissions,
+      branch_id,
+      department_id,
+    } = data;
 
     let createdAccount: User | null = null;
 
     try {
       // Attempt to create the user account
       const password = this.generateStrongPassword();
+      
       createdAccount = await this.userService.createLocalAccount({
         first_name,
         last_name,
         email,
         password,
+        branch: branch_id ? { id: branch_id } : undefined,
+        department: department_id ? { id: department_id } : undefined,
       });
     } catch (error) {
       // Handle the email exists exception

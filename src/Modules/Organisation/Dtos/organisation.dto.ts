@@ -17,7 +17,7 @@ import {
 import { PermissionType } from "../Enums/user-organisation.enum";
 import { Type } from "class-transformer";
 import { PurchaseRequisitionStatus } from "src/Modules/PurchaseRequisition/Enums/purchase-requisition.enum";
-import { CreatePurchaseItemDto } from "src/Modules/PurchaseItem/Dtos/purchase-item.dto";
+import { Optional } from "@nestjs/common";
 // import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 
 export class CreateOrganisationDto {
@@ -98,6 +98,14 @@ export class addUserToOrgDto {
   @ArrayNotEmpty()
   @Validate(IsValidPermission, { each: true })
   permissions: string[];
+
+  @IsUUID()
+  @Optional()
+  branch_id?: string;
+
+  @IsUUID()
+  @Optional()
+  department_id?: string;
 }
 
 export class acceptInvitationDto {
