@@ -5,6 +5,7 @@ import {
   ForbiddenException,
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
+import { isUUID } from "class-validator";
 import { PermissionType } from "src/Modules/Organisation/Enums/user-organisation.enum";
 import { UserOrganisationRepository } from "src/Modules/Organisation/Repositories/user-organisation.repository";
 
@@ -35,6 +36,10 @@ export class OrganisationPermissionsGuard implements CanActivate {
       request.params.organisationId ||
       request.body.organisationId ||
       request.headers.oid;
+
+    if (!isUUID(organisationId)) {
+      throw new ForbiddenException("Organisation ID is required");
+    }
 
     const userOrganisation =
       await this.userOrganisationRepository.findByUserAndOrganisation(
