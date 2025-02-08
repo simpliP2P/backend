@@ -96,6 +96,24 @@ export class OrganisationController {
     }
   }
 
+  @Put(":organisationId")
+  @SetMetadata("permissions", [PermissionType.ORG_MEMBER])
+  @UseGuards(OrganisationPermissionsGuard)
+  async updateOrganisation(@Param("organisationId") organisationId: string, @Body() data: CreateOrganisationDto) {
+
+    try {
+      const organisation = await this.organisationService.updateOrganisationDetails(organisationId, data);
+
+      return {
+        status: "success",
+        message: "Organisation updated successfully",
+        data: organisation,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Public()
   @Post(":organisationId/accept-invitation")
   async acceptInvitation(
@@ -895,7 +913,15 @@ export class OrganisationController {
       const requisition =
         await this.purchaseRequisitionService.createPurchaseRequisition(
           organisationId,
-          { ...data, created_by: { id: userId } as User, department: { id: data.department_id } as OrganisationDepartment, items: data.items.map(item => ({ ...item, purchase_requisition: {} as PurchaseRequisition })) as PurchaseItem[] },
+          {
+            ...data,
+            created_by: { id: userId } as User,
+            department: { id: data.department_id } as OrganisationDepartment,
+            items: data.items.map((item) => ({
+              ...item,
+              purchase_requisition: {} as PurchaseRequisition,
+            })) as PurchaseItem[],
+          },
         );
 
       return {
@@ -964,14 +990,14 @@ export class OrganisationController {
       const purchaseRequisition =
         await this.purchaseRequisitionService.createPurchaseRequisition(
           organisationId,
-          { 
-            ...data, 
-            created_by: { id: userId } as User, 
+          {
+            ...data,
+            created_by: { id: userId } as User,
             department: { id: data.department_id } as OrganisationDepartment,
-            items: data.items.map(item => ({ 
-              ...item, 
-              purchase_requisition: {} as PurchaseRequisition 
-            })) as PurchaseItem[] 
+            items: data.items.map((item) => ({
+              ...item,
+              purchase_requisition: {} as PurchaseRequisition,
+            })) as PurchaseItem[],
           },
         );
 

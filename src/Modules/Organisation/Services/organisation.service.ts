@@ -111,6 +111,21 @@ export class OrganisationService {
     return createdOrg;
   }
 
+  public async updateOrganisationDetails(
+    organisationId: string,
+    data: CreateOrganisationInput,
+  ) {
+    const organisation = await this.findOrganisation({
+      where: { id: organisationId },
+    });
+    if (organisation) {
+      Object.assign(organisation, data);
+      return await this.organisationRepository.save(organisation);
+    } else {
+      throw new NotFoundException("Organisation not found");
+    }
+  }
+
   public async acceptInvitation(data: {
     token: string;
     organisationId: string;
