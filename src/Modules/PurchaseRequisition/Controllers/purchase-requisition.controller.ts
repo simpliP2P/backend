@@ -12,6 +12,7 @@ import { InitializePurchaseRequisitionDto } from "../Dtos/purchase-requisition.d
 import { PermissionType } from "src/Modules/Organisation/Enums/user-organisation.enum";
 import { OrganisationPermissionsGuard } from "src/Guards/permissions.guard";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
+import { CreatePurchaseRequisitionDto } from "src/Modules/Organisation/Dtos/organisation.dto";
 
 @Controller("purchase-requisitions")
 export class PurchaseRequisitionController {
@@ -30,33 +31,68 @@ export class PurchaseRequisitionController {
     @Body() data: InitializePurchaseRequisitionDto,
   ) {
     try {
-      
       const userId = req.user.sub;
-      
+
       const unCompletedRequisition =
-      await this.purchaseRequisitionService.checkForUnCompletedRequisition(
-        userId,
-      );
-      
+        await this.purchaseRequisitionService.checkForUnCompletedRequisition(
+          userId,
+        );
+
       if (unCompletedRequisition) {
         throw new BadRequestException(
           "You already have an incomplete purchase requisition. Please finalize it before starting a new one.",
         );
       }
-      
+
       const prNumber =
-      await this.purchaseRequisitionService.initializePurchaseRequisition(
-        userId,
-        data,
-      );
-      
+        await this.purchaseRequisitionService.initializePurchaseRequisition(
+          userId,
+          data,
+        );
+
       return {
         status: "success",
         message: "Initialized a new purchase requisition",
         data: { prNumber },
       };
     } catch (error) {
-      throw error
+      throw error;
+    }
+  }
+
+  @Post("finalize")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_PURCHASE_REQUISITIONS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async finalizePurchaseRequisition(
+    @Req() req: Request,
+    @Body() data: CreatePurchaseRequisitionDto,
+  ) {
+    try {
+      const userId = req.user.sub;
+      const organisationId = req.headers.oid as string;
+
+      if (!organisationId) {
+        throw new BadRequestException("Organisation ID is required.");
+      }
+
+      const requisition =
+        await this.purchaseRequisitionService.finalizePurchaseRequisition(
+          organisationId,
+          userId,
+          data.prNumber,
+          data,
+        );
+
+      return {
+        status: "success",
+        message: "Purchase requisition finalized",
+        data: { requisition },
+      };
+    } catch (error) {
+      throw error;
     }
   }
 }

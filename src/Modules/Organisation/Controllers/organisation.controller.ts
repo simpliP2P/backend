@@ -57,6 +57,7 @@ import { CreatePurchaseOrderDto } from "src/Modules/PurchaseOrder/Dtos/purchase-
 import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
 import { OrganisationCategoryService } from "../Services/organisation-category.service";
 import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
+import { OrganisationDepartment } from "../Entities/organisation-department.entity";
 
 @Controller("organisations")
 export class OrganisationController {
@@ -424,9 +425,7 @@ export class OrganisationController {
    * Category routes
    */
   @Post(":organisationId/categories")
-  @SetMetadata("permissions", [
-    PermissionType.OWNER,
-  ])
+  @SetMetadata("permissions", [PermissionType.OWNER])
   @UseGuards(OrganisationPermissionsGuard)
   async createCategory(
     @Param("organisationId") organisationId: string,
@@ -449,10 +448,7 @@ export class OrganisationController {
   }
 
   @Get(":organisationId/categories")
-  @SetMetadata("permissions", [
-    PermissionType.OWNER,
-    PermissionType.ORG_MEMBER,
-  ])
+  @SetMetadata("permissions", [PermissionType.OWNER, PermissionType.ORG_MEMBER])
   @UseGuards(OrganisationPermissionsGuard)
   async getCategories(
     @Param("organisationId") organisationId: string,
@@ -460,11 +456,12 @@ export class OrganisationController {
     @Query("pageSize") pageSize: number,
   ) {
     try {
-      const data = await this.organisationCategoryService.getCategoriesByOrganisation(
-        organisationId,
-        page,
-        pageSize,
-      );
+      const data =
+        await this.organisationCategoryService.getCategoriesByOrganisation(
+          organisationId,
+          page,
+          pageSize,
+        );
 
       return {
         status: "success",
@@ -477,10 +474,7 @@ export class OrganisationController {
   }
 
   @Get(":organisationId/categories/:categoryId")
-  @SetMetadata("permissions", [
-    PermissionType.OWNER,
-    PermissionType.ORG_MEMBER,
-  ])
+  @SetMetadata("permissions", [PermissionType.OWNER, PermissionType.ORG_MEMBER])
   @UseGuards(OrganisationPermissionsGuard)
   async getCategoryById(
     @Param("organisationId") organisationId: string,
@@ -503,9 +497,7 @@ export class OrganisationController {
   }
 
   @Put(":organisationId/categories/:categoryId")
-  @SetMetadata("permissions", [
-    PermissionType.OWNER,
-  ])
+  @SetMetadata("permissions", [PermissionType.OWNER])
   @UseGuards(OrganisationPermissionsGuard)
   async editCategory(
     @Param("organisationId") organisationId: string,
@@ -530,9 +522,7 @@ export class OrganisationController {
   }
 
   @Patch(":organisationId/categories/:categoryId/deactivate")
-  @SetMetadata("permissions", [
-    PermissionType.OWNER,
-  ])
+  @SetMetadata("permissions", [PermissionType.OWNER])
   @UseGuards(OrganisationPermissionsGuard)
   async deactivateCategory(
     @Param("organisationId") organisationId: string,
@@ -559,9 +549,7 @@ export class OrganisationController {
   }
 
   @Patch(":organisationId/categories/:categoryId/reactivate")
-  @SetMetadata("permissions", [
-    PermissionType.OWNER,
-  ])
+  @SetMetadata("permissions", [PermissionType.OWNER])
   @UseGuards(OrganisationPermissionsGuard)
   async reactivateCategory(
     @Param("organisationId") organisationId: string,
@@ -657,7 +645,7 @@ export class OrganisationController {
       return {
         status: "success",
         message: "Member fetched successfully",
-        data: {member},
+        data: { member },
       };
     } catch (error) {
       throw error;
@@ -907,7 +895,7 @@ export class OrganisationController {
       const requisition =
         await this.purchaseRequisitionService.createPurchaseRequisition(
           organisationId,
-          { ...data, created_by: { id: userId } as User, items: data.items.map(item => ({ ...item, purchase_requisition: {} as PurchaseRequisition })) as PurchaseItem[] },
+          { ...data, created_by: { id: userId } as User, department: { id: data.department_id } as OrganisationDepartment, items: data.items.map(item => ({ ...item, purchase_requisition: {} as PurchaseRequisition })) as PurchaseItem[] },
         );
 
       return {
@@ -976,7 +964,15 @@ export class OrganisationController {
       const purchaseRequisition =
         await this.purchaseRequisitionService.createPurchaseRequisition(
           organisationId,
-          { ...data, created_by: { id: userId } as User },
+          { 
+            ...data, 
+            created_by: { id: userId } as User, 
+            department: { id: data.department_id } as OrganisationDepartment,
+            items: data.items.map(item => ({ 
+              ...item, 
+              purchase_requisition: {} as PurchaseRequisition 
+            })) as PurchaseItem[] 
+          },
         );
 
       return {

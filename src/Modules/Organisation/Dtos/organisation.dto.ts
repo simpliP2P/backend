@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsUUID,
   Matches,
   MinLength,
   Validate,
@@ -17,7 +18,7 @@ import { PermissionType } from "../Enums/user-organisation.enum";
 import { Type } from "class-transformer";
 import { PurchaseRequisitionStatus } from "src/Modules/PurchaseRequisition/Enums/purchase-requisition.enum";
 import { CreatePurchaseItemDto } from "src/Modules/PurchaseItem/Dtos/purchase-item.dto";
-import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
+// import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 
 export class CreateOrganisationDto {
   @IsString()
@@ -112,9 +113,25 @@ export class acceptInvitationDto {
   newPassword: string;
 }
 
+export class PurchaseItem {
+  product_id?: string;
+  pr_quantity?: number;
+  unit_price?: number;
+  item_name?: string;
+  image_url?: string;
+}
+
 export class CreatePurchaseRequisitionDto {
   @IsString()
-  department: string;
+  prNumber: string;
+  
+  @IsUUID()
+  @IsOptional()
+  department_id: string;
+
+  @IsUUID()
+  @IsOptional()
+  branch_id: string;
 
   @IsEmail()
   contact_info: string;
@@ -138,6 +155,7 @@ export class CreatePurchaseRequisitionDto {
   needed_by_date: Date;
 
   @IsArray()
+  @IsOptional()
   items: PurchaseItem[];
 }
 

@@ -5,6 +5,9 @@ import { PurchaseRequisition } from "../Entities/purchase-requisition.entity";
 import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
 import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 import { OrganisationService } from "src/Modules/Organisation/Services/organisation.service";
+import { CreatePurchaseRequisitionDto } from "src/Modules/Organisation/Dtos/organisation.dto";
+import { ICreatePurchaseRequisition } from "../Types/purchase-requisition.types";
+import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 
 @Injectable()
 export class PurchaseRequisitionService {
@@ -45,6 +48,50 @@ export class PurchaseRequisitionService {
       .execute();
 
     return insertResult.raw[0].prNumber;
+  }
+
+  public async finalizePurchaseRequisition(
+    organisationId: string,
+    userId: string,
+    prNumber: string,
+    data: ICreatePurchaseRequisition,
+  ) {
+    const { branch_id, department_id, ...request } = data;
+    const requisition = await this.purchaseRequisitionRepository.findOne({
+      where: {
+        organisation: { id: organisationId },
+        created_by: { id: userId },
+        prNumber,
+      },
+    });
+
+    if (!requisition) {
+      throw new NotFoundException("Purchase Requisition not found");
+    }
+
+    if (requisition.status !== PurchaseRequisitionStatus.INITIALIZED) {
+      throw new BadRequestException(
+        "Purchase Requisition has already been finalized",
+      );
+    }
+
+    // Update requisition status and other fields
+    await this.purchaseRequisitionRepository
+      .createQueryBuilder()
+      .update(PurchaseRequisition)
+      .set({
+        status: PurchaseRequisitionStatus.PENDING,
+        branch: { id: branch_id },
+        department: { id: department_id },
+        ...request,
+      })
+      .where("id = :id", { id: requisition.id })
+      .execute();
+
+    // Return the updated requisition
+    return await this.purchaseRequisitionRepository.findOne({
+      where: { id: requisition.id },
+    });
   }
 
   public async createPurchaseRequisition(
