@@ -31,7 +31,7 @@ export class PurchaseRequisitionService {
     data: { organisationId: string; branchId: string; departmentId: string },
   ): Promise<string> {
     const requisition = this.purchaseRequisitionRepository.create({
-      prNumber: await this.generatePrNumber(data.organisationId),
+      pr_number: await this.generatePrNumber(data.organisationId),
       organisation: { id: data.organisationId },
       created_by: { id: userId },
       branch: { id: data.branchId },
@@ -47,13 +47,13 @@ export class PurchaseRequisitionService {
       .returning("*")
       .execute();
 
-    return insertResult.raw[0].prNumber;
+    return insertResult.raw[0].pr_number;
   }
 
   public async finalizePurchaseRequisition(
     organisationId: string,
     userId: string,
-    prNumber: string,
+    pr_number: string,
     data: ICreatePurchaseRequisition,
   ) {
     const { branch_id, department_id, ...request } = data;
@@ -61,7 +61,7 @@ export class PurchaseRequisitionService {
       where: {
         organisation: { id: organisationId },
         created_by: { id: userId },
-        prNumber,
+        pr_number,
       },
     });
 
@@ -103,7 +103,7 @@ export class PurchaseRequisitionService {
         // 1️⃣ Create the requisition
         const requisition = this.purchaseRequisitionRepository.create({
           ...data,
-          prNumber: await this.generatePrNumber(organisationId),
+          pr_number: await this.generatePrNumber(organisationId),
           organisation: { id: organisationId },
           // department: { name: data.department },
         });
@@ -269,7 +269,7 @@ export class PurchaseRequisitionService {
 
     const lastPr = await this.purchaseRequisitionRepository
       .createQueryBuilder("pr")
-      .where("pr.prNumber LIKE :pattern", {
+      .where("pr.pr_number LIKE :pattern", {
         pattern: `PR-${tenantCode}-${yy}${mm}-%`,
       })
       .orderBy("pr.created_at", "DESC")
@@ -277,7 +277,7 @@ export class PurchaseRequisitionService {
 
     let sequence = 1;
     if (lastPr) {
-      const lastSeq = lastPr.prNumber.split("-").pop(); // Extract last sequence number
+      const lastSeq = lastPr.pr_number.split("-").pop(); // Extract last sequence number
       sequence = parseInt(lastSeq || "0", 10) + 1;
     }
 

@@ -131,8 +131,8 @@ export class PurchaseItem {
 
 export class CreatePurchaseRequisitionDto {
   @IsString()
-  prNumber: string;
-  
+  pr_number: string;
+
   @IsUUID()
   @IsOptional()
   department_id: string;

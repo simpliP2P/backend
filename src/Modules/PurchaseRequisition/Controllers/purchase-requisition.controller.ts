@@ -44,7 +44,7 @@ export class PurchaseRequisitionController {
         );
       }
 
-      const prNumber =
+      const pr_number =
         await this.purchaseRequisitionService.initializePurchaseRequisition(
           userId,
           data,
@@ -53,7 +53,7 @@ export class PurchaseRequisitionController {
       return {
         status: "success",
         message: "Initialized a new purchase requisition",
-        data: { prNumber },
+        data: { pr_number },
       };
     } catch (error) {
       throw error;
@@ -82,7 +82,7 @@ export class PurchaseRequisitionController {
         await this.purchaseRequisitionService.finalizePurchaseRequisition(
           organisationId,
           userId,
-          data.prNumber,
+          data.pr_number,
           data,
         );
 

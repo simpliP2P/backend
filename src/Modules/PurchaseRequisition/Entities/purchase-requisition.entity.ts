@@ -26,7 +26,7 @@ export class PurchaseRequisition extends BaseEntity {
   @IsNotEmpty()
   @IsString()
   @Column()
-  prNumber: string;
+  pr_number: string;
 
   @ManyToOne(() => OrganisationDepartment)
   @JoinColumn({ name: "department_id" })
