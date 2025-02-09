@@ -44,7 +44,7 @@ export class PurchaseRequisitionController {
         );
       }
 
-      const prData  =
+      const prData =
         await this.purchaseRequisitionService.initializePurchaseRequisition(
           userId,
           data,
@@ -72,7 +72,7 @@ export class PurchaseRequisitionController {
   ) {
     try {
       const userId = req.user.sub;
-      const organisationId = req.headers.oid as string;
+      const organisationId = req.headers.Oid as string;
 
       if (!organisationId) {
         throw new BadRequestException("Organisation ID is required.");

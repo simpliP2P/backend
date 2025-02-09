@@ -34,7 +34,7 @@ export class PurchaseItemController {
   @UseGuards(OrganisationPermissionsGuard)
   async addItem(@Req() req: Request, @Body() data: PurchaseItemDto) {
     try {
-      const organisationId = req.headers["oid"] as string;
+      const organisationId = req.headers["Oid"] as string;
 
       const item = await this.purchaseItemService.createPurchaseItem(
         organisationId,
@@ -65,7 +65,7 @@ export class PurchaseItemController {
     @Query("pageSize") pageSize: number,
   ) {
     try {
-      const organisationId = req.headers["oid"] as string;
+      const organisationId = req.headers["Oid"] as string;
 
       const data = await this.purchaseItemService.getAllPurchaseItems(
         {
@@ -98,7 +98,7 @@ export class PurchaseItemController {
     @Param("id", new ParseUUIDPipe()) itemId: string,
   ) {
     try {
-      const organisationId = req.headers["oid"] as string;
+      const organisationId = req.headers["Oid"] as string;
 
       const item = await this.purchaseItemService.getPurchaseItemById(
         organisationId,
@@ -128,9 +128,8 @@ export class PurchaseItemController {
     @Body() data: UpdatePurchaseItemDto,
   ) {
     try {
-      
-      const organisationId = req.headers["oid"] as string;
-      
+      const organisationId = req.headers["Oid"] as string;
+
       const item = await this.purchaseItemService.updatePurchaseItem(
         organisationId,
         id,
@@ -144,7 +143,6 @@ export class PurchaseItemController {
       };
     } catch (error) {
       throw error;
-      
     }
   }
 
@@ -160,7 +158,7 @@ export class PurchaseItemController {
     @Req() req: Request,
   ) {
     try {
-      const organisationId = req.headers["oid"] as string;
+      const organisationId = req.headers["Oid"] as string;
 
       await this.purchaseItemService.deletePurchaseItem(organisationId, id);
 
