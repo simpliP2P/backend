@@ -12,7 +12,7 @@ export class PurchaseItem extends BaseEntity {
   @ManyToOne(() => PurchaseRequisition, (pr) => pr.items, {
     onDelete: "RESTRICT",
   })
-  @JoinColumn({ name: "purchase_requisition_id" })
+  @JoinColumn({ name: "purchase_requisition_id", })
   purchase_requisition: PurchaseRequisition;
 
   @ManyToOne(() => PurchaseOrder, (po) => po.items, { nullable: true })
@@ -23,8 +23,8 @@ export class PurchaseItem extends BaseEntity {
   @JoinColumn({ name: "product_id" })
   product: Product;
 
-  @Column({ type: "varchar", nullable: true }) // For items not in inventory
-  item_name: string | null;
+  @Column({ type: "varchar" }) // For items not in inventory
+  item_name: string;
 
   @Column({ type: "decimal", precision: 10, scale: 2 }) // For items not in inventory
   unit_price: number;
@@ -45,13 +45,4 @@ export class PurchaseItem extends BaseEntity {
   @ManyToOne(() => Organisation, (org) => org.purchaseRequisitions)
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
-
-  @BeforeInsert()
-  checkProductId() {
-    if (this.product) {
-      // If product_id is set, item_name and image_url should be null
-      this.item_name = null;
-      this.image_url = null;
-    }
-  }
 }

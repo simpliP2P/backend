@@ -9,6 +9,8 @@ import {
   SetMetadata,
   UseGuards,
   Req,
+  Get,
+  Query,
 } from "@nestjs/common";
 import { PurchaseItemService } from "../Services/purchase-item.service";
 import {
@@ -31,11 +33,86 @@ export class PurchaseItemController {
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async addItem(@Req() req: Request, @Body() data: PurchaseItemDto) {
-    const organisationId = req.headers["oid"] as string;
-    return await this.purchaseItemService.createPurchaseItem(
-      organisationId,
-      data,
-    );
+    try {
+      const organisationId = req.headers["oid"] as string;
+
+      const item = await this.purchaseItemService.createPurchaseItem(
+        organisationId,
+        data,
+      );
+
+      return {
+        status: "success",
+        message: "Item added successfully",
+        data: { item },
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get()
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_PURCHASE_REQUISITIONS,
+    PermissionType.MANAGE_PURCHASE_ORDERS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async getAllPurchaseItems(
+    @Req() req: Request,
+    @Query("pr_number") pr_number: string,
+    @Query("page") page: number,
+    @Query("pageSize") pageSize: number,
+  ) {
+    try {
+      const organisationId = req.headers["oid"] as string;
+
+      const data = await this.purchaseItemService.getAllPurchaseItems(
+        {
+          organisation: { id: organisationId },
+          purchase_requisition: { pr_number: pr_number },
+        },
+        page,
+        pageSize,
+      );
+
+      return {
+        status: "success",
+        message: "Items fetched successfully",
+        data,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get(":id")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_PURCHASE_REQUISITIONS,
+    PermissionType.MANAGE_PURCHASE_ORDERS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async getPurchaseItemById(
+    @Req() req: Request,
+    @Param("id", new ParseUUIDPipe()) itemId: string,
+  ) {
+    try {
+      const organisationId = req.headers["oid"] as string;
+
+      const item = await this.purchaseItemService.getPurchaseItemById(
+        organisationId,
+        itemId,
+      );
+
+      return {
+        status: "success",
+        message: "Item fetched successfully",
+        data: { item },
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
   @Put(":id")
@@ -50,13 +127,25 @@ export class PurchaseItemController {
     @Req() req: Request,
     @Body() data: UpdatePurchaseItemDto,
   ) {
-    const organisationId = req.headers["oid"] as string;
+    try {
+      
+      const organisationId = req.headers["oid"] as string;
+      
+      const item = await this.purchaseItemService.updatePurchaseItem(
+        organisationId,
+        id,
+        data,
+      );
 
-    return await this.purchaseItemService.updatePurchaseItem(
-      organisationId,
-      id,
-      data,
-    );
+      return {
+        status: "success",
+        message: "Item updated successfully",
+        data: { item },
+      };
+    } catch (error) {
+      throw error;
+      
+    }
   }
 
   @Delete(":id")
@@ -70,11 +159,17 @@ export class PurchaseItemController {
     @Param("id", new ParseUUIDPipe()) id: string,
     @Req() req: Request,
   ) {
-    const organisationId = req.headers["oid"] as string;
+    try {
+      const organisationId = req.headers["oid"] as string;
 
-    return await this.purchaseItemService.deletePurchaseItem(
-      organisationId,
-      id,
-    );
+      await this.purchaseItemService.deletePurchaseItem(organisationId, id);
+
+      return {
+        status: "success",
+        message: "Item deleted successfully",
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 }

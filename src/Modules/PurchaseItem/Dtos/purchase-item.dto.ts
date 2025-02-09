@@ -2,10 +2,10 @@ import { IsEnum, IsInt, IsNumber, IsOptional, IsString, IsUUID } from "class-val
 import { PurchaseItemStatus } from "../Enums/purchase-item.enum";
 
 export class PurchaseItemDto {
-  @IsOptional()
   @IsUUID()
   pr_id: string;
 
+  @IsOptional()
   @IsString()
   pr_number: string;
 
@@ -17,9 +17,9 @@ export class PurchaseItemDto {
   @IsUUID()
   product_id?: string;
 
-  @IsOptional()
+  // @IsOptional()
   @IsString()
-  item_name?: string;
+  item_name: string;
 
   @IsInt()
   pr_quantity: number;
@@ -54,6 +54,10 @@ export class UpdatePurchaseItemDto {
   @IsOptional()
   @IsInt()
   po_quantity?: number;
+
+  @IsOptional()
+  @IsInt()
+  unit_price?: number;
 
   @IsOptional()
   @IsEnum(PurchaseItemStatus)

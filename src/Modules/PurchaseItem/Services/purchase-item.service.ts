@@ -25,7 +25,7 @@ export class PurchaseItemService {
   ): Promise<PurchaseItem> {
     const newItem = this.purchaseItemRepo.create({
       ...data,
-      purchase_requisition: { id: data.pr_id },
+      purchase_requisition: { id: data.pr_id, pr_number: data.pr_number },
       product: { id: data.product_id },
       purchase_order: { id: data.purchase_order_id },
       organisation: { id: organisationId },
@@ -33,11 +33,46 @@ export class PurchaseItemService {
     return await this.purchaseItemRepo.save(newItem);
   }
 
-  async getAllPurchaseItems(query: any): Promise<PurchaseItem[]> {
-    return await this.purchaseItemRepo.find({
+  async getAllPurchaseItems(
+    query: any,
+    page: number,
+    pageSize: number,
+  ): Promise<{ data: PurchaseItem[]; metadata: any }> {
+    let _page = page;
+    let _pageSize = pageSize;
+    if (isNaN(page) || page < 1) _page = 1;
+    if (isNaN(pageSize) || pageSize < 1) _pageSize = 10;
+
+    const skip = (_page - 1) * _pageSize; // Calculate the offset
+
+    const [data, total] = await this.purchaseItemRepo.findAndCount({
       where: query,
       relations: ["purchase_requisition", "purchase_order", "product"],
+       select: {
+        purchase_requisition: {
+          id: true,
+          pr_number: true,
+        },
+        purchase_order: {
+          id: true,
+        },
+        product: {
+          id: true,
+        },
+      },
+      take: _pageSize,
+      skip,
     });
+
+    return {
+      data,
+      metadata: {
+        total,
+        page: _page,
+        pageSize: _pageSize,
+        totalPages: Math.ceil(total / _pageSize),
+      },
+    };
   }
 
   async getPurchaseItemById(
@@ -45,8 +80,20 @@ export class PurchaseItemService {
     itemId: string,
   ): Promise<PurchaseItem> {
     const item = await this.purchaseItemRepo.findOne({
-      where: { id: itemId },
+      where: { id: itemId, organisation: { id: organisationId } },
       relations: ["purchase_requisition", "purchase_order", "product"],
+      select: {
+        purchase_requisition: {
+          id: true,
+          pr_number: true,
+        },
+        purchase_order: {
+          id: true,
+        },
+        product: {
+          id: true,
+        },
+      }
     });
     if (!item)
       throw new NotFoundException(`Purchase item with ID ${itemId} not found.`);
@@ -69,7 +116,7 @@ export class PurchaseItemService {
       organisation: { id: organisationId },
     });
     if (result.affected === 0)
-      throw new NotFoundException(`Purchase item with ID ${id} not found.`);
+      throw new NotFoundException(`Item not found.`);
   }
 
   async approvePurchaseItem(
