@@ -24,6 +24,7 @@ export class OrganisationDepartmentService {
     department_code?: string;
     description?: string;
     organisation_id: string;
+    branch_id?: string;
     hod_id?: string;
   }) {
     // find organisation department by name or department code
@@ -63,6 +64,7 @@ export class OrganisationDepartmentService {
       department_code: data.department_code,
       description: data.description,
       organisation: { id: data.organisation_id },
+      branch: { id: data.branch_id },
       head_of_department: { id: data.hod_id },
     });
 

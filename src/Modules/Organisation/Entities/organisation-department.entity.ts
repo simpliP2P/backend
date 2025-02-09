@@ -11,6 +11,7 @@ import { Organisation } from "./organisation.entity";
 import { User } from "src/Modules/User/Entities/user.entity";
 import { UserOrganisation } from "./user-organisation.entity";
 import { BaseEntity } from "src/Common/entities/base.entity";
+import { OrganisationBranch } from "./organisation-branch.entity";
 
 @Entity("organisation_departments")
 export class OrganisationDepartment extends BaseEntity {
@@ -35,6 +36,10 @@ export class OrganisationDepartment extends BaseEntity {
   @ManyToOne(() => Organisation, (org) => org.departments)
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
+
+  @ManyToOne(() => OrganisationBranch)
+  @JoinColumn({ name: "branch_id" })
+  branch: OrganisationBranch;
 
   @OneToMany(() => UserOrganisation, (userOrg) => userOrg.department)
   userOrganisations: User[];

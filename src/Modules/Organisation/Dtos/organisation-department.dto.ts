@@ -5,6 +5,9 @@ export class CreateDepartmentDto {
   @IsString()
   name: string;
 
+  @IsUUID()
+  branch_id: string;
+
   @IsOptional()
   @IsString()
   department_code?: string;
