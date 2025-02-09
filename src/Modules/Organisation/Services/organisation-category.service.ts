@@ -107,10 +107,10 @@ export class OrganisationCategoryService {
         where: { id: userId },
       });
 
-      this.auditLogService.logUpdate(
+      await this.auditLogService.logUpdate(
         "organisation_categories",
         updateResult.raw[0].id,
-        `${user?.email} deactivated ${updateResult.raw[0].name} category`,
+        `${user?.email} reactivated ${updateResult.raw[0].name} category`,
         { deactivated_at: null },
       );
     }
