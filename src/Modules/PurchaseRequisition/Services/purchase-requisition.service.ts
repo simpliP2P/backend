@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Not, Repository } from "typeorm";
+import { In, Not, Repository } from "typeorm";
 import { PurchaseRequisition } from "../Entities/purchase-requisition.entity";
 import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
 import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
@@ -136,21 +136,37 @@ export class PurchaseRequisitionService {
     pageSize: number = 10,
     userId: string,
     organisationId: string,
+    status: PurchaseRequisitionStatus,
   ) {
     let _page = page;
     let _pageSize = pageSize;
+
+    // Validate page and pageSize
     if (isNaN(page) || page < 1) _page = 1;
     if (isNaN(pageSize) || pageSize < 1) _pageSize = 10;
 
     const skip = (_page - 1) * _pageSize;
 
+    const whereCondition: any = {
+      created_by: { id: userId },
+      organisation: { id: organisationId },
+    };
+
+    // Handle status condition
+    if (status) {
+      whereCondition.status = status;
+    } else {
+      whereCondition.status = Not(
+        In([
+          PurchaseRequisitionStatus.SAVED_FOR_LATER,
+          PurchaseRequisitionStatus.INITIALIZED,
+        ]),
+      );
+    }
+
     const [requisitions, total] =
       await this.purchaseRequisitionRepository.findAndCount({
-        where: {
-          created_by: { id: userId },
-          organisation: { id: organisationId },
-          status: Not(PurchaseRequisitionStatus.SAVED_FOR_LATER),
-        },
+        where: whereCondition,
         take: _pageSize,
         skip,
         relations: ["created_by", "items"],

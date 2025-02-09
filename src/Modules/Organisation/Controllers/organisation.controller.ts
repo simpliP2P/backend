@@ -967,6 +967,7 @@ export class OrganisationController {
   @UseGuards(OrganisationPermissionsGuard)
   async getRequisitions(
     @Param("organisationId") organisationId: string,
+    @Query("status") status: string,
     @Query("page") page: number,
     @Query("pageSize") pageSize: number,
     @Req() req: Request,
@@ -974,12 +975,26 @@ export class OrganisationController {
     try {
       const userId = req.user.sub;
 
+      const isValidStatus =
+        status &&
+        Object.values(PurchaseRequisitionStatus).includes(
+          status as PurchaseRequisitionStatus,
+        );
+      const isRestrictedStatus =
+        status === PurchaseRequisitionStatus.SAVED_FOR_LATER ||
+        status === PurchaseRequisitionStatus.INITIALIZED;
+
+      if (isValidStatus && isRestrictedStatus) {
+        throw new BadRequestException("Invalid status");
+      }
+
       const data =
         await this.purchaseRequisitionService.getAllPurchaseRequisitions(
           page,
           pageSize,
           userId,
           organisationId,
+          status as PurchaseRequisitionStatus,
         );
 
       return {
