@@ -17,7 +17,7 @@ export class AuditSubscriber implements EntitySubscriberInterface {
   async afterInsert(event: InsertEvent<any>) {
     if (!this.shouldLog(event)) return;
 
-    const relevantFields = ["id", "prNumber", "department", "requestor_name"];
+    const relevantFields = ["id", "pr_number", "department", "requestor_name"];
 
     // Extract only the relevant fields from the entity
     const filteredFields = Object.fromEntries(
@@ -137,10 +137,10 @@ export class AuditSubscriber implements EntitySubscriberInterface {
   ): string {
     if (entity instanceof PurchaseRequisition) {
       if (changedFields.status) {
-        return `Purchase Requisition ${entity.prNumber} status changed to ${changedFields.status}`;
+        return `Purchase Requisition ${entity.pr_number} status changed to ${changedFields.status}`;
       }
       if (changedFields.approved_by) {
-        return `Purchase Requisition ${entity.prNumber} approved by user ${changedFields.approved_by}`;
+        return `Purchase Requisition ${entity.pr_number} approved by user ${changedFields.approved_by}`;
       }
     }
     return `Updated ${entity.constructor.name} (${entity.id}) fields: ${Object.keys(changedFields).join(", ")}`;
