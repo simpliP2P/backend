@@ -28,7 +28,7 @@ export class PurchaseRequisitionService {
   public async initializePurchaseRequisition(
     userId: string,
     data: { organisationId: string; branchId: string; departmentId: string },
-  ): Promise<string> {
+  ): Promise<{ id: string; pr_number: string }> {
     const requisition = this.purchaseRequisitionRepository.create({
       pr_number: await this.generatePrNumber(data.organisationId),
       organisation: { id: data.organisationId },
@@ -46,7 +46,8 @@ export class PurchaseRequisitionService {
       .returning("*")
       .execute();
 
-    return insertResult.raw[0].pr_number;
+    const { id, pr_number } = insertResult.raw[0];
+    return { id, pr_number };
   }
 
   public async finalizePurchaseRequisition(
