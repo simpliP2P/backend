@@ -72,7 +72,7 @@ export class PurchaseRequisitionController {
   ) {
     try {
       const userId = req.user.sub;
-      const organisationId = req.headers.Oid as string;
+      const organisationId = req.headers.oid as string;
 
       if (!organisationId) {
         throw new BadRequestException("Organisation ID is required.");
