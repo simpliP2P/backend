@@ -79,20 +79,14 @@ export class OrganisationDepartmentService {
     if (isNaN(page) || page < 1) _page = 1;
     if (isNaN(pageSize) || pageSize < 1) _pageSize = 10;
 
-    const skip = (_page - 1) * _pageSize; // Calculate the offset
+    const skip = (_page - 1) * _pageSize;
 
     const [data, total] = await this.departmentRepo.findAndCount({
       where: { organisation: { id: organisation_id } },
       relations: ["organisation", "head_of_department"],
       select: {
-        organisation: {
-          id: true,
-        },
-        head_of_department: {
-          // id: true,
-          first_name: true,
-          last_name: true,
-        },
+        id: true,
+        name: true,
       },
       skip,
       take: _pageSize,

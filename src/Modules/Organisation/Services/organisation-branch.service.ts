@@ -55,7 +55,10 @@ export class OrganisationBranchService {
 
     const [data, total] = await this.branchRepo.findAndCount({
       where: { organisation: { id: organisationId } },
-      // relations: ["organisation"],
+      select: {
+        id: true,
+        name: true,
+      },
       skip,
       take: _pageSize,
     });
