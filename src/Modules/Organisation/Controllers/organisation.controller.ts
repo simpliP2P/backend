@@ -96,13 +96,38 @@ export class OrganisationController {
     }
   }
 
+  @Get(":organisationId")
+  @SetMetadata("permissions", [PermissionType.ORG_MEMBER])
+  @UseGuards(OrganisationPermissionsGuard)
+  async getOrganisation(@Param("organisationId") organisationId: string) {
+    try {
+      const organisation = await this.organisationService.findOrganisation({
+        where: { id: organisationId },
+      });
+
+      return {
+        status: "success",
+        message: "Organisation fetched successfully",
+        data: organisation,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Put(":organisationId")
   @SetMetadata("permissions", [PermissionType.ORG_MEMBER])
   @UseGuards(OrganisationPermissionsGuard)
-  async updateOrganisation(@Param("organisationId") organisationId: string, @Body() data: CreateOrganisationDto) {
-
+  async updateOrganisation(
+    @Param("organisationId") organisationId: string,
+    @Body() data: CreateOrganisationDto,
+  ) {
     try {
-      const organisation = await this.organisationService.updateOrganisationDetails(organisationId, data);
+      const organisation =
+        await this.organisationService.updateOrganisationDetails(
+          organisationId,
+          data,
+        );
 
       return {
         status: "success",
