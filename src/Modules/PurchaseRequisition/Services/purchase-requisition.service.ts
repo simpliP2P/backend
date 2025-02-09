@@ -5,7 +5,6 @@ import { PurchaseRequisition } from "../Entities/purchase-requisition.entity";
 import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
 import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 import { OrganisationService } from "src/Modules/Organisation/Services/organisation.service";
-import { CreatePurchaseRequisitionDto } from "src/Modules/Organisation/Dtos/organisation.dto";
 import { ICreatePurchaseRequisition } from "../Types/purchase-requisition.types";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 
