@@ -56,6 +56,7 @@ async function bootstrap() {
       "Access-Control-Allow-Headers",
       "Access-Control-Allow-Methods",
       "Access-Control-Allow-Credentials",
+      "Oid"
     ],
     credentials: true,
     maxAge: 86400,
