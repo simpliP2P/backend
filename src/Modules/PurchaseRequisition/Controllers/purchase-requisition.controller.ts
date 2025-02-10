@@ -33,6 +33,7 @@ export class PurchaseRequisitionController {
     try {
       const userId = req.user.sub;
 
+      /*
       const unCompletedRequisition =
         await this.purchaseRequisitionService.checkForUnCompletedRequisition(
           userId,
@@ -42,7 +43,7 @@ export class PurchaseRequisitionController {
         throw new BadRequestException(
           "You already have an incomplete purchase requisition. Please finalize it before starting a new one.",
         );
-      }
+      }*/
 
       const prData =
         await this.purchaseRequisitionService.initializePurchaseRequisition(
