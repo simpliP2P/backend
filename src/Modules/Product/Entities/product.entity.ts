@@ -11,6 +11,7 @@ import { BaseEntity } from "src/Common/entities/base.entity";
 import { Organisation } from "src/Modules/Organisation/Entities/organisation.entity";
 import { IsOptional } from "class-validator";
 import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
+import { OrganisationCategory } from "src/Modules/Organisation/Entities/organisation-category.entity";
 
 @Entity("products")
 export class Product extends BaseEntity {
@@ -29,8 +30,9 @@ export class Product extends BaseEntity {
   @Column({ name: "stock_qty_alert", nullable: true })
   stockQtyAlert: number;
 
-  @Column()
-  category: string;
+  @ManyToOne(() => OrganisationCategory)
+  @JoinColumn({ name: "category_id" })
+  category: OrganisationCategory;
 
   @Column({ unique: true, nullable: true })
   @IsOptional()

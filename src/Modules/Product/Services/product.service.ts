@@ -26,9 +26,12 @@ export class ProductService {
 
     if (foundProduct) throw new BadRequestException(`Product already exists.`);
 
+    const { category, ...productData } = createProductDto;
+
     const product = this.productRepository.create({
-      ...createProductDto,
+      ...productData,
       organisation: { id: organisationId },
+      category: { id: category },
     });
     return this.productRepository.save(product);
   }
@@ -55,6 +58,13 @@ export class ProductService {
 
     const [data, total] = await this.productRepository.findAndCount({
       where: { organisation: { id: organisationId } },
+      relations: ["category"],
+      select: {
+        category: {
+          id: true,
+          name: true,
+        },
+      },
       take: _pageSize, // Limit the number of results
       skip, // Skip the previous results
     });
@@ -77,6 +87,13 @@ export class ProductService {
   ): Promise<Product> {
     const product = await this.productRepository.findOne({
       where: { id: productId, organisation: { id: organisationId } },
+      relations: ["category"],
+      select: {
+        category: {
+          id: true,
+          name: true,
+        },
+      },
     });
     if (!product) {
       throw new NotFoundException(`Product not found.`);
