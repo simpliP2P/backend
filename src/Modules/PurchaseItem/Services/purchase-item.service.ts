@@ -23,6 +23,18 @@ export class PurchaseItemService {
     organisationId: string,
     data: PurchaseItemDto,
   ): Promise<PurchaseItem> {
+    const foundItem = await this.purchaseItemRepo.findOne({
+      where: {
+        product: { id: data.product_id },
+        item_name: data.item_name,
+        organisation: { id: organisationId },
+        purchase_requisition: { id: data.pr_id, pr_number: data.pr_number },
+      },
+    });
+
+    if (foundItem)
+      throw new NotFoundException(`Item already exists in the purchase list.`);
+
     const newItem = this.purchaseItemRepo.create({
       ...data,
       purchase_requisition: { id: data.pr_id, pr_number: data.pr_number },
