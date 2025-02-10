@@ -177,27 +177,8 @@ export class PurchaseRequisitionService {
         },
       });
 
-    // Fetch INITIALIZED requisition created by user(request sender)
-    const initializedRequisition =
-      await this.purchaseRequisitionRepository.findOne({
-        where: {
-          created_by: { id: userId },
-          organisation: { id: organisationId },
-          status: PurchaseRequisitionStatus.INITIALIZED,
-        },
-        relations: ["created_by", "items"],
-        select: {
-          created_by: {
-            first_name: true,
-            id: true,
-          },
-        },
-      });
-
-    const allRequisitions = [...requisitions, initializedRequisition];
-
     return {
-      requisitions: allRequisitions,
+      requisitions,
       metadata: {
         total,
         page: _page,
@@ -265,11 +246,15 @@ export class PurchaseRequisitionService {
 
     const skip = (_page - 1) * _pageSize; // Calculate the offset
 
+    // Fetch saved and initialized requisitions
     const requisitions = await this.getPurchaseRequisitions({
       where: {
         created_by: { id: userId },
         organisation: { id: organisationId },
-        status: PurchaseRequisitionStatus.SAVED_FOR_LATER,
+        status: In([
+          PurchaseRequisitionStatus.SAVED_FOR_LATER,
+          PurchaseRequisitionStatus.INITIALIZED,
+        ]),
       },
       take: _pageSize,
       skip,
