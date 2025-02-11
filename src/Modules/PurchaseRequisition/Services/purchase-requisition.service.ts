@@ -168,11 +168,17 @@ export class PurchaseRequisitionService {
         where: whereCondition,
         take: _pageSize,
         skip,
-        relations: ["created_by", "items"],
+        relations: ["created_by", "items", "department", "branch"],
         select: {
           created_by: {
             first_name: true,
             id: true,
+          },
+          department: {
+            name: true,
+          },
+          branch: {
+            name: true,
           },
         },
       });
