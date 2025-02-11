@@ -988,8 +988,8 @@ export class OrganisationController {
           {
             ...data,
             created_by: { id: userId } as User,
-
             department: { id: data.department_id } as OrganisationDepartment,
+            status: PurchaseRequisitionStatus.SAVED_FOR_LATER,
           },
         );
 

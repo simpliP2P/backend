@@ -1,6 +1,7 @@
 import { OrganisationBranch } from "src/Modules/Organisation/Entities/organisation-branch.entity";
 import { OrganisationDepartment } from "src/Modules/Organisation/Entities/organisation-department.entity";
 import { User } from "src/Modules/User/Entities/user.entity";
+import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
 
 export interface IPurchaseRequisition {
   pr_number: string;
@@ -14,6 +15,7 @@ export interface IPurchaseRequisition {
   justification: string;
   needed_by_date: Date;
   created_by: User;
+  status: PurchaseRequisitionStatus;
 }
 export interface ICreatePurchaseRequisition {
   department_id?: string;
