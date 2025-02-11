@@ -5,7 +5,7 @@ import { PurchaseRequisition } from "../Entities/purchase-requisition.entity";
 import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
 import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 import { OrganisationService } from "src/Modules/Organisation/Services/organisation.service";
-import { ICreatePurchaseRequisition } from "../Types/purchase-requisition.types";
+import { ICreatePurchaseRequisition, IPurchaseRequisition } from "../Types/purchase-requisition.types";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 
 @Injectable()
@@ -96,7 +96,7 @@ export class PurchaseRequisitionService {
 
   public async createPurchaseRequisition(
     organisationId: string,
-    data: Partial<PurchaseRequisition>,
+    data: IPurchaseRequisition,
   ): Promise<PurchaseRequisition> {
     return await this.purchaseRequisitionRepository.manager.transaction(
       async (transactionalEntityManager) => {
@@ -109,22 +109,6 @@ export class PurchaseRequisitionService {
         });
 
         await transactionalEntityManager.save(requisition);
-
-        // 2️⃣ Insert the purchase items in bulk
-        const items = data.items;
-        if ((items ?? []).length > 0) {
-          const purchaseItems = (items ?? []).map((item) => ({
-            ...item,
-            purchase_requisition: requisition, // Assign saved requisition
-          }));
-
-          await transactionalEntityManager
-            .createQueryBuilder()
-            .insert()
-            .into(PurchaseItem)
-            .values(purchaseItems)
-            .execute();
-        }
 
         return requisition;
       },

@@ -918,46 +918,6 @@ export class OrganisationController {
   /**
    * Purchase Requisition routes
    */
-  @Post(":organisationId/requisitions")
-  @SetMetadata("permissions", [
-    PermissionType.OWNER,
-    PermissionType.MANAGE_PURCHASE_REQUISITIONS,
-  ])
-  @UseGuards(OrganisationPermissionsGuard)
-  async createRequisition(
-    @Param("organisationId") organisationId: string,
-    @Body() data: CreatePurchaseRequisitionDto,
-    @Req() req: Request,
-  ) {
-    try {
-      const userId = req.user.sub;
-
-      if (!userId) return;
-
-      const requisition =
-        await this.purchaseRequisitionService.createPurchaseRequisition(
-          organisationId,
-          {
-            ...data,
-            created_by: { id: userId } as User,
-            department: { id: data.department_id } as OrganisationDepartment,
-            items: data.items.map((item) => ({
-              ...item,
-              purchase_requisition: {} as PurchaseRequisition,
-            })) as PurchaseItem[],
-          },
-        );
-
-      return {
-        status: "success",
-        message: "Purchase requisition created successfully",
-        data: { requisition },
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
-
   @Get(":organisationId/requisitions")
   @SetMetadata("permissions", [
     PermissionType.OWNER,
@@ -1028,11 +988,8 @@ export class OrganisationController {
           {
             ...data,
             created_by: { id: userId } as User,
+
             department: { id: data.department_id } as OrganisationDepartment,
-            items: data.items.map((item) => ({
-              ...item,
-              purchase_requisition: {} as PurchaseRequisition,
-            })) as PurchaseItem[],
           },
         );
 

@@ -56,7 +56,7 @@ export class PurchaseOrderService {
     const purchaseOrder = this.purchaseOrderRepository.create({
       ...data,
       po_number,
-      purchase_requisition: {id: data.request_id} as PurchaseRequisition,
+      purchase_requisition: { id: data.request_id } as PurchaseRequisition,
       organisation: { id: organisationId } as Organisation,
       supplier: foundSupplier,
     });
@@ -78,6 +78,11 @@ export class PurchaseOrderService {
 
     return savedPurchaseOrder;
   }
+
+  /**
+   * Pending orders will be approved requisitions that have not been converted to purchase orders
+   */
+  async getAllPendingOrders() {}
 
   async getOrganisationOrders(
     organisationId: string,
