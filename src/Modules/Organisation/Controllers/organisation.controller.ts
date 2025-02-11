@@ -20,7 +20,6 @@ import {
   addUserToOrgDto,
   CreateOrganisationDto,
   CreatePurchaseRequisitionDto,
-  SavePurchaseRequisitionDto,
   updateUserDetailsDto,
 } from "../Dtos/organisation.dto";
 import { Request } from "express";
@@ -1015,17 +1014,13 @@ export class OrganisationController {
   @UseGuards(OrganisationPermissionsGuard)
   async saveForLater(
     @Param("organisationId") organisationId: string,
-    @Body() data: SavePurchaseRequisitionDto,
+    @Body() data: CreatePurchaseRequisitionDto,
     @Req() req: Request,
   ) {
     try {
       const userId = req.user.sub;
 
       if (!userId) return;
-
-      if (data.status !== PurchaseRequisitionStatus.SAVED_FOR_LATER) {
-        throw new BadRequestException("Invalid status");
-      }
 
       const purchaseRequisition =
         await this.purchaseRequisitionService.createPurchaseRequisition(

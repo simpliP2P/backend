@@ -167,11 +167,3 @@ export class CreatePurchaseRequisitionDto {
   items: PurchaseItem[];
 }
 
-/**
- * SAVE FOR LATER DTO
- */
-export class SavePurchaseRequisitionDto extends CreatePurchaseRequisitionDto {
-  @IsString()
-  @IsEnum(PurchaseRequisitionStatus)
-  status: PurchaseRequisitionStatus;
-}
