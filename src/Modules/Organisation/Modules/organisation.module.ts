@@ -60,6 +60,10 @@ import { OrganisationCategoryModule } from "./organisation-category.module";
     PurchaseOrderService,
     PurchaseRequisitionService,
   ],
-  exports: [OrganisationService],
+  exports: [
+    OrganisationService,
+    OrganisationDepartmentService,
+    OrganisationBranchService,
+  ],
 })
 export class OrganisationModule {}
