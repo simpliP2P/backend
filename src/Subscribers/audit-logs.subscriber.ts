@@ -29,10 +29,13 @@ export class AuditSubscriber implements EntitySubscriberInterface {
     const auditRepo = event.manager.getRepository(AuditLog);
     try {
       await auditRepo.save({
-        organisation: { id: RequestContext.getOrganisationId() || "" },
+        organisation: {
+          id:
+            RequestContext.getOrganisationId() || event.entity.organisation.id,
+        },
         user: { id: RequestContext.getUserId() || "" },
         entity_type: event.metadata.tableName,
-        entity_id: event.entity?.id ?? "",
+        entity_id: event.entity?.id,
         action: "CREATE",
         changed_fields: filteredFields,
         description: `Created new ${
@@ -161,6 +164,7 @@ export class AuditSubscriber implements EntitySubscriberInterface {
       "organisation_departments",
       "organisation_branches",
       "comments",
+      "budgets",
     ].includes(event.metadata.tableName);
   }
 }
