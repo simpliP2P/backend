@@ -31,6 +31,10 @@ jobs:
       - name: Run tests
         run: npm run test
 
+      # Run start command
+      - name: Start server
+        run: npm run start
+
       # Trigger Render deploy hook
       - name: Trigger Render Deploy Hook
         run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
