@@ -7,4 +7,5 @@ export enum PermissionType {
     MANAGE_PRODUCTS = "manage_products",
     MANAGE_DEPARTMENTS = "manage_departments",
     ORG_MEMBER = "org_member",
+    MANAGE_BUDGETS = "manage_budgets",
 }
