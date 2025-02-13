@@ -6,14 +6,19 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { PurchaseRequisition } from "../Entities/purchase-requisition.entity";
 import { OrganisationModule } from "src/Modules/Organisation/Modules/organisation.module";
 import { UserOrganisationRepository } from "src/Modules/Organisation/Repositories/user-organisation.repository";
+import { BudgetModule } from "src/Modules/Budget/Modules/budget.module";
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([PurchaseRequisition]),
     PurchaseItemModule,
     OrganisationModule,
+    BudgetModule,
   ],
   controllers: [PurchaseRequisitionController],
-  providers: [PurchaseRequisitionService, UserOrganisationRepository],
+  providers: [
+    PurchaseRequisitionService,
+    UserOrganisationRepository,
+  ],
 })
 export class PurchaseRequisitionModule {}

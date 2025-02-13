@@ -123,4 +123,23 @@ export class OrganisationDepartmentService {
     if (!department) throw new NotFoundException("Department not found");
     return department;
   }
+
+  async findOne(organisationId: string, id: string): Promise<OrganisationDepartment> {
+    const department = await this.departmentRepo.findOne({
+      where: { id, organisation: { id: organisationId } },
+      relations: ["head_of_department"],
+      select: {
+        head_of_department: {
+          first_name: true,
+          last_name: true,
+        },
+      },
+    });
+
+    if (!department) {
+      throw new NotFoundException(`Department with ID ${id} not found`);
+    }
+
+    return department;
+  }
 }
