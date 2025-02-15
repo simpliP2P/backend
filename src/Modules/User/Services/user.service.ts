@@ -15,7 +15,7 @@ import {
   CreateGoogleAccountInput,
   CreateLocalAccountInput,
 } from "../Types/user.types";
-import { UploadService } from "src/Modules/Upload/Services/upload.service";
+import { FileManagerService } from "src/Modules/FileManager/Services/upload.service";
 import { compare, hash } from "bcrypt";
 import { Token } from "src/Modules/Token/Entities/token.entity";
 import { ProviderType } from "../Enums/user.enum";
@@ -27,7 +27,7 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    private uploadService: UploadService,
+    private fileMangerService: FileManagerService,
     private tokenService: TokenService,
   ) {}
 
@@ -104,8 +104,8 @@ export class UserService {
     userId: string,
     file: Express.Multer.File,
   ): Promise<string> {
-    // Upload img to cloud
-    const imageUrl = await this.uploadService.uploadImage(file.path);
+    // FileManager img to cloud
+    const imageUrl = await this.fileMangerService.uploadImage(file.path);
 
     const user = await this.findAccount({ where: { id: userId } });
     if (!user) {
@@ -114,7 +114,7 @@ export class UserService {
 
     // remove existing img from cloud
     if (user.profile_picture) {
-      this.uploadService.removeImage(imageUrl);
+      this.fileMangerService.removeImage(imageUrl);
     }
 
     // Save the profile picture URL to the user entity in DB

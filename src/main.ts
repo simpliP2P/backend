@@ -49,6 +49,8 @@ async function bootstrap() {
     origin: "*",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     allowedHeaders: [
+      "Origin",
+      "Referer",
       "Content-Type",
       "Authorization",
       "X-Requested-With",
@@ -64,7 +66,7 @@ async function bootstrap() {
   
   const reflector = app.get(Reflector);
   const tokenHelper = app.get(TokenHelper);
-  app.useGlobalGuards(new AuthGuard(reflector, tokenHelper));
+  app.useGlobalGuards(new AuthGuard(reflector, tokenHelper, configService));
   
   app.useGlobalFilters(
     new AppExceptionFilter(),

@@ -16,7 +16,7 @@ import { RequestContextInterceptor } from "./Interceptors/request-context.interc
 import { CommentModule } from "./Modules/Comments/Modules/comment.module";
 import { PurchaseRequisitionModule } from "./Modules/PurchaseRequisition/Modules/purchase-requisition.module";
 import { PurchaseItemModule } from "./Modules/PurchaseItem/Modules/purchase-item.module";
-
+import { FileManagerModule } from "./Modules/FileManager/Modules/file-manager.module";
 @Module({
   // Declares external modules that this module depends on
   imports: [
@@ -32,6 +32,7 @@ import { PurchaseItemModule } from "./Modules/PurchaseItem/Modules/purchase-item
     CommentModule,
     PurchaseRequisitionModule,
     PurchaseItemModule,
+    FileManagerModule,
   ],
   // Defines the controllers for this module.
   controllers: [AppController],
