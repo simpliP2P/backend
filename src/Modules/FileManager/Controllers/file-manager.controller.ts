@@ -1,6 +1,5 @@
 import {
   Controller,
-  ForbiddenException,
   Get,
   Param,
   Post,
@@ -10,13 +9,13 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { S3Service } from "../Services/s3-upload.service";
+import { FileManagerService } from "../Services/upload.service";
 import { Request } from 'express';
 import { Public } from "src/Shared/Decorators/custom.decorator";
 
 @Controller("files")
 export class FileManagerController {
-  constructor(private readonly s3FileManagerService: S3Service) {}
+  constructor(private readonly FileManagerService: FileManagerService) {}
 
   // @Public()
   @Post("upload")
@@ -34,7 +33,7 @@ export class FileManagerController {
         throw new Error("No file uploaded");
       }
 
-      const fileUrl = await this.s3FileManagerService.uploadFile(file);
+      const fileUrl = await this.FileManagerService.uploadFile(file);
 
       // Construct the base URL dynamically
       const baseUrl = `${req.protocol}://${req.get("host")}`;
@@ -54,7 +53,7 @@ export class FileManagerController {
   async getFile(@Param("key") key: string, @Res() res: any) {
     
     const { stream, contentType } =
-      await this.s3FileManagerService.getFileStream(key);
+      await this.FileManagerService.getFileStream(key);
 
     res.set({
       "Content-Type": contentType, // Set correct MIME type (e.g., image/png, video/mp4)

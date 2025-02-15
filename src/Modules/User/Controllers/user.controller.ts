@@ -8,7 +8,6 @@ import {
   UploadedFile,
   UseInterceptors,
 } from "@nestjs/common";
-import { ApiTags } from "@nestjs/swagger";
 import { UserService } from "../Services/user.service";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
@@ -21,7 +20,6 @@ import { SanitizedUser } from "../Types/auth.types";
 import { UpdateUserProfileDto } from "../Dtos/user.dto";
 import { Request } from "express";
 
-@ApiTags("user")
 @Controller("users")
 export class UserController {
   constructor(
@@ -58,14 +56,7 @@ export class UserController {
   @Post("me/profile-picture")
   @UseInterceptors(
     FileInterceptor("file", {
-      storage: diskStorage({
-        destination: "../../uploads",
-        filename: (req, file, callback) => {
-          const uniqueName = `${Date.now()}-${file.originalname}`;
-          callback(null, uniqueName);
-        },
-      }),
-      limits: { fileSize: 0.1 * 1024 * 1024 }, // max: approx. 100MB
+      limits: { fileSize: 0.1 * 1024 * 1024 }, // max: approx. 100KB
       fileFilter: (req, file, callback) => {
         if (!file.mimetype.match(/image\/(jpeg|png|jpg)$/)) {
           return callback(new BadRequestException("Invalid file type"), false);
@@ -83,21 +74,9 @@ export class UserController {
         throw new BadRequestException("No file uploaded");
       }
 
-      const userId = req.user.sub;
+      const userId: string = req.user.sub;
 
-      const url = await this.userService.uploadProfilePicture(userId, file);
-
-      // Delete the local file after processing
-      const filePath = join("../../uploads", file.filename);
-      if (existsSync(filePath)) {
-        unlink(filePath, (err) => {
-          if (err) {
-            this.logger.error("Error deleting file:", err.message);
-          }
-        });
-      } else {
-        this.logger.warn(`File not found for deletion: ${filePath}`);
-      }
+      const url = await this.userService.uploadProfilePicture(userId, file, req);
 
       return {
         status: "success",

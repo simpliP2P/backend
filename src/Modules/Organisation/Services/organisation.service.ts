@@ -27,7 +27,7 @@ import { AppLogger } from "src/Logger/logger.service";
 import { SuppliersService } from "src/Modules/Supplier/Services/supplier.service";
 // import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchaseOrder.service";
 import { ProductService } from "src/Modules/Product/Services/product.service";
-import { UploadService } from "src/Modules/Upload/Services/upload.service";
+import { FileManagerService } from "src/Modules/FileManager/Services/upload.service";
 import { ConfigService } from "@nestjs/config";
 import { createHash } from "crypto";
 import { AuditLogsService } from "src/Modules/AuditLogs/Services/audit-logs.service";
@@ -47,7 +47,7 @@ export class OrganisationService {
     private readonly supplierService: SuppliersService,
     // private readonly purchaseOrderService: PurchaseOrderService,
     private readonly productService: ProductService,
-    private readonly uploadService: UploadService,
+    private readonly fileManagerService: FileManagerService,
     private readonly clientHelper: ClientHelper,
     private readonly logger: AppLogger,
     private readonly configService: ConfigService,
@@ -155,18 +155,29 @@ export class OrganisationService {
     );
   }
 
-  public async uploadLogo(orgId: string, file: Express.Multer.File) {
-    // Upload img to cloud
-    const imageUrl = await this.uploadService.uploadImage(file.path);
-
+  public async uploadLogo(orgId: string, file: Express.Multer.File, req: any) {
     const org = await this.findOrganisation({ where: { id: orgId } });
     if (!org) {
       throw new Error("Organisation not found");
     }
 
+    // FileManager img to cloud
+    const imageUrl = await this.fileManagerService.uploadFile(file);
+
     // remove existing img from cloud
     if (org.logo) {
-      this.uploadService.removeImage(imageUrl);
+      const existingKey = this.fileManagerService.extractFileKey(org.logo);
+      const fileKey = await this.fileManagerService.uploadFile(
+        file,
+        existingKey,
+      );
+
+      const imageUrl = this.fileManagerService.constructUrl(fileKey, req);
+
+      org.logo = imageUrl;
+      await this.organisationRepository.save(org);
+
+      return imageUrl;
     }
 
     // Save the logo URL to the user entity in DB
@@ -222,7 +233,7 @@ export class OrganisationService {
     try {
       // Attempt to create the user account
       const password = this.generateStrongPassword();
-      
+
       createdAccount = await this.userService.createLocalAccount({
         first_name,
         last_name,

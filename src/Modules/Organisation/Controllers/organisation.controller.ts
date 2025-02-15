@@ -184,13 +184,6 @@ export class OrganisationController {
   @UseGuards(OrganisationPermissionsGuard)
   @UseInterceptors(
     FileInterceptor("file", {
-      storage: diskStorage({
-        destination: "../../uploads",
-        filename: (req, file, callback) => {
-          const uniqueName = `${Date.now()}-${file.originalname}`;
-          callback(null, uniqueName);
-        },
-      }),
       limits: { fileSize: 0.1 * 1024 * 1024 }, // max: approx. 100MB
       fileFilter: (req, file, callback) => {
         if (!file.mimetype.match(/image\/(jpeg|png|jpg)$/)) {
@@ -213,19 +206,8 @@ export class OrganisationController {
       const url = await this.organisationService.uploadLogo(
         organisationId,
         file,
+        req,
       );
-
-      // Delete the local file after processing
-      const filePath = join("../../uploads", file.filename);
-      if (existsSync(filePath)) {
-        unlink(filePath, (err) => {
-          if (err) {
-            this.logger.error("Error deleting file:", err.message);
-          }
-        });
-      } else {
-        this.logger.warn(`File not found for deletion: ${filePath}`);
-      }
 
       return {
         status: "success",
@@ -1078,6 +1060,7 @@ export class OrganisationController {
     approvalData: {
       status: PurchaseRequisitionStatus;
       approval_justification: string;
+      budget_id: string;
     },
   ) {
     try {

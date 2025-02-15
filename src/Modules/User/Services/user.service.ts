@@ -21,13 +21,14 @@ import { Token } from "src/Modules/Token/Entities/token.entity";
 import { ProviderType } from "../Enums/user.enum";
 import { TokenService } from "src/Modules/Token/Services/token.service";
 import { SanitizedUser } from "../Types/auth.types";
+import { Request } from "express";
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    private fileMangerService: FileManagerService,
+    private fileManagerService: FileManagerService,
     private tokenService: TokenService,
   ) {}
 
@@ -92,8 +93,6 @@ export class UserService {
     // Save the updated user
     const updatedUser = await this.userRepository.save(user);
 
-    console.log(updatedUser);
-
     // Exclude password hash before returning
     const { password_hash, ...sanitizedUser } = updatedUser;
 
@@ -103,10 +102,8 @@ export class UserService {
   public async uploadProfilePicture(
     userId: string,
     file: Express.Multer.File,
+    req: Request,
   ): Promise<string> {
-    // FileManager img to cloud
-    const imageUrl = await this.fileMangerService.uploadImage(file.path);
-
     const user = await this.findAccount({ where: { id: userId } });
     if (!user) {
       throw new Error("User not found");
@@ -114,8 +111,19 @@ export class UserService {
 
     // remove existing img from cloud
     if (user.profile_picture) {
-      this.fileMangerService.removeImage(imageUrl);
+      const existingKey = this.fileManagerService.extractFileKey(user.profile_picture);
+      const fileKey = await this.fileManagerService.uploadFile(file, existingKey);
+      
+      const imageUrl = this.fileManagerService.constructUrl(fileKey, req);
+
+      user.profile_picture = imageUrl;
+      await this.userRepository.save(user);
+
+      return imageUrl; 
     }
+    
+    // Upload img to cloud
+    const imageUrl = await this.fileManagerService.uploadFile(file);
 
     // Save the profile picture URL to the user entity in DB
     user.profile_picture = imageUrl;

@@ -14,7 +14,6 @@ import { SuppliersModule } from "src/Modules/Supplier/Modules/supplier.module";
 import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchase-requisition.service";
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
 import { ProductModule } from "src/Modules/Product/Modules/product.module";
-import { UploadModule } from "src/Modules/Upload/upload.module";
 import { AuditLogsModule } from "src/Modules/AuditLogs/Modules/audit-logs.module";
 import { OrganisationDepartmentService } from "../Services/organisation-department.service";
 import { OrganisationBranchService } from "../Services/organisation-branch.service";
@@ -26,6 +25,7 @@ import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchas
 import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order.entity";
 import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 import { OrganisationCategoryModule } from "./organisation-category.module";
+import { FileManagerModule } from "src/Modules/FileManager/Modules/file-manager.module";
 
 @Module({
   imports: [
@@ -44,7 +44,7 @@ import { OrganisationCategoryModule } from "./organisation-category.module";
     MailModule,
     SuppliersModule,
     ProductModule,
-    UploadModule,
+    FileManagerModule,
     AuditLogsModule,
     PurchaseItemModule,
     OrganisationCategoryModule,
@@ -60,10 +60,7 @@ import { OrganisationCategoryModule } from "./organisation-category.module";
     PurchaseOrderService,
     PurchaseRequisitionService,
   ],
-  exports: [
-    OrganisationService,
-    OrganisationDepartmentService,
-    OrganisationBranchService,
-  ],
+  exports: [OrganisationService, OrganisationDepartmentService,
+    OrganisationBranchService,],
 })
 export class OrganisationModule {}
