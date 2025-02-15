@@ -26,20 +26,16 @@ export class SignUpDto {
   })
   password: string;
 
-
   @IsString()
   @IsOptional()
   profile_picture: string;
 
-
   @IsString()
   @IsOptional()
   phone: string;
-
 }
 
 export class loginDto {
-
   @IsEmail()
   email: string;
 
@@ -52,7 +48,6 @@ export class verifyEmailDto {
 }
 
 export class initiateResetPasswordDto {
-
   email: string;
 }
 
