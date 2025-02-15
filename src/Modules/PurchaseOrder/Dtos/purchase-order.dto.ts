@@ -16,6 +16,9 @@ export class CreatePurchaseOrderDto {
 
   @IsUUID()
   request_id: string;
+
+  @IsString()
+  attachment: string;
 }
 
 export class UpdatePurchaseOrderDto {
