@@ -8,9 +8,7 @@ import { EmailServices } from "../../../../src/Modules/Mail/Services/mail.servic
 import { ClientHelper } from "../../../../src/Shared/Helpers/client.helper";
 import { TokenService } from "../../../../src/Modules/Token/Services/token.service";
 import { AppLogger } from "../../../../src/Logger/logger.service";
-import { Repository } from "typeorm";
 import {
-  UnauthorizedException,
   UnprocessableEntityException,
 } from "@nestjs/common";
 import { ProviderType } from "../../../../src/Modules/User/Enums/user.enum";
@@ -19,13 +17,6 @@ import * as bcrypt from "bcrypt";
 
 describe("AuthService", () => {
   let service: AuthService;
-  let userRepository: Repository<User>;
-  let userService: UserService;
-  let tokenHelper: TokenHelper;
-  let emailService: EmailServices;
-  let clientHelper: ClientHelper;
-  let tokenService: TokenService;
-  let logger: AppLogger;
 
   const mockUserRepository = {
     findOne: jest.fn(),
@@ -33,7 +24,7 @@ describe("AuthService", () => {
 
   const mockUserService = {
     createLocalAccount: jest.fn(),
-    updateLastLogin: jest.fn().mockImplementation((userId) => {
+    updateLastLogin: jest.fn().mockImplementation((_) => {
       // Explicitly return a Promise
       return Promise.resolve();
       // OR
@@ -115,13 +106,6 @@ describe("AuthService", () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
-    userService = module.get<UserService>(UserService);
-    tokenHelper = module.get<TokenHelper>(TokenHelper);
-    emailService = module.get<EmailServices>(EmailServices);
-    clientHelper = module.get<ClientHelper>(ClientHelper);
-    tokenService = module.get<TokenService>(TokenService);
-    logger = module.get<AppLogger>(AppLogger);
   });
 
   describe("signUp", () => {
