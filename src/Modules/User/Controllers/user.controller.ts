@@ -18,9 +18,7 @@ import { Request } from "express";
 
 @Controller("users")
 export class UserController {
-  constructor(
-    private readonly userService: UserService,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   @Get("me")
   async getProfile(@Req() req: any): Promise<ApiResponse<SanitizedUser>> {

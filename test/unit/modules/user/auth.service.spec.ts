@@ -8,9 +8,7 @@ import { EmailServices } from "../../../../src/Modules/Mail/Services/mail.servic
 import { ClientHelper } from "../../../../src/Shared/Helpers/client.helper";
 import { TokenService } from "../../../../src/Modules/Token/Services/token.service";
 import { AppLogger } from "../../../../src/Logger/logger.service";
-import {
-  UnprocessableEntityException,
-} from "@nestjs/common";
+import { UnprocessableEntityException } from "@nestjs/common";
 import { ProviderType } from "../../../../src/Modules/User/Enums/user.enum";
 import { TokenType } from "../../../../src/Modules/Token/Enums/token.enum";
 import * as bcrypt from "bcrypt";
