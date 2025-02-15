@@ -44,10 +44,6 @@ import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiResponse } from "src/Shared/Interfaces/api-response.interface";
 import { AuditLogsService } from "src/Modules/AuditLogs/Services/audit-logs.service";
-import { OrganisationDepartmentService } from "../Services/organisation-department.service";
-import { OrganisationBranchService } from "../Services/organisation-branch.service";
-import { CreateDepartmentDto } from "../Dtos/organisation-department.dto";
-import { CreateBranchDto } from "../Dtos/organisation-branch.dto";
 import { CreatePurchaseOrderDto } from "src/Modules/PurchaseOrder/Dtos/purchase-order.dto";
 import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
 import { OrganisationCategoryService } from "../Services/organisation-category.service";
@@ -57,8 +53,6 @@ import { OrganisationDepartment } from "../Entities/organisation-department.enti
 export class OrganisationController {
   constructor(
     private readonly organisationService: OrganisationService,
-    private readonly organisationDepartmentService: OrganisationDepartmentService,
-    private readonly organisationBranchService: OrganisationBranchService,
     private readonly organisationCategoryService: OrganisationCategoryService,
     private readonly supplierService: SuppliersService,
     private readonly purchaseRequisitionService: PurchaseRequisitionService,
@@ -177,7 +171,7 @@ export class OrganisationController {
   @UseGuards(OrganisationPermissionsGuard)
   @UseInterceptors(
     FileInterceptor("file", {
-      limits: { fileSize: 0.1 * 1024 * 1024 }, // max: approx. 100MB
+      limits: { fileSize: 0.1 * 1024 * 1024 }, // max: approx. 100KB
       fileFilter: (_, file, callback) => {
         if (!file.mimetype.match(/image\/(jpeg|png|jpg)$/)) {
           return callback(new BadRequestException("Invalid file type"), false);
@@ -262,176 +256,6 @@ export class OrganisationController {
         status: "success",
         message: "Audit logs fetched successfully",
         data: { data },
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Departments routes
-   */
-  @Post(":organisationId/departments")
-  @SetMetadata("permissions", [
-    PermissionType.OWNER,
-    PermissionType.MANAGE_DEPARTMENTS,
-  ])
-  @UseGuards(OrganisationPermissionsGuard)
-  async createDepartment(
-    @Param("organisationId") organisationId: string,
-    @Body() data: CreateDepartmentDto,
-  ) {
-    try {
-      const department =
-        await this.organisationDepartmentService.createDepartment({
-          ...data,
-          organisation_id: organisationId,
-        });
-
-      return {
-        status: "success",
-        message: "Department created successfully",
-        data: department,
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  @Get(":organisationId/departments")
-  @SetMetadata("permissions", [
-    PermissionType.OWNER,
-    PermissionType.MANAGE_DEPARTMENTS,
-  ])
-  @UseGuards(OrganisationPermissionsGuard)
-  async getDepartments(
-    @Param("organisationId") organisationId: string,
-    @Query("page") page: number,
-    @Query("pageSize") pageSize: number,
-  ) {
-    try {
-      const department =
-        await this.organisationDepartmentService.getDepartmentsByOrganisation(
-          organisationId,
-          page,
-          pageSize,
-        );
-
-      return {
-        status: "success",
-        message: "Department fetched successfully",
-        data: department,
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  @Get(":organisationId/departments/:departmentId")
-  @SetMetadata("permissions", [
-    PermissionType.OWNER,
-    PermissionType.MANAGE_DEPARTMENTS,
-  ])
-  @UseGuards(OrganisationPermissionsGuard)
-  async getDepartmentById(
-    @Param("organisationId") organisationId: string,
-    @Param("departmentId") departmentId: string,
-  ) {
-    try {
-      const department =
-        await this.organisationDepartmentService.getDepartmentById(
-          organisationId,
-          departmentId,
-        );
-
-      return {
-        status: "success",
-        message: "Department fetched successfully",
-        data: department,
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Branches routes
-   */
-  @Post(":organisationId/branches")
-  @SetMetadata("permissions", [
-    PermissionType.OWNER,
-    PermissionType.MANAGE_DEPARTMENTS,
-  ])
-  @UseGuards(OrganisationPermissionsGuard)
-  async createBranch(
-    @Param("organisationId") organisationId: string,
-    @Body() data: CreateBranchDto,
-  ) {
-    try {
-      const branch = await this.organisationBranchService.createBranch({
-        ...data,
-        organisationId,
-      });
-
-      return {
-        status: "success",
-        message: "Branch created successfully",
-        data: branch,
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  @Get(":organisationId/branches")
-  @SetMetadata("permissions", [
-    PermissionType.OWNER,
-    PermissionType.MANAGE_DEPARTMENTS,
-  ])
-  @UseGuards(OrganisationPermissionsGuard)
-  async getBranches(
-    @Param("organisationId") organisationId: string,
-    @Query("page") page: number,
-    @Query("pageSize") pageSize: number,
-  ) {
-    try {
-      const branch =
-        await this.organisationBranchService.getBranchesByOrganisation(
-          organisationId,
-          page,
-          pageSize,
-        );
-
-      return {
-        status: "success",
-        message: "Department fetched successfully",
-        data: branch,
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  @Get(":organisationId/branches/:branchId")
-  @SetMetadata("permissions", [
-    PermissionType.OWNER,
-    PermissionType.MANAGE_DEPARTMENTS,
-  ])
-  @UseGuards(OrganisationPermissionsGuard)
-  async getBranchById(
-    @Param("organisationId") organisationId: string,
-    @Param("branchId") branchId: string,
-  ) {
-    try {
-      const department = await this.organisationBranchService.getBranchById(
-        organisationId,
-        branchId,
-      );
-
-      return {
-        status: "success",
-        message: "Department fetched successfully",
-        data: department,
       };
     } catch (error) {
       throw error;
@@ -904,6 +728,8 @@ export class OrganisationController {
     @Query("status") status: string,
     @Query("page") page: number,
     @Query("pageSize") pageSize: number,
+    @Query("startDate") startDate: string,
+    @Query("endDate") endDate: string
   ) {
     try {
       const isValidStatus =
@@ -925,6 +751,8 @@ export class OrganisationController {
           pageSize,
           organisationId,
           status as PurchaseRequisitionStatus,
+          startDate,
+          endDate,
         );
 
       return {
@@ -1020,7 +848,6 @@ export class OrganisationController {
     try {
       const requisition =
         await this.purchaseRequisitionService.getPurchaseRequisitionById(
-          // userId,
           organisationId,
           requisitionId,
         );
@@ -1115,12 +942,16 @@ export class OrganisationController {
     @Param("organisationId") organisationId: string,
     @Query("page") page: number,
     @Query("pageSize") pageSize: number,
+    @Query("startDate") startDate: string,
+    @Query("endDate") endDate: string,
   ) {
     try {
       const orders = await this.purchaseOrderService.getOrganisationOrders(
         organisationId,
         page,
         pageSize,
+        startDate,
+        endDate,
       );
 
       return {

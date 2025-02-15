@@ -26,6 +26,8 @@ import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order
 import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 import { OrganisationCategoryModule } from "./organisation-category.module";
 import { FileManagerModule } from "src/Modules/FileManager/Modules/file-manager.module";
+import { OrganisationDepartmentController } from "../Controllers/organisation-department.controller";
+import { OrganisationBranchController } from "../Controllers/organisation-branch.controller";
 
 @Module({
   imports: [
@@ -49,7 +51,11 @@ import { FileManagerModule } from "src/Modules/FileManager/Modules/file-manager.
     PurchaseItemModule,
     OrganisationCategoryModule,
   ],
-  controllers: [OrganisationController],
+  controllers: [
+    OrganisationController,
+    OrganisationDepartmentController,
+    OrganisationBranchController,
+  ],
   providers: [
     OrganisationService,
     OrganisationDepartmentService,
