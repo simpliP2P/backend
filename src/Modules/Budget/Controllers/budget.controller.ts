@@ -66,7 +66,10 @@ export class BudgetController {
   ): Promise<Budget> {
     const organisationId = req.headers["oid"] as string;
 
-    return this.budgetService.update(id, updateBudgetDto);
+    return this.budgetService.update(id, {
+      ...updateBudgetDto,
+      organisationId,
+    });
   }
 
   // Delete a budget

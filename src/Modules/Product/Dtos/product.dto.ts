@@ -2,7 +2,6 @@ import {
   IsString,
   IsNotEmpty,
   IsOptional,
-  IsDecimal,
   IsNumber,
   ValidateIf,
   IsUUID,

@@ -7,7 +7,10 @@ import { UserOrganisation } from "src/Modules/Organisation/Entities/user-organis
 import { OrganisationModule } from "src/Modules/Organisation/Modules/organisation.module";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Comment, UserOrganisation]), OrganisationModule],
+  imports: [
+    TypeOrmModule.forFeature([Comment, UserOrganisation]),
+    OrganisationModule,
+  ],
   providers: [CommentService],
   controllers: [CommentController],
   exports: [CommentService],

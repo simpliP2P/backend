@@ -10,10 +10,6 @@ import {
 } from "@nestjs/common";
 import { UserService } from "../Services/user.service";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { diskStorage } from "multer";
-import { join } from "path";
-import { existsSync, unlink } from "fs";
-import { AppLogger } from "src/Logger/logger.service";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 import { ApiResponse } from "src/Shared/Interfaces/api-response.interface";
 import { SanitizedUser } from "../Types/auth.types";
@@ -24,7 +20,6 @@ import { Request } from "express";
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private readonly logger: AppLogger,
   ) {}
 
   @Get("me")
@@ -57,7 +52,7 @@ export class UserController {
   @UseInterceptors(
     FileInterceptor("file", {
       limits: { fileSize: 0.1 * 1024 * 1024 }, // max: approx. 100KB
-      fileFilter: (req, file, callback) => {
+      fileFilter: (_, file, callback) => {
         if (!file.mimetype.match(/image\/(jpeg|png|jpg)$/)) {
           return callback(new BadRequestException("Invalid file type"), false);
         }

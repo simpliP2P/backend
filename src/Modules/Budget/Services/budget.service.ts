@@ -3,8 +3,6 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Budget } from "../Entities/budget.entity";
 import { CreateBudgetDto, UpdateBudgetDto } from "../Dtos/budget.dto";
-import { OrganisationBranch } from "src/Modules/Organisation/Entities/organisation-branch.entity";
-import { OrganisationDepartment } from "src/Modules/Organisation/Entities/organisation-department.entity";
 import { OrganisationBranchService } from "src/Modules/Organisation/Services/organisation-branch.service";
 import { OrganisationDepartmentService } from "src/Modules/Organisation/Services/organisation-department.service";
 

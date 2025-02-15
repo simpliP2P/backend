@@ -2,7 +2,6 @@ import {
   ArrayNotEmpty,
   IsArray,
   IsEmail,
-  IsEnum,
   IsNumber,
   IsOptional,
   IsString,
@@ -16,9 +15,7 @@ import {
 } from "class-validator";
 import { PermissionType } from "../Enums/user-organisation.enum";
 import { Type } from "class-transformer";
-import { PurchaseRequisitionStatus } from "src/Modules/PurchaseRequisition/Enums/purchase-requisition.enum";
 import { Optional } from "@nestjs/common";
-// import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 
 export class CreateOrganisationDto {
   @IsString()

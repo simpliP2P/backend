@@ -21,10 +21,8 @@ export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
   @Post()
-   @SetMetadata("permissions", [
-      PermissionType.ORG_MEMBER
-    ])
-    @UseGuards(OrganisationPermissionsGuard)
+  @SetMetadata("permissions", [PermissionType.ORG_MEMBER])
+  @UseGuards(OrganisationPermissionsGuard)
   async create(
     @Body() createCommentDto: CreateCommentDto,
     @Req() req: Request,

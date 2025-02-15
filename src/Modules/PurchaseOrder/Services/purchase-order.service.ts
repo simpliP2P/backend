@@ -7,7 +7,6 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { PurchaseOrder } from "../Entities/purchase-order.entity";
 import { Organisation } from "src/Modules/Organisation/Entities/organisation.entity";
-import { UpdatePurchaseOrderDto } from "../Dtos/purchase-order.dto";
 import { OrganisationService } from "src/Modules/Organisation/Services/organisation.service";
 import { IPurchaseOrder } from "../Types/purchase-order.types";
 import { SuppliersService } from "src/Modules/Supplier/Services/supplier.service";

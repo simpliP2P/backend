@@ -5,7 +5,6 @@ import {
   IsNumber,
   Min,
   Max,
-  IsObject,
 } from "class-validator";
 
 export class CreateSupplierDto {

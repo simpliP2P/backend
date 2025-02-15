@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { Organisation } from "../Entities/organisation.entity";
 import { User } from "src/Modules/User/Entities/user.entity";
 import { OrganisationDepartment } from "../Entities/organisation-department.entity";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
@@ -11,9 +10,6 @@ export class OrganisationDepartmentService {
   constructor(
     @InjectRepository(OrganisationDepartment)
     private readonly departmentRepo: Repository<OrganisationDepartment>,
-
-    @InjectRepository(Organisation)
-    private readonly organisationRepo: Repository<Organisation>,
 
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,

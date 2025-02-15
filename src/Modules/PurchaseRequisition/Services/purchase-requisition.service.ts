@@ -3,14 +3,12 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { In, Not, Repository } from "typeorm";
 import { PurchaseRequisition } from "../Entities/purchase-requisition.entity";
 import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
-import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 import { OrganisationService } from "src/Modules/Organisation/Services/organisation.service";
 import {
   ICreatePurchaseRequisition,
   IPurchaseRequisition,
 } from "../Types/purchase-requisition.types";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
-import { BudgetService } from "src/Modules/Budget/Services/budget.service";
 
 @Injectable()
 export class PurchaseRequisitionService {
@@ -120,7 +118,6 @@ export class PurchaseRequisitionService {
   public async getAllPurchaseRequisitions(
     page: number = 1,
     pageSize: number = 10,
-    userId: string,
     organisationId: string,
     status: PurchaseRequisitionStatus,
   ) {

@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { Organisation } from "../Entities/organisation.entity";
 import { OrganisationBranch } from "../Entities/organisation-branch.entity";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 
@@ -10,9 +9,6 @@ export class OrganisationBranchService {
   constructor(
     @InjectRepository(OrganisationBranch)
     private readonly branchRepo: Repository<OrganisationBranch>,
-
-    @InjectRepository(Organisation)
-    private readonly organisationRepo: Repository<Organisation>,
   ) {}
 
   async createBranch(data: {

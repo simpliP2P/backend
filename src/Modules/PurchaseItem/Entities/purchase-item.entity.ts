@@ -3,7 +3,7 @@ import { BaseEntity } from "src/Common/entities/base.entity";
 import { Product } from "src/Modules/Product/Entities/product.entity";
 import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order.entity";
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
-import { BeforeInsert, Column, Entity, JoinColumn, ManyToOne } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { PurchaseItemStatus } from "../Enums/purchase-item.enum";
 import { Organisation } from "src/Modules/Organisation/Entities/organisation.entity";
 

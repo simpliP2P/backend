@@ -5,7 +5,6 @@ import { PurchaseRequisitionController } from "../Controllers/purchase-requisiti
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { PurchaseRequisition } from "../Entities/purchase-requisition.entity";
 import { OrganisationModule } from "src/Modules/Organisation/Modules/organisation.module";
-import { UserOrganisationRepository } from "src/Modules/Organisation/Repositories/user-organisation.repository";
 import { BudgetModule } from "src/Modules/Budget/Modules/budget.module";
 
 @Module({
@@ -16,6 +15,6 @@ import { BudgetModule } from "src/Modules/Budget/Modules/budget.module";
     BudgetModule,
   ],
   controllers: [PurchaseRequisitionController],
-  providers: [PurchaseRequisitionService, UserOrganisationRepository],
+  providers: [PurchaseRequisitionService],
 })
 export class PurchaseRequisitionModule {}

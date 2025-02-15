@@ -42,10 +42,6 @@ import {
 } from "src/Modules/Product/Dtos/product.dto";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { diskStorage } from "multer";
-import { join } from "path";
-import { existsSync, unlink } from "fs";
-import { AppLogger } from "src/Logger/logger.service";
 import { ApiResponse } from "src/Shared/Interfaces/api-response.interface";
 import { AuditLogsService } from "src/Modules/AuditLogs/Services/audit-logs.service";
 import { OrganisationDepartmentService } from "../Services/organisation-department.service";
@@ -55,7 +51,6 @@ import { CreateBranchDto } from "../Dtos/organisation-branch.dto";
 import { CreatePurchaseOrderDto } from "src/Modules/PurchaseOrder/Dtos/purchase-order.dto";
 import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
 import { OrganisationCategoryService } from "../Services/organisation-category.service";
-import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 import { OrganisationDepartment } from "../Entities/organisation-department.entity";
 
 @Controller("organisations")
@@ -70,8 +65,6 @@ export class OrganisationController {
     private readonly productService: ProductService,
     private readonly auditLogsService: AuditLogsService,
     private readonly purchaseOrderService: PurchaseOrderService,
-
-    private readonly logger: AppLogger,
   ) {}
 
   @Post()
@@ -185,7 +178,7 @@ export class OrganisationController {
   @UseInterceptors(
     FileInterceptor("file", {
       limits: { fileSize: 0.1 * 1024 * 1024 }, // max: approx. 100MB
-      fileFilter: (req, file, callback) => {
+      fileFilter: (_, file, callback) => {
         if (!file.mimetype.match(/image\/(jpeg|png|jpg)$/)) {
           return callback(new BadRequestException("Invalid file type"), false);
         }
@@ -911,11 +904,8 @@ export class OrganisationController {
     @Query("status") status: string,
     @Query("page") page: number,
     @Query("pageSize") pageSize: number,
-    @Req() req: Request,
   ) {
     try {
-      const userId = req.user.sub;
-
       const isValidStatus =
         status &&
         Object.values(PurchaseRequisitionStatus).includes(
@@ -933,7 +923,6 @@ export class OrganisationController {
         await this.purchaseRequisitionService.getAllPurchaseRequisitions(
           page,
           pageSize,
-          userId,
           organisationId,
           status as PurchaseRequisitionStatus,
         );
@@ -1294,11 +1283,10 @@ export class OrganisationController {
     @Param("productId") productId: string,
   ) {
     try {
-      const updatedProduct =
-        await this.productService.deleteOrganisationProduct(
-          organisationId,
-          productId,
-        );
+      await this.productService.deleteOrganisationProduct(
+        organisationId,
+        productId,
+      );
 
       return {
         status: "success",

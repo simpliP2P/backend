@@ -64,6 +64,7 @@ import { FileManagerModule } from "src/Modules/FileManager/Modules/file-manager.
     OrganisationService,
     OrganisationDepartmentService,
     OrganisationBranchService,
+    UserOrganisationRepository,
   ],
 })
 export class OrganisationModule {}
