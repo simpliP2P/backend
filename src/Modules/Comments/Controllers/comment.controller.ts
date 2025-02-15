@@ -29,7 +29,7 @@ export class CommentController {
     @Body() createCommentDto: CreateCommentDto,
     @Req() req: Request,
   ) {
-    try { 
+    try {
       const userId = req.user.sub;
       const organisationId = req.headers["oid"] as string;
 
@@ -52,10 +52,7 @@ export class CommentController {
   }
 
   @Get("entities/:entityId")
-  async findAll(
-    @Param("entityId") entityId: string,
-    @Req() req: Request,
-  ) {
+  async findAll(@Param("entityId") entityId: string, @Req() req: Request) {
     const organisationId = req.headers["oid"] as string;
 
     if (!organisationId || !entityId) {
