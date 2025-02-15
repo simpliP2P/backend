@@ -162,8 +162,5 @@ export class CreatePurchaseRequisitionDto {
   @IsString()
   needed_by_date: Date;
 
-  @IsArray()
-  @IsOptional()
-  items: PurchaseItem[];
 }
 
