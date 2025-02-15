@@ -167,14 +167,11 @@ export class AuthController {
     try {
       await this.authService.logout(body.refreshToken);
 
-      res
-        .clearCookie("access_token")
-        .status(HttpStatus.OK)
-        .json({
-          status: "success",
-          message: "Logged out successfully",
-          data: {},
-        });
+      res.clearCookie("access_token").status(HttpStatus.OK).json({
+        status: "success",
+        message: "Logged out successfully",
+        data: {},
+      });
     } catch (error) {
       throw error;
     }
@@ -188,20 +185,17 @@ export class AuthController {
   ): Promise<void> {
     try {
       const userId = req.user.sub;
-      
+
       if (req.user.sub !== body.userId) {
         throw new UnauthorizedException("Unauthorized!");
       }
-      
+
       await this.authService.logoutAll(userId);
-      res
-        .clearCookie("access_token")
-        .status(HttpStatus.OK)
-        .json({
-          status: "success",
-          message: "Logged out of all devices",
-          data: {},
-        });
+      res.clearCookie("access_token").status(HttpStatus.OK).json({
+        status: "success",
+        message: "Logged out of all devices",
+        data: {},
+      });
     } catch (error) {
       throw error;
     }

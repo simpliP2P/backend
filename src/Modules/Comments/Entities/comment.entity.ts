@@ -12,7 +12,7 @@ export class Comment extends BaseEntity {
   entity_type: CommentEntityType;
 
   @Column()
-  entity_id: string; 
+  entity_id: string;
 
   @Column("text")
   text: string;

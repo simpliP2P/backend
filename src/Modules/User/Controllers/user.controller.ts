@@ -76,7 +76,11 @@ export class UserController {
 
       const userId: string = req.user.sub;
 
-      const url = await this.userService.uploadProfilePicture(userId, file, req);
+      const url = await this.userService.uploadProfilePicture(
+        userId,
+        file,
+        req,
+      );
 
       return {
         status: "success",

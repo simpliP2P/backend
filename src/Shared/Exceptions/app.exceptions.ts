@@ -60,7 +60,7 @@ export class UserHasOrganisation extends AppException {
       null,
     );
   }
-} 
+}
 
 export class OrganisationExists extends AppException {
   constructor(name: string) {

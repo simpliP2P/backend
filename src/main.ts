@@ -48,16 +48,16 @@ async function bootstrap() {
       "Access-Control-Allow-Headers",
       "Access-Control-Allow-Methods",
       "Access-Control-Allow-Credentials",
-      "Oid"
+      "Oid",
     ],
     credentials: true,
     maxAge: 86400,
   });
-  
+
   const reflector = app.get(Reflector);
   const tokenHelper = app.get(TokenHelper);
   app.useGlobalGuards(new AuthGuard(reflector, tokenHelper, configService));
-  
+
   app.useGlobalFilters(
     new AppExceptionFilter(),
     new ValidationExceptionFilter(),
@@ -68,7 +68,8 @@ async function bootstrap() {
       whitelist: true, // Removes properties that are not defined in the DTO
       forbidNonWhitelisted: true, // Throws an error if unknown properties are provided
       transform: true, // Automatically transforms payloads to match the DTO
-    }))
+    }),
+  );
 
   const port = configService.get<number>("port") || 3000;
   await app.listen(port);

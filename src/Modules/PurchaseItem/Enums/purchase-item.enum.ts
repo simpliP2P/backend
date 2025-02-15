@@ -1,5 +1,5 @@
 export enum PurchaseItemStatus {
-  PENDING= "PENDING",
-  APPROVED= "APPROVED",
-  REJECTED= "REJECTED",
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
 }

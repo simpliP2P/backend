@@ -60,7 +60,10 @@ import { FileManagerModule } from "src/Modules/FileManager/Modules/file-manager.
     PurchaseOrderService,
     PurchaseRequisitionService,
   ],
-  exports: [OrganisationService, OrganisationDepartmentService,
-    OrganisationBranchService,],
+  exports: [
+    OrganisationService,
+    OrganisationDepartmentService,
+    OrganisationBranchService,
+  ],
 })
 export class OrganisationModule {}

@@ -5,8 +5,12 @@ import { PurchaseRequisition } from "../Entities/purchase-requisition.entity";
 import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
 import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 import { OrganisationService } from "src/Modules/Organisation/Services/organisation.service";
-import { ICreatePurchaseRequisition, IPurchaseRequisition } from "../Types/purchase-requisition.types";
+import {
+  ICreatePurchaseRequisition,
+  IPurchaseRequisition,
+} from "../Types/purchase-requisition.types";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
+import { BudgetService } from "src/Modules/Budget/Services/budget.service";
 
 @Injectable()
 export class PurchaseRequisitionService {
@@ -76,7 +80,7 @@ export class PurchaseRequisitionService {
     }
 
     // Update requisition status and other fields
-    await this.purchaseRequisitionRepository
+    const updatedRequisition = await this.purchaseRequisitionRepository
       .createQueryBuilder()
       .update(PurchaseRequisition)
       .set({
@@ -86,12 +90,10 @@ export class PurchaseRequisitionService {
         ...request,
       })
       .where("id = :id", { id: requisition.id })
+      .returning("*")
       .execute();
 
-    // Return the updated requisition
-    return await this.purchaseRequisitionRepository.findOne({
-      where: { id: requisition.id },
-    });
+    return updatedRequisition.raw[0];
   }
 
   public async createPurchaseRequisition(
@@ -205,6 +207,7 @@ export class PurchaseRequisitionService {
       status: PurchaseRequisitionStatus;
       approved_by: any;
       approval_justification: string;
+      budget_id: string;
     },
   ): Promise<PurchaseRequisition> {
     const requisition = await this.purchaseRequisitionRepository.findOne({
@@ -218,6 +221,9 @@ export class PurchaseRequisitionService {
     requisition.status = approvalData.status;
     requisition.approved_by = approvalData.approved_by;
     requisition.approval_justification = approvalData.approval_justification;
+
+    if (approvalData.status === PurchaseRequisitionStatus.APPROVED) {
+    }
 
     return this.purchaseRequisitionRepository.save(requisition);
   }

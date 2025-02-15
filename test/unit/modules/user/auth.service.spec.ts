@@ -182,13 +182,15 @@ describe("AuthService", () => {
         profile_picture: "https://example.com/image.jpg",
         created_at: new Date(),
         updated_at: new Date(),
-        userOrganisations: [{
-          organisation: {id: 1},
-          role: "admin",
-          permissions: ["read", "write"], 
-          is_creator: true,
-          // accepted_invitation: true
-        }],
+        userOrganisations: [
+          {
+            organisation: { id: 1 },
+            role: "admin",
+            permissions: ["read", "write"],
+            is_creator: true,
+            // accepted_invitation: true
+          },
+        ],
         // last_login: null,
       };
 

@@ -111,17 +111,22 @@ export class UserService {
 
     // remove existing img from cloud
     if (user.profile_picture) {
-      const existingKey = this.fileManagerService.extractFileKey(user.profile_picture);
-      const fileKey = await this.fileManagerService.uploadFile(file, existingKey);
-      
+      const existingKey = this.fileManagerService.extractFileKey(
+        user.profile_picture,
+      );
+      const fileKey = await this.fileManagerService.uploadFile(
+        file,
+        existingKey,
+      );
+
       const imageUrl = this.fileManagerService.constructUrl(fileKey, req);
 
       user.profile_picture = imageUrl;
       await this.userRepository.save(user);
 
-      return imageUrl; 
+      return imageUrl;
     }
-    
+
     // Upload img to cloud
     const imageUrl = await this.fileManagerService.uploadFile(file);
 

@@ -124,7 +124,10 @@ export class OrganisationDepartmentService {
     return department;
   }
 
-  async findOne(organisationId: string, id: string): Promise<OrganisationDepartment> {
+  async findOne(
+    organisationId: string,
+    id: string,
+  ): Promise<OrganisationDepartment> {
     const department = await this.departmentRepo.findOne({
       where: { id, organisation: { id: organisationId } },
       relations: ["head_of_department"],

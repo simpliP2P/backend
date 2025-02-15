@@ -18,15 +18,18 @@ export class PurchaseOrder extends BaseEntity {
   total_amount: number;
 
   @IsEnum(PurchaseOrderStatus)
-    @Column({ default: PurchaseOrderStatus.PENDING })
+  @Column({ default: PurchaseOrderStatus.PENDING })
   status: string;
+
+  @Column({ nullable: true })
+  attachment: string;
 
   @ManyToOne(() => Organisation, (org) => org.purchaseOrders)
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
 
   @ManyToOne(() => Supplier, (supplier) => supplier.purchaseOrders)
-  @JoinColumn({ name: "supplier_id", })
+  @JoinColumn({ name: "supplier_id" })
   supplier: Supplier;
 
   @OneToMany(() => PurchaseItem, (item) => item.purchase_order)
@@ -36,10 +39,10 @@ export class PurchaseOrder extends BaseEntity {
   comments: Comment[];
 
   @ManyToOne(() => User, (user) => user.purchaseRequisitions)
-  @JoinColumn({ name: "created_by" }) 
+  @JoinColumn({ name: "created_by" })
   created_by: User;
 
   @ManyToOne(() => PurchaseRequisition, { nullable: true })
-  @JoinColumn({ name: "pr_id"})
+  @JoinColumn({ name: "pr_id" })
   purchase_requisition: PurchaseRequisition;
 }

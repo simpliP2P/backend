@@ -39,7 +39,7 @@ export class CreateSupplierDto {
     bank_name: string;
     account_number: number;
     account_name: string;
-  }
+  };
 }
 
 export class UpdateSupplierDto {

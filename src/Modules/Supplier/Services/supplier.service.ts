@@ -39,7 +39,7 @@ export class SuppliersService {
     let _pageSize = pageSize;
     if (isNaN(page) || page < 1) _page = 1;
     if (isNaN(pageSize) || pageSize < 1) _pageSize = 10;
-    
+
     const skip = (_page - 1) * _pageSize; // Calculate the offset
 
     const [data, total] = await this.supplierRepository.findAndCount({

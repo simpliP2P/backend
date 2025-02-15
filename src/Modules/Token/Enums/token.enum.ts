@@ -10,7 +10,7 @@ export enum TokenType {
   EMAIL_VERIFICATION = "email_verification",
   PASSWORD_RESET = "password_reset",
   ORG_INVITATION = "org_invitation",
-  REFRESH_TOKEN = "refresh_token"
+  REFRESH_TOKEN = "refresh_token",
 }
 
 export interface MetaData {

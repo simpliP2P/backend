@@ -1,4 +1,4 @@
 export enum CommentEntityType {
-    PurchaseOrder = "purchase_order",
-    Budget = "budget",
+  PurchaseOrder = "purchase_order",
+  Budget = "budget",
 }

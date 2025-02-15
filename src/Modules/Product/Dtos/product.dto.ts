@@ -1,4 +1,12 @@
-import { IsString, IsNotEmpty, IsOptional, IsDecimal, IsNumber, ValidateIf, IsUUID } from "class-validator";
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsDecimal,
+  IsNumber,
+  ValidateIf,
+  IsUUID,
+} from "class-validator";
 
 export class CreateProductDto {
   @IsString()
@@ -17,7 +25,7 @@ export class CreateProductDto {
 
   @IsNumber()
   @IsOptional()
-  stockQtyAlert : number;
+  stockQtyAlert: number;
 
   @IsUUID()
   @IsNotEmpty()

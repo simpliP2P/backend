@@ -73,9 +73,10 @@ export class OrganisationCategoryService {
       .returning("id, name")
       .execute();
 
-
     if (updateResult.affected && updateResult.affected > 0) {
-      const user = await this.userService.findAccount({ where: { id: userId } });
+      const user = await this.userService.findAccount({
+        where: { id: userId },
+      });
 
       this.auditLogService.logUpdate(
         "organisation_categories",

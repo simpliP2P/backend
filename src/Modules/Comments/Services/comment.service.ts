@@ -13,9 +13,7 @@ export class CommentService {
     private readonly commentRepository: Repository<Comment>,
   ) {}
 
-  async create(
-    createCommentDto: CreateCommentDto,
-  ): Promise<Comment> {
+  async create(createCommentDto: CreateCommentDto): Promise<Comment> {
     const comment = this.commentRepository.create({
       ...createCommentDto,
       created_by: { id: createCommentDto.created_by } as User,
@@ -36,8 +34,8 @@ export class CommentService {
           id: true,
           first_name: true,
           last_name: true,
-        }
-      }
+        },
+      },
     });
   }
 

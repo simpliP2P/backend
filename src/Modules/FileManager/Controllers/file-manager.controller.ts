@@ -10,7 +10,7 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { FileManagerService } from "../Services/upload.service";
-import { Request } from 'express';
+import { Request } from "express";
 import { Public } from "src/Shared/Decorators/custom.decorator";
 
 @Controller("files")
@@ -51,7 +51,6 @@ export class FileManagerController {
   @Public()
   @Get(":key")
   async getFile(@Param("key") key: string, @Res() res: any) {
-    
     const { stream, contentType } =
       await this.FileManagerService.getFileStream(key);
 

@@ -45,7 +45,7 @@ export class BudgetService {
         department: {
           name: true,
         },
-      }
+      },
     });
   }
 
@@ -97,11 +97,10 @@ export class BudgetService {
     }
 
     if (departmentId) {
-      const department =
-        await this.departmentService.findOne(
-          organisationId || "",
-          departmentId,
-        );
+      const department = await this.departmentService.findOne(
+        organisationId || "",
+        departmentId,
+      );
       if (!department) {
         throw new NotFoundException(
           `Department with ID ${departmentId} not found`,

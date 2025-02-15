@@ -1,4 +1,3 @@
-import { PartialType } from "@nestjs/swagger";
 import {
   IsString,
   IsNotEmpty,
@@ -45,4 +44,4 @@ export class CreateBudgetDto {
   organisationId: string;
 }
 
-export class UpdateBudgetDto extends PartialType(CreateBudgetDto) {}
+export class UpdateBudgetDto extends CreateBudgetDto {}

@@ -60,7 +60,7 @@ export class PurchaseItemService {
     const [data, total] = await this.purchaseItemRepo.findAndCount({
       where: query,
       relations: ["purchase_requisition", "purchase_order", "product"],
-       select: {
+      select: {
         purchase_requisition: {
           id: true,
           pr_number: true,
@@ -105,7 +105,7 @@ export class PurchaseItemService {
         product: {
           id: true,
         },
-      }
+      },
     });
     if (!item)
       throw new NotFoundException(`Purchase item with ID ${itemId} not found.`);
@@ -127,8 +127,7 @@ export class PurchaseItemService {
       id,
       organisation: { id: organisationId },
     });
-    if (result.affected === 0)
-      throw new NotFoundException(`Item not found.`);
+    if (result.affected === 0) throw new NotFoundException(`Item not found.`);
   }
 
   async approvePurchaseItem(

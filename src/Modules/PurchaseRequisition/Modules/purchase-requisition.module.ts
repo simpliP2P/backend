@@ -16,9 +16,6 @@ import { BudgetModule } from "src/Modules/Budget/Modules/budget.module";
     BudgetModule,
   ],
   controllers: [PurchaseRequisitionController],
-  providers: [
-    PurchaseRequisitionService,
-    UserOrganisationRepository,
-  ],
+  providers: [PurchaseRequisitionService, UserOrganisationRepository],
 })
 export class PurchaseRequisitionModule {}
