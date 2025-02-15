@@ -18,16 +18,10 @@ import {
 } from "../Dtos/auth.dto";
 import { ApiResponse } from "src/Shared/Interfaces/api-response.interface";
 import { Request, Response } from "express";
-import {
-  ApiTags,
-  ApiBody,
-  ApiResponse as SwaggerApiResponse,
-} from "@nestjs/swagger";
 import { Public } from "src/Shared/Decorators/custom.decorator";
 // import { Throttle, ThrottlerGuard } from "@nestjs/throttler";
 // import { CustomThrottlerGuard } from "src/Guards/custom-throttler.guard";
 
-@ApiTags("auth")
 @Controller("auth")
 // @UseGuards(CustomThrottlerGuard)
 export class AuthController {
@@ -35,11 +29,6 @@ export class AuthController {
 
   @Post("signup")
   @Public()
-  @ApiBody({ type: SignUpDto })
-  @SwaggerApiResponse({
-    status: 201,
-    description: "User signed up successfully",
-  })
   // @Throttle({ default: { limit: 1, ttl: 60 } }) // 1 request per minute
   async signUp(@Body() signUpDto: SignUpDto): Promise<ApiResponse<{}>> {
     try {
@@ -57,7 +46,6 @@ export class AuthController {
 
   @Post("login")
   @Public()
-  @ApiBody({ type: loginDto })
   // @Throttle({ default: { limit: 5, ttl: 60 } })
   async login(
     @Body() loginDto: loginDto,
@@ -92,7 +80,6 @@ export class AuthController {
 
   @Post("verify-email")
   @Public()
-  @ApiBody({ type: verifyEmailDto })
   async verifyEmail(@Body() body: verifyEmailDto): Promise<ApiResponse<{}>> {
     try {
       await this.authService.verifyEmail(body.token);
@@ -109,7 +96,6 @@ export class AuthController {
 
   @Post("initiate-reset-password")
   @Public()
-  @ApiBody({ type: initiateResetPasswordDto })
   async initiateResetPassword(
     @Body() body: initiateResetPasswordDto,
   ): Promise<ApiResponse<{}>> {
@@ -128,7 +114,6 @@ export class AuthController {
 
   @Post("reset-password")
   @Public()
-  @ApiBody({ type: resetPasswordDto })
   async resetPassword(
     @Body() body: resetPasswordDto,
   ): Promise<ApiResponse<{}>> {

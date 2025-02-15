@@ -1,5 +1,4 @@
 import { NestFactory } from "@nestjs/core";
-import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
 import { AppExceptionFilter } from "./Shared/Filters/exception.filter";
 import { AppLogger } from "./Logger/logger.service";
@@ -21,15 +20,6 @@ async function bootstrap() {
 
   // Set the logger as the application's logger
   app.useLogger(logger);
-
-  const config = new DocumentBuilder()
-    .setTitle("Simplip2p")
-    .setDescription("The simplip2p API documentation")
-    .setVersion("1.0")
-    .addTag("procurement")
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup("api", app, document);
 
   // Database connection status
   const dbConnSuccess = "Successfully connected to the database";
