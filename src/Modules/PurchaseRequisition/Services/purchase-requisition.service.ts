@@ -1,6 +1,13 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { In, Not, Repository } from "typeorm";
+import {
+  Between,
+  In,
+  LessThanOrEqual,
+  MoreThanOrEqual,
+  Not,
+  Repository,
+} from "typeorm";
 import { PurchaseRequisition } from "../Entities/purchase-requisition.entity";
 import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
 import { OrganisationService } from "src/Modules/Organisation/Services/organisation.service";
@@ -120,6 +127,8 @@ export class PurchaseRequisitionService {
     pageSize: number = 10,
     organisationId: string,
     status: PurchaseRequisitionStatus,
+    startDate?: string,
+    endDate?: string,
   ) {
     let _page = page;
     let _pageSize = pageSize;
@@ -130,15 +139,26 @@ export class PurchaseRequisitionService {
 
     const skip = (_page - 1) * _pageSize;
 
-    const whereCondition: any = {
+    const whereConditions: any = {
       organisation: { id: organisationId },
     };
 
+    if (startDate && endDate) {
+      whereConditions.created_at = Between(
+        new Date(startDate),
+        new Date(endDate),
+      );
+    } else if (startDate) {
+      whereConditions.created_at = MoreThanOrEqual(new Date(startDate));
+    } else if (endDate) {
+      whereConditions.created_at = LessThanOrEqual(new Date(endDate));
+    }
+
     // Handle status condition
     if (status) {
-      whereCondition.status = status;
+      whereConditions.status = status;
     } else {
-      whereCondition.status = Not(
+      whereConditions.status = Not(
         In([
           PurchaseRequisitionStatus.SAVED_FOR_LATER,
           PurchaseRequisitionStatus.INITIALIZED,
@@ -148,7 +168,7 @@ export class PurchaseRequisitionService {
 
     const [requisitions, total] =
       await this.purchaseRequisitionRepository.findAndCount({
-        where: whereCondition,
+        where: whereConditions,
         take: _pageSize,
         skip,
         relations: ["created_by", "items", "department", "branch"],
@@ -163,6 +183,12 @@ export class PurchaseRequisitionService {
           branch: {
             name: true,
           },
+          items: {
+            item_name: true,
+            unit_price: true,
+            pr_quantity: true,
+            po_quantity: true,
+          }
         },
       });
 

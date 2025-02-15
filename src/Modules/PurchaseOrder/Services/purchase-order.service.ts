@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Repository, Between, MoreThanOrEqual, LessThanOrEqual } from "typeorm";
 import { PurchaseOrder } from "../Entities/purchase-order.entity";
 import { Organisation } from "src/Modules/Organisation/Entities/organisation.entity";
 import { OrganisationService } from "src/Modules/Organisation/Services/organisation.service";
@@ -87,6 +87,8 @@ export class PurchaseOrderService {
     organisationId: string,
     page: number = 1,
     pageSize: number = 10,
+    startDate?: string,
+    endDate?: string,
   ): Promise<{
     orders: PurchaseOrder[];
     metadata: {
@@ -103,8 +105,23 @@ export class PurchaseOrderService {
 
     const skip = (_page - 1) * _pageSize;
 
+    const whereConditions: any = {
+      organisation: { id: organisationId },
+    };
+
+    if (startDate && endDate) {
+      whereConditions.created_at = Between(
+        new Date(startDate),
+        new Date(endDate),
+      );
+    } else if (startDate) {
+      whereConditions.created_at = MoreThanOrEqual(new Date(startDate));
+    } else if (endDate) {
+      whereConditions.created_at = LessThanOrEqual(new Date(endDate));
+    }
+
     const [orders, total] = await this.purchaseOrderRepository.findAndCount({
-      where: { organisation: { id: organisationId } },
+      where: whereConditions,
       take: _pageSize,
       skip,
       relations: ["supplier", "purchase_requisition"],
