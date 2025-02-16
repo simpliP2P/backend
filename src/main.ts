@@ -9,6 +9,7 @@ import { ValidationExceptionFilter } from "./Shared/Filters/validation-exception
 import { AuthGuard } from "./Guards/auth.guard";
 import { Reflector } from "@nestjs/core";
 import { TokenHelper } from "./Shared/Helpers/token.helper";
+import * as helmet from "helmet";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -53,6 +54,8 @@ async function bootstrap() {
     credentials: true,
     maxAge: 86400,
   });
+
+  app.use(helmet.default());
 
   const reflector = app.get(Reflector);
   const tokenHelper = app.get(TokenHelper);
