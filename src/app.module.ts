@@ -1,5 +1,6 @@
 import { Module, NestModule } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { BullModule } from "@nestjs/bullmq"; // Import BullMQ
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { AuthModule } from "./Modules/User/Modules/auth.module";
@@ -17,13 +18,25 @@ import { CommentModule } from "./Modules/Comments/Modules/comment.module";
 import { PurchaseRequisitionModule } from "./Modules/PurchaseRequisition/Modules/purchase-requisition.module";
 import { PurchaseItemModule } from "./Modules/PurchaseItem/Modules/purchase-item.module";
 import { FileManagerModule } from "./Modules/FileManager/Modules/file-manager.module";
+import { ExportModule } from "./Modules/ExportData/Modules/export.module";
+
 @Module({
-  // Declares external modules that this module depends on
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
       cache: true,
+    }),
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        connection: {
+          host: configService.get<string>("REDIS_HOST", "127.0.0.1"),
+          port: configService.get<number>("REDIS_PORT", 6379),
+          password: configService.get<string>("REDIS_PASSWORD", ""),
+        },
+      }),
+      inject: [ConfigService],
     }),
     DatabaseModule,
     AuthModule,
@@ -33,10 +46,9 @@ import { FileManagerModule } from "./Modules/FileManager/Modules/file-manager.mo
     PurchaseRequisitionModule,
     PurchaseItemModule,
     FileManagerModule,
+    ExportModule,
   ],
-  // Defines the controllers for this module.
   controllers: [AppController],
-  // Declares the services that are available in this module
   providers: [
     {
       provide: APP_INTERCEPTOR,

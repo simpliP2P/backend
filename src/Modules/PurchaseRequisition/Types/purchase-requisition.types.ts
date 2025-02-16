@@ -28,3 +28,13 @@ export interface ICreatePurchaseRequisition {
   justification: string;
   needed_by_date: Date;
 }
+
+export interface IGetAllPurchaseRequisitionInput {
+  organisationId: string;
+  status?: PurchaseRequisitionStatus;
+  page?: number;
+  pageSize?: number;
+  startDate?: string;
+  endDate?: string;
+  exportAll?: boolean;
+}

@@ -13,6 +13,7 @@ import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
 import { OrganisationService } from "src/Modules/Organisation/Services/organisation.service";
 import {
   ICreatePurchaseRequisition,
+  IGetAllPurchaseRequisitionInput,
   IPurchaseRequisition,
 } from "../Types/purchase-requisition.types";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
@@ -122,22 +123,25 @@ export class PurchaseRequisitionService {
     );
   }
 
-  public async getAllPurchaseRequisitions(
-    page: number = 1,
-    pageSize: number = 10,
-    organisationId: string,
-    status: PurchaseRequisitionStatus,
-    startDate?: string,
-    endDate?: string,
-  ) {
-    let _page = page;
-    let _pageSize = pageSize;
-
-    // Validate page and pageSize
-    if (isNaN(page) || page < 1) _page = 1;
-    if (isNaN(pageSize) || pageSize < 1) _pageSize = 10;
-
-    const skip = (_page - 1) * _pageSize;
+  public async getAllPurchaseRequisitions({
+    organisationId,
+    status,
+    page,
+    pageSize,
+    startDate,
+    endDate,
+    exportAll = false,
+  }: IGetAllPurchaseRequisitionInput): Promise<{
+    requisitions: PurchaseRequisition[];
+    metadata: {
+      total: number;
+      page: number;
+      pageSize: number;
+      totalPages: number;
+    };
+  }> {
+    let _page = page && page > 0 ? page : 1;
+    let _pageSize = pageSize && pageSize > 0 ? pageSize : 10;
 
     const whereConditions: any = {
       organisation: { id: organisationId },
@@ -166,31 +170,37 @@ export class PurchaseRequisitionService {
       );
     }
 
-    const [requisitions, total] =
-      await this.purchaseRequisitionRepository.findAndCount({
-        where: whereConditions,
-        take: _pageSize,
-        skip,
-        relations: ["created_by", "items", "department", "branch"],
-        select: {
-          created_by: {
-            first_name: true,
-            id: true,
-          },
-          department: {
-            name: true,
-          },
-          branch: {
-            name: true,
-          },
-          items: {
-            item_name: true,
-            unit_price: true,
-            pr_quantity: true,
-            po_quantity: true,
-          }
+    // Build query options
+    const queryOptions: any = {
+      where: whereConditions,
+      relations: ["created_by", "items", "department", "branch"],
+      select: {
+        created_by: {
+          first_name: true,
         },
-      });
+        department: {
+          name: true,
+        },
+        branch: {
+          name: true,
+        },
+        items: {
+          item_name: true,
+          unit_price: true,
+          pr_quantity: true,
+          po_quantity: true,
+        },
+      },
+    };
+
+    // Enforce pagination for normal API calls, bypass when exporting
+    if (!exportAll) {
+      queryOptions.take = _pageSize;
+      queryOptions.skip = (_page - 1) * _pageSize;
+    }
+
+    const [requisitions, total] =
+      await this.purchaseRequisitionRepository.findAndCount(queryOptions);
 
     return {
       requisitions,

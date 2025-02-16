@@ -48,6 +48,7 @@ import { CreatePurchaseOrderDto } from "src/Modules/PurchaseOrder/Dtos/purchase-
 import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
 import { OrganisationCategoryService } from "../Services/organisation-category.service";
 import { OrganisationDepartment } from "../Entities/organisation-department.entity";
+import { PurchaseOrderStatus } from "src/Modules/PurchaseOrder/Enums/purchase-order.enum";
 
 @Controller("organisations")
 export class OrganisationController {
@@ -729,7 +730,7 @@ export class OrganisationController {
     @Query("page") page: number,
     @Query("pageSize") pageSize: number,
     @Query("startDate") startDate: string,
-    @Query("endDate") endDate: string
+    @Query("endDate") endDate: string,
   ) {
     try {
       const isValidStatus =
@@ -746,14 +747,14 @@ export class OrganisationController {
       }
 
       const data =
-        await this.purchaseRequisitionService.getAllPurchaseRequisitions(
+        await this.purchaseRequisitionService.getAllPurchaseRequisitions({
+          organisationId,
+          status: status as PurchaseRequisitionStatus,
           page,
           pageSize,
-          organisationId,
-          status as PurchaseRequisitionStatus,
           startDate,
           endDate,
-        );
+        });
 
       return {
         status: "success",
@@ -944,15 +945,17 @@ export class OrganisationController {
     @Query("pageSize") pageSize: number,
     @Query("startDate") startDate: string,
     @Query("endDate") endDate: string,
+    @Query("status") status: PurchaseOrderStatus,
   ) {
     try {
-      const orders = await this.purchaseOrderService.getOrganisationOrders(
+      const orders = await this.purchaseOrderService.getOrganisationOrders({
         organisationId,
         page,
         pageSize,
         startDate,
         endDate,
-      );
+        status,
+      });
 
       return {
         status: "success",

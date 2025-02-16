@@ -13,14 +13,13 @@ export class FileManagerService {
   private region: string;
 
   constructor(private configService: ConfigService) {
-    this.bucketName = this.configService.get<string>("aws.bucketName") || "";
-    this.region = this.configService.get<string>("aws.region") || "";
+    this.bucketName = this.configService.get<string>("aws.bucketName")!;
+    this.region = this.configService.get<string>("aws.region")!;
 
     this.s3 = new S3Client({
       credentials: {
-        accessKeyId: this.configService.get<string>("aws.accessKeyId") || "",
-        secretAccessKey:
-          this.configService.get<string>("aws.secretAccessKey") || "",
+        accessKeyId: this.configService.get<string>("aws.accessKeyId")!,
+        secretAccessKey: this.configService.get<string>("aws.secretAccessKey")!,
       },
       region: this.region,
     });
@@ -30,11 +29,7 @@ export class FileManagerService {
     file: Express.Multer.File,
     existingKey?: string,
   ): Promise<string> {
-    if (!this.bucketName) {
-      throw new Error("AWS Bucket name is not defined");
-    }
-
-    const fileKey = existingKey || randomUUID().replace(/-/g, "");
+    const fileKey = existingKey || this.generateFileKey();
 
     const params = {
       Bucket: this.bucketName,
@@ -55,7 +50,6 @@ export class FileManagerService {
 
       return fileKey;
     } catch (error) {
-      console.log(error);
       throw new Error(`Failed to upload file to S3: ${error.message}`);
     }
   }
@@ -86,6 +80,10 @@ export class FileManagerService {
 
   public constructUrl(fileKey: string, req: Request): string {
     return `${req.protocol}://${req.get("host")}/files/${fileKey}`;
+  }
+
+  public generateFileKey() {
+    return randomUUID().replace(/-/g, "");
   }
 
   public extractFileKey(url: string): string {

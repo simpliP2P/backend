@@ -8,7 +8,10 @@ import { Repository, Between, MoreThanOrEqual, LessThanOrEqual } from "typeorm";
 import { PurchaseOrder } from "../Entities/purchase-order.entity";
 import { Organisation } from "src/Modules/Organisation/Entities/organisation.entity";
 import { OrganisationService } from "src/Modules/Organisation/Services/organisation.service";
-import { IPurchaseOrder } from "../Types/purchase-order.types";
+import {
+  IGetAllPurchaseOrdersInput,
+  IPurchaseOrder,
+} from "../Types/purchase-order.types";
 import { SuppliersService } from "src/Modules/Supplier/Services/supplier.service";
 import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchase-requisition.service";
@@ -83,13 +86,15 @@ export class PurchaseOrderService {
    */
   async getAllPendingOrders() {}
 
-  async getOrganisationOrders(
-    organisationId: string,
-    page: number = 1,
-    pageSize: number = 10,
-    startDate?: string,
-    endDate?: string,
-  ): Promise<{
+  async getOrganisationOrders({
+    organisationId,
+    status,
+    page,
+    pageSize,
+    startDate,
+    endDate,
+    exportAll = false,
+  }: IGetAllPurchaseOrdersInput): Promise<{
     orders: PurchaseOrder[];
     metadata: {
       total: number;
@@ -98,12 +103,8 @@ export class PurchaseOrderService {
       totalPages: number;
     };
   }> {
-    let _page = page;
-    let _pageSize = pageSize;
-    if (isNaN(page) || page < 1) _page = 1;
-    if (isNaN(pageSize) || pageSize < 1) _pageSize = 10;
-
-    const skip = (_page - 1) * _pageSize;
+    let _page = page && page > 0 ? page : 1;
+    let _pageSize = pageSize && pageSize > 0 ? pageSize : 10;
 
     const whereConditions: any = {
       organisation: { id: organisationId },
@@ -120,19 +121,31 @@ export class PurchaseOrderService {
       whereConditions.created_at = LessThanOrEqual(new Date(endDate));
     }
 
-    const [orders, total] = await this.purchaseOrderRepository.findAndCount({
+    // Handle status condition
+    if (status) {
+      whereConditions.status = status;
+    }
+
+    // Build query options
+    const queryOptions: any = {
       where: whereConditions,
-      take: _pageSize,
-      skip,
       relations: ["supplier", "purchase_requisition"],
       select: {
         supplier: {
-          id: true,
           full_name: true,
           category: true,
         },
       },
-    });
+    };
+
+    // Enforce pagination for normal API calls, bypass when exporting
+    if (!exportAll) {
+      queryOptions.take = _pageSize;
+      queryOptions.skip = (_page - 1) * _pageSize;
+    }
+
+    const [orders, total] =
+      await this.purchaseOrderRepository.findAndCount(queryOptions);
 
     return {
       orders,
@@ -154,7 +167,6 @@ export class PurchaseOrderService {
       relations: ["supplier", "purchase_requisition"],
       select: {
         supplier: {
-          id: true,
           full_name: true,
           category: true,
         },
