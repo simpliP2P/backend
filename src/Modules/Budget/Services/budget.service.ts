@@ -85,7 +85,7 @@ export class BudgetService {
 
     if (branchId) {
       const branch = await this.branchService.findOne(
-        organisationId || "",
+        organisationId!,
         branchId,
       );
       if (!branch) {
@@ -96,7 +96,7 @@ export class BudgetService {
 
     if (departmentId) {
       const department = await this.departmentService.findOne(
-        organisationId || "",
+        organisationId!,
         departmentId,
       );
       if (!department) {
