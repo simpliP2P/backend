@@ -31,9 +31,9 @@ import { ExportModule } from "./Modules/ExportData/Modules/export.module";
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         connection: {
-          host: configService.get<string>("REDIS_HOST", "127.0.0.1"),
-          port: configService.get<number>("REDIS_PORT", 6379),
-          password: configService.get<string>("REDIS_PASSWORD", ""),
+          host: configService.get<string>("redis.host"),
+          port: configService.get<number>("redis.port"),
+          password: configService.get<string>("redis.password"),
         },
       }),
       inject: [ConfigService],
