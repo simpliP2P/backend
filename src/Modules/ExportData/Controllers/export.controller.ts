@@ -16,7 +16,6 @@ import { Request, Response } from "express";
 import { ExportFileType } from "../Enums/export.enum";
 import { ExportHelper } from "src/Shared/Helpers/export.helper";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
-import { Public } from "src/Shared/Decorators/custom.decorator";
 import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
 
 @Controller("organisations/:organisationId/export")
@@ -30,7 +29,6 @@ export class ExportController {
     private readonly purchaseOrderService: PurchaseOrderService,
   ) {}
 
-  @Public()
   @Get("requisitions")
   @SetMetadata("permissions", [
     PermissionType.OWNER,
@@ -42,14 +40,14 @@ export class ExportController {
     @Query("format") format: ExportFileType,
     @Query("startDate") startDate: string,
     @Query("endDate") endDate: string,
-    @Req() _: Request,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
     if (!format || !startDate || !endDate) {
       throw new BadRequestException("Missing required query parameters");
     }
 
-    const userId = `req.user.sub`;
+    const userId = req.user.sub;
 
     const { requisitions } =
       await this.purchaseRequisitionService.getAllPurchaseRequisitions({
@@ -118,7 +116,6 @@ export class ExportController {
     }
   }
 
-  @Public()
   @Get("orders")
   @SetMetadata("permissions", [
     PermissionType.OWNER,
@@ -130,14 +127,14 @@ export class ExportController {
     @Query("format") format: ExportFileType,
     @Query("startDate") startDate: string,
     @Query("endDate") endDate: string,
-    @Req() _: Request,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
     if (!format || !startDate || !endDate) {
       throw new BadRequestException("Missing required query parameters");
     }
 
-    const userId = `req.user.sub`;
+    const userId = req.user.sub;
 
     const { orders } = await this.purchaseOrderService.getOrganisationOrders({
       organisationId,
@@ -146,7 +143,7 @@ export class ExportController {
       exportAll: true,
     });
 
-    // Remove `id` field from each requisition
+    // Remove `id` field from each order
     const sanitizedOrders = orders.map(({ id, ...rest }) => rest);
 
     switch (format) {
