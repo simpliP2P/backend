@@ -26,8 +26,15 @@ export class SuppliersService {
 
       return await this.supplierRepository.save(supplier);
     } catch (error) {
+      console.log(error);
       if (error.code === "23505") {
         throw new SupplierExists();
+      } else if (error.code === "23503") {
+        throw new NotFoundException(
+          `Category with ID ${category} does not exist`,
+        );
+      } else {
+        throw new Error(error.message);
       }
     }
   }
@@ -49,6 +56,11 @@ export class SuppliersService {
       relations: ["category"],
       take: _pageSize, // Limit the number of results
       skip, // Skip the previous results
+      select: {
+        category: {
+          name: true,
+        }
+      }
     });
 
     return {
