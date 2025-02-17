@@ -16,10 +16,12 @@ export class SuppliersService {
     createSupplierDto: CreateSupplierDto,
     organisationId: string,
   ) {
+    const { category, ...otherDetails } = createSupplierDto;
     try {
       const supplier = this.supplierRepository.create({
-        ...createSupplierDto,
+        ...otherDetails,
         organisation: { id: organisationId },
+        category: { id: category },
       });
 
       return await this.supplierRepository.save(supplier);
@@ -44,6 +46,7 @@ export class SuppliersService {
 
     const [data, total] = await this.supplierRepository.findAndCount({
       where: { organisation: { id: organisationId } },
+      relations: ["category"],
       take: _pageSize, // Limit the number of results
       skip, // Skip the previous results
     });
@@ -89,15 +92,12 @@ export class SuppliersService {
     );
 
     if (!supplier) {
-      throw new NotFoundException(`Supplier with ID ${supplierId} not found`);
+      throw new NotFoundException(`Supplier not found`);
     }
 
-    const updatedSupplier = await this.supplierRepository.save({
-      ...supplier,
-      ...updateSupplierDto,
-    });
+    Object.assign(supplier, updateSupplierDto);
 
-    return updatedSupplier;
+    return await this.supplierRepository.save(supplier);
   }
 
   public async removeSupplier(supplierId: string, organisationId: string) {

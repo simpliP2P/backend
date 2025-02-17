@@ -111,6 +111,11 @@ export class ProductService {
       organisationId,
       productId,
     );
+
+    if (!product) {
+      throw new NotFoundException(`Product not found`);
+
+    }
     Object.assign(product, updateProductDto);
     return this.productRepository.save(product);
   }

@@ -5,6 +5,7 @@ import {
   IsNumber,
   Min,
   Max,
+  IsUUID,
 } from "class-validator";
 
 export class CreateSupplierDto {
@@ -23,7 +24,7 @@ export class CreateSupplierDto {
   @IsOptional()
   address?: string;
 
-  @IsString()
+  @IsUUID()
   @IsOptional()
   category?: string;
 
@@ -58,7 +59,7 @@ export class UpdateSupplierDto {
   @IsOptional()
   address?: string;
 
-  @IsString()
+  @IsUUID()
   @IsOptional()
   category?: string;
 

@@ -4,6 +4,7 @@ import { IsEmail } from "class-validator";
 import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order.entity";
 import { BaseEntity } from "src/Common/entities/base.entity";
 import { BankDetails, SupplierMetadata } from "../Types/supplier.types";
+import { OrganisationCategory } from "src/Modules/Organisation/Entities/organisation-category.entity";
 
 @Entity("suppliers")
 export class Supplier extends BaseEntity {
@@ -20,8 +21,9 @@ export class Supplier extends BaseEntity {
   @Column({ type: "varchar", nullable: true })
   address: string;
 
-  @Column({ length: 100, nullable: true })
-  category: string;
+  @ManyToOne(() => OrganisationCategory)
+  @JoinColumn({ name: "category_id" })
+  category: OrganisationCategory;
 
   @Column({ type: "decimal", precision: 2, scale: 1, default: 0.0 })
   rating: number;
