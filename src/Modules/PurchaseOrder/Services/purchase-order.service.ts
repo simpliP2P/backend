@@ -165,7 +165,7 @@ export class PurchaseOrderService {
     const order = await this.purchaseOrderRepository.findOne({
       where: { organisation: { id: organisationId }, id: orderId },
       relations: ["supplier", "purchase_requisition"],
-       select: {
+      select: {
         supplier: {
           full_name: true,
           category: {
