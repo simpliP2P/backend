@@ -59,7 +59,7 @@ async function bootstrap() {
 
   const reflector = app.get(Reflector);
   const tokenHelper = app.get(TokenHelper);
-  app.useGlobalGuards(new AuthGuard(reflector, tokenHelper, configService));
+  app.useGlobalGuards(new AuthGuard(reflector, tokenHelper,));
 
   app.useGlobalFilters(
     new AppExceptionFilter(),
