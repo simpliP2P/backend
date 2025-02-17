@@ -223,11 +223,22 @@ export class PurchaseRequisitionService {
         id: requisitionId,
         status: Not(PurchaseRequisitionStatus.SAVED_FOR_LATER),
       },
-      relations: ["created_by", "items"],
+      relations: ["created_by", "items", "department", "branch"],
       select: {
         created_by: {
           first_name: true,
-          id: true,
+        },
+        department: {
+          name: true,
+        },
+        branch: {
+          name: true,
+        },
+        items: {
+          item_name: true,
+          unit_price: true,
+          pr_quantity: true,
+          po_quantity: true,
         },
       },
     });
