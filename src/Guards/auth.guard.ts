@@ -3,10 +3,10 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
-  ForbiddenException,
+  // ForbiddenException,
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { ConfigService } from "@nestjs/config";
+// import { ConfigService } from "@nestjs/config";
 import { TokenHelper } from "src/Shared/Helpers/token.helper";
 
 @Injectable()
@@ -14,7 +14,7 @@ export class AuthGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private tokenHelper: TokenHelper,
-    private configService: ConfigService,
+    // private configService: ConfigService,
   ) {}
 
   canActivate(context: ExecutionContext): boolean {
@@ -28,6 +28,7 @@ export class AuthGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
 
+    /*
     const isProdEnv = this.configService.get<string>("isAppInProduction");
     const stagingClient = this.configService.get<string>(
       "clients.staging.landingPage",
@@ -49,6 +50,7 @@ export class AuthGuard implements CanActivate {
         throw new ForbiddenException("Access denied");
       }
     }
+    */
 
     const token = request.headers["authorization"]?.split(" ")[1]; // Extract JWT token
 
