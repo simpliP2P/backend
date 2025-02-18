@@ -13,7 +13,7 @@ export default () => ({
   tokenSecrets: {
     accessToken: {
       secret: process.env.ACCESS_TOKEN_SECRET || "hgjfj",
-      expiresIn: "1h",
+      expiresIn: "500h",
     },
     resetToken: { secret: process.env.RESET_TOKEN_SECRET, expiresIn: "6h" },
     verificationToken: {
@@ -62,5 +62,10 @@ export default () => ({
     bucketName: process.env.AWS_S3_BUCKET_NAME,
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+  redis: {
+    host: process.env.REDIS_HOST,
+    port: parseInt(process.env.REDIS_PORT || "6379", 10),
+    password: process.env.REDIS_PASSWORD,
   },
 });
