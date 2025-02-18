@@ -31,7 +31,6 @@ export class CommentService {
       relations: ["created_by"],
       select: {
         created_by: {
-          id: true,
           first_name: true,
           last_name: true,
         },
@@ -45,7 +44,6 @@ export class CommentService {
       relations: ["created_by"],
       select: {
         created_by: {
-          id: true,
           first_name: true,
           last_name: true,
         },
