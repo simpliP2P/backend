@@ -59,8 +59,8 @@ export class SuppliersService {
       select: {
         category: {
           name: true,
-        }
-      }
+        },
+      },
     });
 
     return {

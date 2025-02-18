@@ -181,6 +181,10 @@ export class PurchaseOrderService {
     return order;
   }
 
+  async count(query: any) {
+    return this.purchaseOrderRepository.count(query);
+  }
+
   private async generatePoNumber(organisationId: string): Promise<string> {
     const now = new Date();
     const yy = String(now.getFullYear()).slice(-2);
