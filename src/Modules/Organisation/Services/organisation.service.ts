@@ -25,12 +25,12 @@ import { TokenService } from "src/Modules/Token/Services/token.service";
 import { TokenType } from "src/Modules/Token/Enums/token.enum";
 import { AppLogger } from "src/Logger/logger.service";
 import { SuppliersService } from "src/Modules/Supplier/Services/supplier.service";
-import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
 import { ProductService } from "src/Modules/Product/Services/product.service";
 import { FileManagerService } from "src/Modules/FileManager/Services/upload.service";
 import { ConfigService } from "@nestjs/config";
 import { createHash } from "crypto";
 import { AuditLogsService } from "src/Modules/AuditLogs/Services/audit-logs.service";
+import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order.entity";
 
 @Injectable()
 export class OrganisationService {
@@ -41,11 +41,13 @@ export class OrganisationService {
     @InjectRepository(UserOrganisation)
     private userOrganisationRepository: Repository<UserOrganisation>,
 
+    @InjectRepository(PurchaseOrder)
+    private purchaseOrderRepository: Repository<PurchaseOrder>,
+
     private readonly userService: UserService,
     private readonly emailService: EmailServices,
     private readonly tokenService: TokenService,
     private readonly supplierService: SuppliersService,
-    private readonly purchaseOrderService: PurchaseOrderService,
     private readonly productService: ProductService,
     private readonly fileManagerService: FileManagerService,
     private readonly clientHelper: ClientHelper,
@@ -196,7 +198,7 @@ export class OrganisationService {
       where: { organisation: { id: organisationId } },
     });
 
-    const pendingPurchaseOrders = await this.purchaseOrderService.count({
+    const pendingPurchaseOrders = await this.purchaseOrderRepository.count({
       where: { organisation: { id: organisationId }, status: "PENDING" },
     });
 
