@@ -993,6 +993,41 @@ export class OrganisationController {
     }
   }
 
+  @Patch(":organisationId/orders/:orderId/status")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_PURCHASE_ORDERS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async updateOrderStatus(
+    @Param("organisationId") organisationId: string,
+    @Param("orderId") orderId: string,
+    @Body() data: { status: PurchaseOrderStatus },
+  ) {
+    try {
+      if (
+        !Object.values(PurchaseOrderStatus).includes(data.status) ||
+        data.status === PurchaseOrderStatus.PENDING
+      ) {
+        throw new BadRequestException("Invalid status");
+      }
+
+      const order = await this.purchaseOrderService.updateOrderStatus(
+        organisationId,
+        orderId,
+        data.status,
+      );
+
+      return {
+        status: "success",
+        message: "Order status updated successfully",
+        data: order,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   /**
    * Products routes
    */

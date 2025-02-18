@@ -181,6 +181,24 @@ export class PurchaseOrderService {
     return order;
   }
 
+  public async updateOrderStatus(
+    organisationId: string,
+    orderId: string,
+    status: string,
+  ): Promise<PurchaseOrder> {
+    const order = await this.purchaseOrderRepository.findOne({
+      where: { organisation: { id: organisationId }, id: orderId },
+    });
+
+    if (!order) {
+      throw new NotFoundException("Purchase order not found");
+    }
+
+    order.status = status;
+
+    return await this.purchaseOrderRepository.save(order);
+  }
+
   public async count(query: any) {
     return this.purchaseOrderRepository.count(query);
   }
