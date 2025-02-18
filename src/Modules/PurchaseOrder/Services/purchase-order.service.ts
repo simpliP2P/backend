@@ -32,7 +32,7 @@ export class PurchaseOrderService {
     private readonly purchaseRequisitionService: PurchaseRequisitionService,
   ) {}
 
-  async create(
+  public async create(
     organisationId: string,
     data: Partial<IPurchaseOrder>,
   ): Promise<Partial<PurchaseOrder>> {
@@ -84,9 +84,9 @@ export class PurchaseOrderService {
   /**
    * Pending orders will be approved requisitions that have not been converted to purchase orders
    */
-  async getAllPendingOrders() {}
+  public async getAllPendingOrders() {}
 
-  async getOrganisationOrders({
+  public async getOrganisationOrders({
     organisationId,
     status,
     page,
@@ -158,7 +158,7 @@ export class PurchaseOrderService {
     };
   }
 
-  async getOrganisationOrderById(
+  public async getOrganisationOrderById(
     organisationId: string,
     orderId: string,
   ): Promise<PurchaseOrder> {
@@ -181,7 +181,7 @@ export class PurchaseOrderService {
     return order;
   }
 
-  async count(query: any) {
+  public async count(query: any) {
     return this.purchaseOrderRepository.count(query);
   }
 
