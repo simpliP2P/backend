@@ -79,7 +79,10 @@ export class PurchaseRequisitionService {
       throw new NotFoundException("Purchase Requisition not found");
     }
 
-    if (requisition.status !== PurchaseRequisitionStatus.INITIALIZED) {
+    if (
+      requisition.status !== PurchaseRequisitionStatus.INITIALIZED &&
+      requisition.status !== PurchaseRequisitionStatus.SAVED_FOR_LATER
+    ) {
       throw new BadRequestException(
         "Purchase Requisition has already been finalized",
       );
