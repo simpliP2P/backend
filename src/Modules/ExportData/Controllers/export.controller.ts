@@ -60,6 +60,10 @@ export class ExportController {
     // Remove `id` field from each requisition
     const sanitizedRequisitions = requisitions.map(({ id, ...rest }) => rest);
 
+    if (sanitizedRequisitions.length === 0) {
+      throw new BadRequestException("No requisitions found");
+    }
+
     switch (format) {
       case ExportFileType.CSV:
         if (requisitions.length > this.DATA_THRESHOLD) {
@@ -146,9 +150,13 @@ export class ExportController {
     // Remove `id` field from each order
     const sanitizedOrders = orders.map(({ id, ...rest }) => rest);
 
+    if (sanitizedOrders.length === 0) {
+      throw new BadRequestException("No orders found");
+    }
+
     switch (format) {
       case ExportFileType.CSV:
-        if (orders.length > 1) {
+        if (orders.length > this.DATA_THRESHOLD) {
           await this.exportService.addExportJob(
             userId,
             sanitizedOrders,
