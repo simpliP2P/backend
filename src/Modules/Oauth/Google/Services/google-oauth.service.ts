@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import {
   GoogleClientConfig,
   TokenPayload,
-} from "../../../../Infrastructure/Oauth/googleOauth.config";
+} from "../../../../Infrastructure/Oauth/google-oauth.config";
 import { ProviderType } from "src/Modules/User/Enums/user.enum";
 import { CreateGoogleAccountInput } from "src/Modules/User/Types/user.types";
 import { UserService } from "src/Modules/User/Services/user.service";
