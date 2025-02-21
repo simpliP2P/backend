@@ -212,6 +212,7 @@ export class UserService {
             name: true,
             logo: true,
           },
+          permissions: true,
         },
       },
     });
