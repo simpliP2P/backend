@@ -17,6 +17,7 @@ import {
   IPurchaseRequisition,
 } from "../Types/purchase-requisition.types";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
+import { BudgetService } from "src/Modules/Budget/Services/budget.service";
 
 @Injectable()
 export class PurchaseRequisitionService {
@@ -24,6 +25,8 @@ export class PurchaseRequisitionService {
     @InjectRepository(PurchaseRequisition)
     private readonly purchaseRequisitionRepository: Repository<PurchaseRequisition>,
     private readonly organisationService: OrganisationService,
+
+    private readonly budgetService: BudgetService,
   ) {}
 
   public async checkForUnCompletedRequisition(userId: string) {
@@ -265,14 +268,29 @@ export class PurchaseRequisitionService {
       throw new NotFoundException("Purchase Requisition not found");
     }
 
-    requisition.status = approvalData.status;
-    requisition.approved_by = approvalData.approved_by;
-    requisition.approval_justification = approvalData.approval_justification;
+    const updatedRequisition = await this.purchaseRequisitionRepository
+      .createQueryBuilder()
+      .update(PurchaseRequisition)
+      .set({
+        status: approvalData.status,
+        approved_by: approvalData.approved_by,
+        approval_justification: approvalData.approval_justification,
+        budget: { id: approvalData.budget_id },
+      })
+      .where("id = :id", { id: requisition.id })
+      .returning("*")
+      .execute();
 
     if (approvalData.status === PurchaseRequisitionStatus.APPROVED) {
+      // Update budget reserved
+      await this.budgetService.reserveAmount(
+        organisationId,
+        approvalData.budget_id,
+        requisition.estimated_cost,
+      );
     }
 
-    return this.purchaseRequisitionRepository.save(requisition);
+    return updatedRequisition.raw[0];
   }
 
   // returns: purchase requisition saved for later

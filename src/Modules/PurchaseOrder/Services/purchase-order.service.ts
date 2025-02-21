@@ -17,6 +17,7 @@ import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.en
 import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchase-requisition.service";
 import { PurchaseRequisitionStatus } from "src/Modules/PurchaseRequisition/Enums/purchase-requisition.enum";
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
+import { BudgetService } from "src/Modules/Budget/Services/budget.service";
 
 @Injectable()
 export class PurchaseOrderService {
@@ -30,6 +31,7 @@ export class PurchaseOrderService {
     private readonly supplierService: SuppliersService,
     private readonly organisationService: OrganisationService,
     private readonly purchaseRequisitionService: PurchaseRequisitionService,
+    private readonly budgetService: BudgetService,
   ) {}
 
   public async create(
@@ -188,6 +190,14 @@ export class PurchaseOrderService {
   ): Promise<PurchaseOrder> {
     const order = await this.purchaseOrderRepository.findOne({
       where: { organisation: { id: organisationId }, id: orderId },
+      relations: ["purchase_requisition"],
+      select: {
+        purchase_requisition: {
+          budget: {
+            id: true,
+          },
+        },
+      },
     });
 
     if (!order) {
@@ -196,7 +206,17 @@ export class PurchaseOrderService {
 
     order.status = status;
 
-    return await this.purchaseOrderRepository.save(order);
+    const updatedOrder = await this.purchaseOrderRepository.save(order);
+
+    const budgetId = order.purchase_requisition.budget.id;
+
+    await this.budgetService.consumeAmount(
+      organisationId,
+      budgetId,
+      updatedOrder.total_amount,
+    );
+
+    return updatedOrder;
   }
 
   public async count(query: any) {

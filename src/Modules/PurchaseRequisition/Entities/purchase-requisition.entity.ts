@@ -14,6 +14,7 @@ import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
 import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 import { OrganisationBranch } from "src/Modules/Organisation/Entities/organisation-branch.entity";
 import { OrganisationDepartment } from "src/Modules/Organisation/Entities/organisation-department.entity";
+import { Budget } from "src/Modules/Budget/Entities/budget.entity";
 
 @Entity("purchase_requisitions")
 export class PurchaseRequisition extends BaseEntity {
@@ -79,6 +80,10 @@ export class PurchaseRequisition extends BaseEntity {
   @IsString()
   @Column({ default: "NGN" })
   currency: string;
+
+  @ManyToOne(() => Budget, { nullable: true })
+  @JoinColumn({ name: "budget_id" })
+  budget: Budget;
 
   @ManyToOne(() => Organisation, (org) => org.purchaseRequisitions)
   @JoinColumn({ name: "organisation_id" })

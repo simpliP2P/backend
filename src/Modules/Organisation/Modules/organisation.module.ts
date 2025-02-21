@@ -28,6 +28,8 @@ import { OrganisationCategoryModule } from "./organisation-category.module";
 import { FileManagerModule } from "src/Modules/FileManager/Modules/file-manager.module";
 import { OrganisationDepartmentController } from "../Controllers/organisation-department.controller";
 import { OrganisationBranchController } from "../Controllers/organisation-branch.controller";
+import { BudgetService } from "src/Modules/Budget/Services/budget.service";
+import { Budget } from "src/Modules/Budget/Entities/budget.entity";
 
 @Module({
   imports: [
@@ -40,6 +42,7 @@ import { OrganisationBranchController } from "../Controllers/organisation-branch
       PurchaseRequisition,
       PurchaseOrder,
       PurchaseItem,
+      Budget,
     ]),
     UserModule,
     TokenModule,
@@ -65,6 +68,7 @@ import { OrganisationBranchController } from "../Controllers/organisation-branch
     AppLogger,
     PurchaseOrderService,
     PurchaseRequisitionService,
+    BudgetService,
   ],
   exports: [
     OrganisationService,
