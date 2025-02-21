@@ -1,11 +1,10 @@
-import { Entity, Column, OneToMany, BeforeInsert } from "typeorm";
+import { Entity, Column, OneToMany } from "typeorm";
 import { MinLength, IsNotEmpty } from "class-validator";
 import { Supplier } from "src/Modules/Supplier/Entities/supplier.entity";
 import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order.entity";
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
 import { BaseEntity } from "src/Common/entities/base.entity";
 import { Product } from "src/Modules/Product/Entities/product.entity";
-import { createHash } from "crypto";
 import { UserOrganisation } from "./user-organisation.entity";
 import { OrganisationBranch } from "./organisation-branch.entity";
 import { OrganisationDepartment } from "./organisation-department.entity";
@@ -18,7 +17,7 @@ export class Organisation extends BaseEntity {
   @Column({ type: "varchar", unique: true })
   name: string;
 
-  @Column({ type: "varchar", unique: true })
+  @Column({ type: "varchar", unique: true, default: "" })
   tenant_code: string;
 
   @Column({ type: "varchar" })
@@ -53,16 +52,4 @@ export class Organisation extends BaseEntity {
 
   @OneToMany(() => OrganisationCategory, (category) => category.organisation)
   categories: OrganisationCategory[];
-
-  @BeforeInsert()
-  generateTenantCode() {
-    if (!this.tenant_code) {
-      this.tenant_code = this.generateHashFromId();
-    }
-  }
-
-  private generateHashFromId(): string {
-    const hash = createHash("sha256").update(this.id).digest("hex");
-    return parseInt(hash.substring(0, 10), 16).toString(36).substring(0, 8); // Convert hex to base36
-  }
 }

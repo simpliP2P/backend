@@ -87,8 +87,14 @@ export class OrganisationService {
         address,
       });
 
-      // Save the organisation to the db
+      // Save the organisation to the db first
       createdOrg = await this.organisationRepository.save(organisation);
+
+      const tenant_code = this.generateHashFromId(createdOrg.id);
+      createdOrg.tenant_code = tenant_code;
+
+      // Save the organisation again with the `tenant_code`
+      await this.organisationRepository.save(createdOrg);
 
       // Save the userOrganisation relation (creator is already validated implicitly)
       await this.userOrganisationRepository.save({
