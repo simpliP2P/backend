@@ -49,6 +49,7 @@ export class verifyEmailDto {
 }
 
 export class initiateResetPasswordDto {
+  @IsString()
   email: string;
 }
 
