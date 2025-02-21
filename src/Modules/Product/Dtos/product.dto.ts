@@ -68,7 +68,7 @@ export class UpdateProductDto {
   )
   stockQtyAlert?: number;
 
-  @IsString()
+  @IsUUID()
   @IsOptional()
   category: string;
 }
