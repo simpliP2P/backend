@@ -71,16 +71,8 @@ export class User extends BaseEntity {
 
   @BeforeInsert()
   validateBeforeInsert() {
-    if (this.provider === ProviderType.LOCAL) {
-      this.validateLocalProvider();
-    } else {
+    if (this.provider === ProviderType.GOOGLE) {
       this.setDefaultsForExternalProvider();
-    }
-  }
-
-  private validateLocalProvider() {
-    if (!this.password_hash) {
-      throw new Error("Password is required for local provider accounts.");
     }
   }
 
