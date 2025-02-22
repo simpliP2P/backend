@@ -17,7 +17,7 @@ import { PermissionType } from "../Enums/user-organisation.enum";
 import { Type } from "class-transformer";
 import { Optional } from "@nestjs/common";
 
-export class CreateOrganisationDto {
+export class UpdateOrganisationDto {
   @IsString()
   @MinLength(3)
   name: string;
@@ -25,7 +25,8 @@ export class CreateOrganisationDto {
   @IsString()
   @MinLength(3)
   address: string;
-
+}
+export class CreateOrganisationDto extends UpdateOrganisationDto {
   @IsString()
   @MinLength(2)
   creator_role: string;

@@ -1,7 +1,7 @@
 export interface CreateOrganisationInput {
   name: string;
   address: string;
-  creator_role: string;
+  creator_role?: string;
 }
 
 export interface updateUserDetails {

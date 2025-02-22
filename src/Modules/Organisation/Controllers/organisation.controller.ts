@@ -20,6 +20,7 @@ import {
   addUserToOrgDto,
   CreateOrganisationDto,
   CreatePurchaseRequisitionDto,
+  UpdateOrganisationDto,
   updateUserDetailsDto,
 } from "../Dtos/organisation.dto";
 import { Request } from "express";
@@ -107,7 +108,7 @@ export class OrganisationController {
   @UseGuards(OrganisationPermissionsGuard)
   async updateOrganisation(
     @Param("organisationId") organisationId: string,
-    @Body() data: CreateOrganisationDto,
+    @Body() data: UpdateOrganisationDto,
   ) {
     try {
       const organisation =
