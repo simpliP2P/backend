@@ -80,6 +80,12 @@ export class SuppliersService {
         id,
         organisation: { id: organisationId },
       },
+      relations: ["category"],
+      select: {
+        category: {
+          name: true,
+        }
+      }
     });
 
     if (!supplier) {
