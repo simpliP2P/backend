@@ -26,6 +26,7 @@ export class BudgetController {
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_BUDGETS,
+    PermissionType.CREATE_BUDGETS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async create(
@@ -39,6 +40,8 @@ export class BudgetController {
 
   // Get all budgets
   @Get()
+  @SetMetadata("permissions", [PermissionType.ORG_MEMBER])
+  @UseGuards(OrganisationPermissionsGuard)
   async findAll(@Req() req: Request): Promise<Budget[]> {
     const organisationId = req.headers["oid"] as string;
     return this.budgetService.findAll(organisationId);
@@ -46,6 +49,8 @@ export class BudgetController {
 
   // Get a budget by ID
   @Get(":id")
+  @SetMetadata("permissions", [PermissionType.ORG_MEMBER])
+  @UseGuards(OrganisationPermissionsGuard)
   async findOne(@Param("id") id: string, @Req() req: Request): Promise<Budget> {
     const organisationId = req.headers["oid"] as string;
 
@@ -57,6 +62,7 @@ export class BudgetController {
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_BUDGETS,
+    PermissionType.UPDATE_BUDGETS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async update(
@@ -77,6 +83,7 @@ export class BudgetController {
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_BUDGETS,
+    PermissionType.DELETE_BUDGETS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async remove(@Param("id") id: string, @Req() req: Request): Promise<void> {
