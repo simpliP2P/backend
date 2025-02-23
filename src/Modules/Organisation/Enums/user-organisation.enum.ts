@@ -1,5 +1,6 @@
 export enum PermissionType {
   OWNER = "all_permissions",
+  ORG_MEMBER = "org_member",
   MANAGE_USERS = "manage_users",
   MANAGE_SUPPLIERS = "manage_suppliers",
   CREATE_SUPPLIERS = "create_suppliers",
@@ -24,7 +25,6 @@ export enum PermissionType {
   UPDATE_PRODUCTS = "update_products",
   DELETE_PRODUCTS = "delete_products",
   MANAGE_DEPARTMENTS = "manage_departments",
-  ORG_MEMBER = "org_member",
   MANAGE_BUDGETS = "manage_budgets",
   CREATE_BUDGETS = "create_budgets",
   UPDATE_BUDGETS = "update_budgets",
