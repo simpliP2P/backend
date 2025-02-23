@@ -104,7 +104,7 @@ export class OrganisationController {
   }
 
   @Put(":organisationId")
-  @SetMetadata("permissions", [PermissionType.ORG_MEMBER])
+  @SetMetadata("permissions", [PermissionType.OWNER])
   @UseGuards(OrganisationPermissionsGuard)
   async updateOrganisation(
     @Param("organisationId") organisationId: string,
@@ -586,7 +586,9 @@ export class OrganisationController {
   @Post(":organisationId/suppliers")
   @SetMetadata("permissions", [
     PermissionType.OWNER,
-    PermissionType.MANAGE_USERS,
+    // PermissionType.MANAGE_USERS,
+    PermissionType.MANAGE_SUPPLIERS,
+    PermissionType.CREATE_SUPPLIERS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async addSupplierToOrganisation(
@@ -613,6 +615,7 @@ export class OrganisationController {
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_SUPPLIERS,
+    PermissionType.GET_SUPPLIERS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async getAllSuppliers(
@@ -643,6 +646,7 @@ export class OrganisationController {
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_SUPPLIERS,
+    PermissionType.GET_SUPPLIERS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async getSupplierById(
@@ -669,6 +673,7 @@ export class OrganisationController {
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_SUPPLIERS,
+    PermissionType.UPDATE_SUPPLIERS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async updateSupplier(
@@ -697,6 +702,7 @@ export class OrganisationController {
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_SUPPLIERS,
+    PermissionType.DELETE_SUPPLIERS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async deleteSupplier(
@@ -723,6 +729,7 @@ export class OrganisationController {
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_PURCHASE_REQUISITIONS,
+    PermissionType.GET_PURCHASE_REQUISITIONS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async getRequisitions(
@@ -771,6 +778,7 @@ export class OrganisationController {
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_PURCHASE_REQUISITIONS,
+    PermissionType.CREATE_PURCHASE_REQUISITIONS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async saveForLater(
@@ -808,6 +816,7 @@ export class OrganisationController {
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_PURCHASE_REQUISITIONS,
+    PermissionType.GET_PURCHASE_REQUISITIONS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async getRequisitionsSavedForLater(
@@ -841,6 +850,7 @@ export class OrganisationController {
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_PURCHASE_REQUISITIONS,
+    PermissionType.GET_PURCHASE_REQUISITIONS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async getRequisitionById(
@@ -868,6 +878,7 @@ export class OrganisationController {
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_PURCHASE_REQUISITIONS,
+    PermissionType.APPROVE_PURCHASE_REQUISITIONS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async updateApproval(
@@ -907,6 +918,7 @@ export class OrganisationController {
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_PURCHASE_ORDERS,
+    PermissionType.CREATE_PURCHASE_ORDERS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async createOrder(
@@ -938,6 +950,7 @@ export class OrganisationController {
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_PURCHASE_ORDERS,
+    PermissionType.GET_PURCHASE_ORDERS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async getOrders(
@@ -972,6 +985,7 @@ export class OrganisationController {
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_PURCHASE_ORDERS,
+    PermissionType.GET_PURCHASE_ORDERS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async getOrderById(
@@ -998,6 +1012,7 @@ export class OrganisationController {
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_PURCHASE_ORDERS,
+    PermissionType.UPDATE_PURCHASE_ORDERS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async updateOrderStatus(
@@ -1036,6 +1051,7 @@ export class OrganisationController {
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_PRODUCTS,
+    PermissionType.CREATE_PRODUCTS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async createProduct(
@@ -1117,6 +1133,7 @@ export class OrganisationController {
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_PRODUCTS,
+    PermissionType.UPDATE_PRODUCTS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async updateProduct(
@@ -1146,6 +1163,7 @@ export class OrganisationController {
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_PRODUCTS,
+    PermissionType.DELETE_PRODUCTS
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async deleteProduct(
