@@ -16,7 +16,7 @@ import {
   // BadRequestException,
   EmailExistsException,
   OrganisationExists,
-  UserHasOrganisation,
+  // UserHasOrganisation,
   UserNotFoundException,
 } from "src/Shared/Exceptions/app.exceptions";
 import { EmailServices } from "src/Modules/Mail/Services/mail.service";
@@ -258,6 +258,7 @@ export class OrganisationService {
           where: { email },
         });
 
+        /*
         // Check if the user is already associated with any organisation
         const existingAssociations = await this.userOrganisationRepository.find(
           {
@@ -267,7 +268,7 @@ export class OrganisationService {
 
         if (existingAssociations.length > 0) {
           throw new UserHasOrganisation();
-        }
+        }*/
       } else {
         throw error;
       }
