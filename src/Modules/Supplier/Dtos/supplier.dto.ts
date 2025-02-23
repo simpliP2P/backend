@@ -7,6 +7,7 @@ import {
   Max,
   IsUUID,
 } from "class-validator";
+import { Address } from "src/Shared/Interfaces/address.interface";
 
 export class CreateSupplierDto {
   @IsString()
@@ -20,9 +21,8 @@ export class CreateSupplierDto {
   @IsOptional()
   phone?: string;
 
-  @IsString()
   @IsOptional()
-  address?: string;
+  address?: Address;
 
   @IsUUID()
   @IsOptional()

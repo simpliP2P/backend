@@ -5,6 +5,7 @@ import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order
 import { BaseEntity } from "src/Common/entities/base.entity";
 import { BankDetails, SupplierMetadata } from "../Types/supplier.types";
 import { OrganisationCategory } from "src/Modules/Organisation/Entities/organisation-category.entity";
+import { Address } from "src/Shared/Interfaces/address.interface";
 
 @Entity("suppliers")
 export class Supplier extends BaseEntity {
@@ -18,8 +19,8 @@ export class Supplier extends BaseEntity {
   @Column({ type: "varchar", nullable: true, unique: true })
   phone: string;
 
-  @Column({ type: "varchar", nullable: true })
-  address: string;
+  @Column({ type: "jsonb", nullable: true })
+  address: Address;
 
   @ManyToOne(() => OrganisationCategory)
   @JoinColumn({ name: "category_id" })
