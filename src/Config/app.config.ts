@@ -47,7 +47,7 @@ export default () => ({
       clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET,
       redirectUrl: {
         stagingLink: "http://localhost:3000/auth/google/callback",
-        productionLink: "http://localhost:3000/auth/google/callback",
+        productionLink: "https://simplip2p.vercel.app/auth/google/callback",
       },
     },
   },
