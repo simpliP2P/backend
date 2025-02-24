@@ -617,6 +617,7 @@ export class OrganisationController {
   @Get(":organisationId/suppliers")
   @SetMetadata("permissions", [
     PermissionType.OWNER,
+    PermissionType.ORG_MEMBER,
     PermissionType.MANAGE_SUPPLIERS,
     PermissionType.GET_SUPPLIERS,
   ])
@@ -648,6 +649,7 @@ export class OrganisationController {
   @Get(":organisationId/suppliers/:supplierId")
   @SetMetadata("permissions", [
     PermissionType.OWNER,
+    PermissionType.ORG_MEMBER,
     PermissionType.MANAGE_SUPPLIERS,
     PermissionType.GET_SUPPLIERS,
   ])
