@@ -11,6 +11,10 @@ export class CreatePurchaseOrderDto {
   @IsNumber()
   total_amount: number;
 
+  @IsString()
+  @IsOptional()
+  currency?: string;
+
   @IsUUID()
   supplier_id: string;
 

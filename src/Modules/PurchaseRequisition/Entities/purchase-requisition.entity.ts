@@ -15,6 +15,7 @@ import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.en
 import { OrganisationBranch } from "src/Modules/Organisation/Entities/organisation-branch.entity";
 import { OrganisationDepartment } from "src/Modules/Organisation/Entities/organisation-department.entity";
 import { Budget } from "src/Modules/Budget/Entities/budget.entity";
+// import { Supplier } from "src/Modules/Supplier/Entities/supplier.entity";
 
 @Entity("purchase_requisitions")
 export class PurchaseRequisition extends BaseEntity {
@@ -78,12 +79,17 @@ export class PurchaseRequisition extends BaseEntity {
   items: PurchaseItem[];
 
   @IsString()
-  @Column({ default: "NGN" })
+  @Column({ default: "USD" })
   currency: string;
 
   @ManyToOne(() => Budget, { nullable: true })
   @JoinColumn({ name: "budget_id" })
   budget: Budget;
+
+  /*
+  @ManyToOne(() => Supplier, (supplier) => supplier.purchaseOrders)
+  @JoinColumn({ name: "supplier_id" })
+  supplier: Supplier;*/
 
   @ManyToOne(() => Organisation, (org) => org.purchaseRequisitions)
   @JoinColumn({ name: "organisation_id" })

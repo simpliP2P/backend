@@ -34,6 +34,10 @@ export class PurchaseItemDto {
   @IsNumber()
   unit_price: number;
 
+  @IsString()
+  @IsOptional()
+  currency?: string;
+
   @IsOptional()
   @IsInt()
   po_quantity?: number;

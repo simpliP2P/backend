@@ -193,6 +193,7 @@ export class PurchaseRequisitionService {
         items: {
           item_name: true,
           unit_price: true,
+          currency: true,
           pr_quantity: true,
           po_quantity: true,
         },
@@ -243,6 +244,7 @@ export class PurchaseRequisitionService {
         items: {
           item_name: true,
           unit_price: true,
+          currency: true,
           pr_quantity: true,
           po_quantity: true,
         },

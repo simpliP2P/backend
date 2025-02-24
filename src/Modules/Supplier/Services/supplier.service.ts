@@ -84,8 +84,8 @@ export class SuppliersService {
       select: {
         category: {
           name: true,
-        }
-      }
+        },
+      },
     });
 
     if (!supplier) {

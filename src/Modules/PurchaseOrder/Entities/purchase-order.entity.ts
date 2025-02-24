@@ -17,6 +17,9 @@ export class PurchaseOrder extends BaseEntity {
   @Column("decimal", { precision: 10, scale: 2 })
   total_amount: number;
 
+  @Column({ default: "USD" })
+  currency: string;
+
   @IsEnum(PurchaseOrderStatus)
   @Column({ default: PurchaseOrderStatus.PENDING })
   status: string;
