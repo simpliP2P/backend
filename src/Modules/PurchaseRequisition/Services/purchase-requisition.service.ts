@@ -302,6 +302,15 @@ export class PurchaseRequisitionService {
       throw new BadRequestException("No supplier assigned to this requisition");
     }
 
+    if (approvalData.status === PurchaseRequisitionStatus.APPROVED) {
+      // Update budget reserved
+      await this.budgetService.reserveAmount(
+        organisationId,
+        approvalData.budget_id,
+        requisition.estimated_cost,
+      );
+    }
+
     const updatedRequisition = await this.purchaseRequisitionRepository
       .createQueryBuilder()
       .update(PurchaseRequisition)
@@ -317,15 +326,6 @@ export class PurchaseRequisitionService {
       .where("id = :id", { id: requisition.id })
       .returning("*")
       .execute();
-
-    if (approvalData.status === PurchaseRequisitionStatus.APPROVED) {
-      // Update budget reserved
-      await this.budgetService.reserveAmount(
-        organisationId,
-        approvalData.budget_id,
-        requisition.estimated_cost,
-      );
-    }
 
     if (
       approvalData.action_type === PRApprovalActionType.APPROVE_AND_CREATE_PO
