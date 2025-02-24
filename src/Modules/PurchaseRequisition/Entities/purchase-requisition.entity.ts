@@ -1,7 +1,7 @@
 import { BaseEntity } from "src/Common/entities/base.entity";
 import { Organisation } from "src/Modules/Organisation/Entities/organisation.entity";
 import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order.entity";
-import { User } from "src/Modules/User/Entities/user.entity"; // Import User entity
+import { User } from "src/Modules/User/Entities/user.entity";
 import { Column, Entity, ManyToOne, OneToMany, JoinColumn } from "typeorm";
 import {
   IsNotEmpty,
@@ -15,7 +15,7 @@ import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.en
 import { OrganisationBranch } from "src/Modules/Organisation/Entities/organisation-branch.entity";
 import { OrganisationDepartment } from "src/Modules/Organisation/Entities/organisation-department.entity";
 import { Budget } from "src/Modules/Budget/Entities/budget.entity";
-// import { Supplier } from "src/Modules/Supplier/Entities/supplier.entity";
+import { Supplier } from "src/Modules/Supplier/Entities/supplier.entity";
 
 @Entity("purchase_requisitions")
 export class PurchaseRequisition extends BaseEntity {
@@ -86,10 +86,9 @@ export class PurchaseRequisition extends BaseEntity {
   @JoinColumn({ name: "budget_id" })
   budget: Budget;
 
-  /*
   @ManyToOne(() => Supplier, (supplier) => supplier.purchaseOrders)
   @JoinColumn({ name: "supplier_id" })
-  supplier: Supplier;*/
+  supplier: Supplier;
 
   @ManyToOne(() => Organisation, (org) => org.purchaseRequisitions)
   @JoinColumn({ name: "organisation_id" })

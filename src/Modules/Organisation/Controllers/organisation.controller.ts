@@ -34,7 +34,10 @@ import {
 } from "src/Modules/Supplier/Dtos/supplier.dto";
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
 import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchase-requisition.service";
-import { PurchaseRequisitionStatus } from "src/Modules/PurchaseRequisition/Enums/purchase-requisition.enum";
+import {
+  PRApprovalActionType,
+  PurchaseRequisitionStatus,
+} from "src/Modules/PurchaseRequisition/Enums/purchase-requisition.enum";
 import { User } from "src/Modules/User/Entities/user.entity";
 import { ProductService } from "src/Modules/Product/Services/product.service";
 import {
@@ -890,6 +893,7 @@ export class OrganisationController {
       status: PurchaseRequisitionStatus;
       approval_justification: string;
       budget_id: string;
+      action_type: PRApprovalActionType;
     },
   ) {
     try {

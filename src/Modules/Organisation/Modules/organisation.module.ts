@@ -75,6 +75,8 @@ import { Budget } from "src/Modules/Budget/Entities/budget.entity";
     OrganisationDepartmentService,
     OrganisationBranchService,
     UserOrganisationRepository,
+    PurchaseOrderService,
+    PurchaseRequisitionService,
   ],
 })
 export class OrganisationModule {}

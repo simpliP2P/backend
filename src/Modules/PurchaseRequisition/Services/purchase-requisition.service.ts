@@ -9,7 +9,10 @@ import {
   Repository,
 } from "typeorm";
 import { PurchaseRequisition } from "../Entities/purchase-requisition.entity";
-import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
+import {
+  PRApprovalActionType,
+  PurchaseRequisitionStatus,
+} from "../Enums/purchase-requisition.enum";
 import { OrganisationService } from "src/Modules/Organisation/Services/organisation.service";
 import {
   ICreatePurchaseRequisition,
@@ -18,6 +21,7 @@ import {
 } from "../Types/purchase-requisition.types";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 import { BudgetService } from "src/Modules/Budget/Services/budget.service";
+import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
 
 @Injectable()
 export class PurchaseRequisitionService {
@@ -25,6 +29,7 @@ export class PurchaseRequisitionService {
     @InjectRepository(PurchaseRequisition)
     private readonly purchaseRequisitionRepository: Repository<PurchaseRequisition>,
     private readonly organisationService: OrganisationService,
+    private readonly purchaseOrderService: PurchaseOrderService,
 
     private readonly budgetService: BudgetService,
   ) {}
@@ -69,7 +74,7 @@ export class PurchaseRequisitionService {
     pr_number: string,
     data: ICreatePurchaseRequisition,
   ) {
-    const { branch_id, department_id, ...request } = data;
+    const { branch_id, department_id, supplier_id, ...request } = data;
     const requisition = await this.purchaseRequisitionRepository.findOne({
       where: {
         organisation: { id: organisationId },
@@ -99,6 +104,7 @@ export class PurchaseRequisitionService {
         status: PurchaseRequisitionStatus.PENDING,
         branch: { id: branch_id },
         department: { id: department_id },
+        supplier: { id: supplier_id },
         ...request,
       })
       .where("id = :id", { id: requisition.id })
@@ -260,14 +266,40 @@ export class PurchaseRequisitionService {
       approved_by: any;
       approval_justification: string;
       budget_id: string;
+      action_type: PRApprovalActionType;
+      supplier_id?: string;
     },
   ): Promise<PurchaseRequisition> {
     const requisition = await this.purchaseRequisitionRepository.findOne({
       where: { id: requisitionId, organisation: { id: organisationId } },
+      relations: ["created_by", "supplier"],
+      select: {
+        created_by: {
+          id: true,
+        },
+        supplier: {
+          id: true,
+        },
+      },
     });
 
     if (!requisition) {
       throw new NotFoundException("Purchase Requisition not found");
+    }
+
+    if (
+      new Set([
+        PurchaseRequisitionStatus.APPROVED,
+        PurchaseRequisitionStatus.REJECTED,
+      ]).has(requisition.status)
+    ) {
+      throw new BadRequestException(
+        `Purchase Requisition has already been ${requisition.status.toLowerCase()}`,
+      );
+    }
+
+    if (requisition.supplier?.id || approvalData?.supplier_id) {
+      throw new BadRequestException("No supplier assigned to this requisition");
     }
 
     const updatedRequisition = await this.purchaseRequisitionRepository
@@ -278,6 +310,9 @@ export class PurchaseRequisitionService {
         approved_by: approvalData.approved_by,
         approval_justification: approvalData.approval_justification,
         budget: { id: approvalData.budget_id },
+        supplier: approvalData.supplier_id
+          ? { id: approvalData.supplier_id }
+          : undefined,
       })
       .where("id = :id", { id: requisition.id })
       .returning("*")
@@ -290,6 +325,19 @@ export class PurchaseRequisitionService {
         approvalData.budget_id,
         requisition.estimated_cost,
       );
+    }
+
+    if (
+      approvalData.action_type === PRApprovalActionType.APPROVE_AND_CREATE_PO
+    ) {
+      // Create purchase order
+      await this.purchaseOrderService.create(organisationId, {
+        request_id: requisitionId,
+        total_amount: requisition.estimated_cost,
+        supplier_id: approvalData?.supplier_id,
+        created_by: { id: requisition.created_by.id },
+        status: "pending",
+      });
     }
 
     return updatedRequisition.raw[0];

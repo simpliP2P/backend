@@ -1,5 +1,7 @@
 import {
   ForbiddenException,
+  Inject,
+  forwardRef,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
@@ -30,6 +32,7 @@ export class PurchaseOrderService {
 
     private readonly supplierService: SuppliersService,
     private readonly organisationService: OrganisationService,
+    @Inject(forwardRef(() => PurchaseRequisitionService))
     private readonly purchaseRequisitionService: PurchaseRequisitionService,
     private readonly budgetService: BudgetService,
   ) {}

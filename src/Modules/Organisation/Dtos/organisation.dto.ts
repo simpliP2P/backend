@@ -139,6 +139,10 @@ export class CreatePurchaseRequisitionDto {
   @IsOptional()
   branch_id: string;
 
+  @IsUUID()
+  @IsOptional()
+  supplier_id: string;
+
   @IsEmail()
   contact_info: string;
 

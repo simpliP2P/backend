@@ -20,6 +20,7 @@ export interface IPurchaseRequisition {
 export interface ICreatePurchaseRequisition {
   department_id?: string;
   branch_id?: string;
+  supplier_id?: string;
   contact_info: string;
   requestor_name: string;
   request_description: string;
