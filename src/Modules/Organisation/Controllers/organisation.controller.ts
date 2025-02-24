@@ -1163,7 +1163,7 @@ export class OrganisationController {
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_PRODUCTS,
-    PermissionType.DELETE_PRODUCTS
+    PermissionType.DELETE_PRODUCTS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async deleteProduct(
