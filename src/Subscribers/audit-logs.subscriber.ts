@@ -146,7 +146,7 @@ export class AuditSubscriber implements EntitySubscriberInterface {
         return `Purchase Requisition ${entity.pr_number} approved by user ${changedFields.approved_by}`;
       }
     }
-    return `Updated ${entity.constructor.name} (${entity.id}) fields: ${Object.keys(changedFields).join(", ")}`;
+    return `Updated ${entity.constructor.name} fields: ${Object.keys(changedFields).join(", ")}`;
   }
 
   /**
