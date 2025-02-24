@@ -159,6 +159,9 @@ export class CreatePurchaseRequisitionDto {
   estimated_cost: number;
 
   @IsString()
+  currency: string;
+
+  @IsString()
   justification: string;
 
   @IsString()

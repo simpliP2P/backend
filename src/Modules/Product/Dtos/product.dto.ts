@@ -19,6 +19,9 @@ export class CreateProductDto {
   @IsNumber()
   unitPrice: number;
 
+  @IsString()
+  currency: string;
+
   @IsNumber()
   stockQty: number;
 
