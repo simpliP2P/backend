@@ -26,28 +26,28 @@ export class Budget extends BaseEntity {
   /**
    * Initial budget amount
    */
-  @Column("decimal", { precision: 10, scale: 2, default: 0 })
+  @Column("decimal", { precision: 18, scale: 2, default: 0 })
   @IsDecimal()
   amount_allocated: number;
 
   /**
    * Amount remaining after deductions
    */
-  @Column("decimal", { precision: 10, scale: 2, default: 0 })
+  @Column("decimal", { precision: 18, scale: 2, default: 0 })
   @IsDecimal()
   amount_remaining: number;
 
   /**
    * Amount reserved for use
    */
-  @Column("decimal", { precision: 10, scale: 2, default: 0 })
+  @Column("decimal", { precision: 18, scale: 2, default: 0 })
   @IsDecimal()
   amount_reserved: number;
 
   /**
    * remaining - reserved
    */
-  @Column("decimal", { precision: 10, scale: 2, default: 0 })
+  @Column("decimal", { precision: 18, scale: 2, default: 0 })
   @IsDecimal()
   balance: number;
 

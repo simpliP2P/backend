@@ -5,6 +5,7 @@ import { Budget } from "../Entities/budget.entity";
 import { CreateBudgetDto, UpdateBudgetDto } from "../Dtos/budget.dto";
 import { OrganisationBranchService } from "src/Modules/Organisation/Services/organisation-branch.service";
 import { OrganisationDepartmentService } from "src/Modules/Organisation/Services/organisation-department.service";
+import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 
 @Injectable()
 export class BudgetService {
@@ -148,7 +149,7 @@ export class BudgetService {
     const budget = await this.findOne(organisationId, id);
 
     if (budget.amount_remaining < amount) {
-      throw new Error("Insufficient remaining budget");
+      throw new BadRequestException("Insufficient remaining budget");
     }
 
     budget.amount_reserved += amount;
