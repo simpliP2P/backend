@@ -56,6 +56,10 @@ export class UpdateProductDto {
 
   @IsString()
   @IsOptional()
+  currency: string;
+
+  @IsString()
+  @IsOptional()
   productCode?: string;
 
   @IsNumber()
