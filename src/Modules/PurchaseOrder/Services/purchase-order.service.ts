@@ -191,34 +191,27 @@ export class PurchaseOrderService {
     organisationId: string,
     orderId: string,
     status: string,
-  ): Promise<PurchaseOrder> {
+  ) {
     const order = await this.purchaseOrderRepository.findOne({
       where: { organisation: { id: organisationId }, id: orderId },
-      relations: ["purchase_requisition"],
-      select: {
-        purchase_requisition: {
-          budget: {
-            id: true,
-          },
-        },
-      },
+      relations: [
+        "purchase_requisition.budget",
+      ],
     });
 
     if (!order) {
       throw new NotFoundException("Purchase order not found");
     }
-
-    order.status = status;
-
-    const updatedOrder = await this.purchaseOrderRepository.save(order);
-
+    
     const budgetId = order.purchase_requisition.budget.id;
-
     await this.budgetService.consumeAmount(
       organisationId,
       budgetId,
-      updatedOrder.total_amount,
+      order.total_amount,
     );
+
+    order.status = status;
+    const {purchase_requisition, ...updatedOrder} = await this.purchaseOrderRepository.save(order);
 
     return updatedOrder;
   }
