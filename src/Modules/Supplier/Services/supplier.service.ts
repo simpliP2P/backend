@@ -58,6 +58,7 @@ export class SuppliersService {
       skip, // Skip the previous results
       select: {
         category: {
+          id: true,
           name: true,
         },
       },
@@ -83,6 +84,7 @@ export class SuppliersService {
       relations: ["category"],
       select: {
         category: {
+          id: true,
           name: true,
         },
       },

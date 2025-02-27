@@ -174,6 +174,7 @@ export class PurchaseOrderService {
         supplier: {
           full_name: true,
           category: {
+            id: true,
             name: true,
           },
         },
