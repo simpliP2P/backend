@@ -110,7 +110,7 @@ export class OrganisationDepartmentService {
           id: true,
         },
         head_of_department: {
-          // id: true,
+          id: true,
           first_name: true,
           last_name: true,
         },

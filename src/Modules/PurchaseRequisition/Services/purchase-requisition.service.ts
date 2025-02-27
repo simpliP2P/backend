@@ -191,9 +191,11 @@ export class PurchaseRequisitionService {
           first_name: true,
         },
         department: {
+          id: true,
           name: true,
         },
         branch: {
+          id: true,
           name: true,
         },
         items: {
@@ -242,9 +244,11 @@ export class PurchaseRequisitionService {
           first_name: true,
         },
         department: {
+          id: true,
           name: true,
         },
         branch: {
+          id: true,
           name: true,
         },
         items: {

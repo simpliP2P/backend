@@ -39,9 +39,11 @@ export class BudgetService {
       relations: ["branch", "department"],
       select: {
         branch: {
+          id: true,
           name: true,
         },
         department: {
+          id: true,
           name: true,
         },
       },
@@ -55,9 +57,11 @@ export class BudgetService {
       relations: ["branch", "department"],
       select: {
         branch: {
+          id: true,
           name: true,
         },
         department: {
+          id: true,
           name: true,
         },
       },
