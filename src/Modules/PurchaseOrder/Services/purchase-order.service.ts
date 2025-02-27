@@ -137,6 +137,7 @@ export class PurchaseOrderService {
       relations: ["supplier", "purchase_requisition"],
       select: {
         supplier: {
+          id: true,
           full_name: true,
           category: true,
         },
@@ -172,6 +173,7 @@ export class PurchaseOrderService {
       relations: ["supplier", "purchase_requisition"],
       select: {
         supplier: {
+          id: true,
           full_name: true,
           category: {
             id: true,
