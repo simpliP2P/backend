@@ -68,6 +68,26 @@ export class EmailServices {
     return this.sendEmail(sendEmailParams);
   }
 
+  async sendPurchaseOrderEmail(
+    email: string,
+    data: {
+      organisationName: string;
+      poId: string;
+      expectedDeliveryDate: Date;
+      signedUrl: string;
+    },
+  ) {
+    const subject = "New Purchase Order";
+    const templateName = "purchaseOrderEmail";
+    const sendEmailParams = await this.buildSendEmailParams(
+      email,
+      subject,
+      templateName,
+      data,
+    );
+    return this.sendEmail(sendEmailParams);
+  }
+
   async invitationEmail(email: string, data: emailInvitationData) {
     try {
       const subject = `Invitation to join ${data.organisationName}`;

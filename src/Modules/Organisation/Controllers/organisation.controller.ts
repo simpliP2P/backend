@@ -896,6 +896,7 @@ export class OrganisationController {
       approval_justification: string;
       budget_id: string;
       action_type: PRApprovalActionType;
+      supplier_id?: string;
     },
   ) {
     try {

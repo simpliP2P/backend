@@ -6,6 +6,7 @@ import { SuppliersModule } from "src/Modules/Supplier/Modules/supplier.module";
 import { OrganisationModule } from "src/Modules/Organisation/Modules/organisation.module";
 import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 import { BudgetModule } from "src/Modules/Budget/Modules/budget.module";
+import { MailModule } from "src/Modules/Mail/mail.module";
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { BudgetModule } from "src/Modules/Budget/Modules/budget.module";
     SuppliersModule,
     OrganisationModule,
     BudgetModule,
+    MailModule,
   ],
   providers: [PurchaseOrderService],
   exports: [PurchaseOrderService],

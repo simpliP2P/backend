@@ -30,6 +30,7 @@ import { OrganisationDepartmentController } from "../Controllers/organisation-de
 import { OrganisationBranchController } from "../Controllers/organisation-branch.controller";
 import { BudgetService } from "src/Modules/Budget/Services/budget.service";
 import { Budget } from "src/Modules/Budget/Entities/budget.entity";
+import { PdfHelper } from "src/Shared/Helpers/pdf-generator.helper";
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { Budget } from "src/Modules/Budget/Entities/budget.entity";
     PurchaseOrderService,
     PurchaseRequisitionService,
     BudgetService,
+    PdfHelper,
   ],
   exports: [
     OrganisationService,
@@ -77,6 +79,8 @@ import { Budget } from "src/Modules/Budget/Entities/budget.entity";
     UserOrganisationRepository,
     PurchaseOrderService,
     PurchaseRequisitionService,
+    FileManagerModule,
+    PdfHelper,
   ],
 })
 export class OrganisationModule {}

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Upload } from "@aws-sdk/lib-storage";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner"; // Import the presigner
 import { randomUUID } from "crypto";
 import { Readable } from "stream";
 import { Request } from "express";
@@ -75,6 +76,24 @@ export class FileManagerService {
       };
     } catch (error) {
       throw new NotFoundException(`File not found: ${error.message}`);
+    }
+  }
+
+  public async getSignedUrl(
+    fileKey: string,
+    expiresIn: number = 3600,
+  ): Promise<string> {
+    try {
+      const command = new GetObjectCommand({
+        Bucket: this.bucketName,
+        Key: fileKey,
+      });
+
+      // Generate a pre-signed URL that expires in `expiresIn` seconds (default: 1 hour)
+      const signedUrl = await getSignedUrl(this.s3, command, { expiresIn });
+      return signedUrl;
+    } catch (error) {
+      throw new Error(`Failed to generate signed URL: ${error.message}`);
     }
   }
 

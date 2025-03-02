@@ -200,7 +200,7 @@ export class PurchaseRequisitionService {
         },
         supplier: {
           id: true,
-          name: true
+          full_name: true,
         },
         items: {
           item_name: true,
@@ -306,9 +306,17 @@ export class PurchaseRequisitionService {
       );
     }
 
-    if (requisition.supplier?.id || approvalData?.supplier_id) {
-      throw new BadRequestException("No supplier assigned to this requisition");
-    }
+   if (!requisition.supplier?.id) {
+     throw new BadRequestException(
+       "No supplier is assigned to the requisition.",
+     );
+   }
+
+   if (!approvalData?.supplier_id) {
+     throw new BadRequestException(
+       "No supplier ID is provided in the approval data.",
+     );
+   }
 
     if (approvalData.status === PurchaseRequisitionStatus.APPROVED) {
       // Update budget reserved
@@ -390,8 +398,8 @@ export class PurchaseRequisitionService {
         },
         supplier: {
           id: true,
-          name: true,
-        }
+          full_name: true,
+        },
       },
       take: _pageSize,
       skip,

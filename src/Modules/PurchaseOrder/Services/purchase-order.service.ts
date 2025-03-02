@@ -20,6 +20,10 @@ import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Serv
 import { PurchaseRequisitionStatus } from "src/Modules/PurchaseRequisition/Enums/purchase-requisition.enum";
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
 import { BudgetService } from "src/Modules/Budget/Services/budget.service";
+import { EmailServices } from "src/Modules/Mail/Services/mail.service";
+import { PdfHelper } from "src/Shared/Helpers/pdf-generator.helper";
+import { readFileSync } from "fs";
+import { FileManagerService } from "src/Modules/FileManager/Services/upload.service";
 
 @Injectable()
 export class PurchaseOrderService {
@@ -35,6 +39,9 @@ export class PurchaseOrderService {
     @Inject(forwardRef(() => PurchaseRequisitionService))
     private readonly purchaseRequisitionService: PurchaseRequisitionService,
     private readonly budgetService: BudgetService,
+    private readonly emailService: EmailServices,
+    private readonly pdfHelper: PdfHelper,
+    private readonly fileManagerService: FileManagerService,
   ) {}
 
   public async create(
@@ -44,6 +51,13 @@ export class PurchaseOrderService {
     // check if PR is approved
     const pr = await this.purchaseRequisitionService.getPurchaseRequisition({
       where: { id: data.request_id },
+      relations: ["items", "organisation"],
+      select: {
+        organisation: {
+          id: true,
+          name: true,
+        },
+      },
     });
 
     if (!pr) {
@@ -82,6 +96,14 @@ export class PurchaseOrderService {
       })
       .andWhere("purchase_order_id IS NULL") // Optional: Only update if not already linked
       .execute();
+
+    this.genPdfAndSendEmail({
+      supplierEmail: foundSupplier.email,
+      organisationName: pr.organisation.name,
+      poId: savedPurchaseOrder.po_number,
+      items: pr.items,
+      expectedDeliveryDate: pr.needed_by_date,
+    });
 
     return savedPurchaseOrder;
   }
@@ -196,15 +218,13 @@ export class PurchaseOrderService {
   ) {
     const order = await this.purchaseOrderRepository.findOne({
       where: { organisation: { id: organisationId }, id: orderId },
-      relations: [
-        "purchase_requisition.budget",
-      ],
+      relations: ["purchase_requisition.budget"],
     });
 
     if (!order) {
       throw new NotFoundException("Purchase order not found");
     }
-    
+
     const budgetId = order.purchase_requisition.budget.id;
     await this.budgetService.consumeAmount(
       organisationId,
@@ -213,7 +233,8 @@ export class PurchaseOrderService {
     );
 
     order.status = status;
-    const {purchase_requisition, ...updatedOrder} = await this.purchaseOrderRepository.save(order);
+    const { purchase_requisition, ...updatedOrder } =
+      await this.purchaseOrderRepository.save(order);
 
     return updatedOrder;
   }
@@ -246,5 +267,62 @@ export class PurchaseOrderService {
     }
 
     return `PO-${tenantCode}-${yy}${mm}-${String(sequence).padStart(3, "0")}`;
+  }
+
+  private async purchaseOrderPdf(data: {
+    supplierEmail: string;
+    organisationName: string;
+    poId: string;
+    items: any[];
+    expectedDeliveryDate: Date;
+  }) {
+    const filePath = `/tmp/po-${data.poId}.pdf`;
+    await this.pdfHelper.generatePurchaseOrderPDF(
+      data.organisationName,
+      data.poId,
+      data.items,
+      data.expectedDeliveryDate,
+      filePath,
+    );
+
+    // Upload PDF to AWS
+    const fileBuffer = readFileSync(filePath);
+
+    const file: Express.Multer.File = {
+      fieldname: "file",
+      originalname: `po-${data.poId}.pdf`,
+      encoding: "7bit",
+      mimetype: "application/pdf",
+      size: fileBuffer.length,
+      buffer: fileBuffer,
+      destination: "",
+      filename: "",
+      path: "",
+      stream: null as any,
+    };
+
+    const key = await this.fileManagerService.uploadFile(file);
+
+    // Generate signed URL
+    const signedUrl = await this.fileManagerService.getSignedUrl(key);
+
+    return signedUrl;
+  }
+
+  private async genPdfAndSendEmail(data: {
+    supplierEmail: string;
+    organisationName: string;
+    poId: string;
+    items: any[];
+    expectedDeliveryDate: Date;
+  }): Promise<void> {
+    const signedUrl = await this.purchaseOrderPdf(data);
+
+    await this.emailService.sendPurchaseOrderEmail(data.supplierEmail, {
+      organisationName: data.organisationName,
+      poId: data.poId,
+      expectedDeliveryDate: data.expectedDeliveryDate,
+      signedUrl,
+    });
   }
 }
