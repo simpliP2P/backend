@@ -35,6 +35,10 @@ export class CreateSupplierDto {
   @IsOptional()
   payment_term: PaymentTerms;
 
+  @IsString()
+  @IsOptional()
+  lead_time?: string;
+
   @IsNumber()
   @Min(0)
   @Max(5)
@@ -74,6 +78,10 @@ export class UpdateSupplierDto {
   @IsEnum(PaymentTerms)
   @IsOptional()
   payment_term: PaymentTerms;
+
+  @IsString()
+  @IsOptional()
+  lead_time?: string;
 
   @IsNumber()
   @Min(0)

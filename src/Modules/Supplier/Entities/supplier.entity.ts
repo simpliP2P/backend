@@ -40,6 +40,9 @@ export class Supplier extends BaseEntity {
   @Column({type: "varchar", nullable: true})
   payment_term: PaymentTerms;
 
+  @Column({ type: "varchar", nullable: true })
+  lead_time: string;
+
   @ManyToOne(() => Organisation, { nullable: false, onDelete: "CASCADE" })
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
