@@ -4,7 +4,6 @@ import {
   ManyToOne,
   JoinColumn,
   BeforeInsert,
-  AfterUpdate,
 } from "typeorm";
 import { IsDecimal, IsNotEmpty, IsString } from "class-validator";
 import { OrganisationBranch } from "src/Modules/Organisation/Entities/organisation-branch.entity";
@@ -35,7 +34,7 @@ export class Budget extends BaseEntity {
    */
   @Column("decimal", { precision: 18, scale: 2, default: 0 })
   @IsDecimal()
-  amount_remaining: number;
+  balance: number;
 
   /**
    * Amount reserved for use
@@ -43,13 +42,6 @@ export class Budget extends BaseEntity {
   @Column("decimal", { precision: 18, scale: 2, default: 0 })
   @IsDecimal()
   amount_reserved: number;
-
-  /**
-   * remaining - reserved
-   */
-  @Column("decimal", { precision: 18, scale: 2, default: 0 })
-  @IsDecimal()
-  balance: number;
 
   @Column({ default: true })
   active: boolean;
@@ -71,20 +63,11 @@ export class Budget extends BaseEntity {
   department: OrganisationDepartment;
 
   /**
-   * Before inserting, set initial `amount_remaining`
+   * Before inserting, set initial `balance`
    * and calculate `balance`
    */
   @BeforeInsert()
   beforeInsertActions() {
-    this.amount_remaining = this.amount_allocated;
-    this.balance = this.amount_remaining - this.amount_reserved;
-  }
-
-  /**
-   * After updating, update `balance`
-   */
-  @AfterUpdate()
-  AfterUpdateActions() {
-    this.balance = this.amount_remaining - this.amount_reserved;
+    this.balance = this.amount_allocated;
   }
 }

@@ -135,11 +135,11 @@ export class BudgetService {
   ): Promise<Budget> {
     const budget = await this.findOne(organisationId, budgetId);
 
-    if (budget.amount_remaining < amount) {
+    if (budget.balance < amount) {
       throw new Error("Insufficient remaining budget");
     }
 
-    budget.amount_remaining -= amount;
+    budget.balance -= amount;
 
     return this.budgetRepository.save(budget);
   }
@@ -152,12 +152,12 @@ export class BudgetService {
   ): Promise<Budget> {
     const budget = await this.findOne(organisationId, id);
 
-    if (budget.amount_remaining < amount) {
+    if (budget.balance < amount) {
       throw new BadRequestException("Insufficient remaining budget");
     }
 
     budget.amount_reserved += amount;
-    budget.amount_remaining -= amount;
+    budget.balance -= amount;
 
     return this.budgetRepository.save(budget);
   }
@@ -175,7 +175,7 @@ export class BudgetService {
     }
 
     budget.amount_reserved -= amount;
-    budget.amount_remaining += amount;
+    budget.balance += amount;
 
     return this.budgetRepository.save(budget);
   }
@@ -188,6 +188,6 @@ export class BudgetService {
     const budget = await this.findOne(organisationId, id);
     const amountRemaining = budget.amount_allocated - budget.amount_reserved;
 
-    budget.amount_remaining = amountRemaining;
+    budget.balance = amountRemaining;
   }
 }
