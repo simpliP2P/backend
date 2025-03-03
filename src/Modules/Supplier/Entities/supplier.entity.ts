@@ -37,7 +37,7 @@ export class Supplier extends BaseEntity {
   meta_data: SupplierMetadata;
 
   @IsEnum(PaymentTerms)
-  @Column({type: "varchar", nullable: true})
+  @Column({ type: "varchar", nullable: true })
   payment_term: PaymentTerms;
 
   @Column({ type: "varchar", nullable: true })

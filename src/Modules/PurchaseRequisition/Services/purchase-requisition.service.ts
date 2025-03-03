@@ -306,17 +306,17 @@ export class PurchaseRequisitionService {
       );
     }
 
-   if (!requisition.supplier?.id) {
-     throw new BadRequestException(
-       "No supplier is assigned to the requisition.",
-     );
-   }
+    if (!requisition.supplier?.id) {
+      throw new BadRequestException(
+        "No supplier is assigned to the requisition.",
+      );
+    }
 
-   if (!approvalData?.supplier_id) {
-     throw new BadRequestException(
-       "No supplier ID is provided in the approval data.",
-     );
-   }
+    if (!approvalData?.supplier_id) {
+      throw new BadRequestException(
+        "No supplier ID is provided in the approval data.",
+      );
+    }
 
     if (approvalData.status === PurchaseRequisitionStatus.APPROVED) {
       // Update budget reserved

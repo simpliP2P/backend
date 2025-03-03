@@ -26,7 +26,6 @@ export class SuppliersService {
 
       return await this.supplierRepository.save(supplier);
     } catch (error) {
-
       if (error.code === "23505") {
         throw new SupplierExists();
       } else if (error.code === "23503") {
