@@ -10,6 +10,7 @@ import {
 } from "class-validator";
 import { Address } from "src/Shared/Interfaces/address.interface";
 import { PaymentTerms } from "../Enums/supplier.enum";
+import { BankDetails } from "../Types/supplier.types";
 
 export class CreateSupplierDto {
   @IsString()
@@ -46,11 +47,7 @@ export class CreateSupplierDto {
   rating?: number;
 
   @IsOptional()
-  bank_details: {
-    bank_name: string;
-    account_number: number;
-    account_name: string;
-  };
+  bank_details: BankDetails;
 }
 
 export class UpdateSupplierDto {
@@ -88,4 +85,7 @@ export class UpdateSupplierDto {
   @Max(5)
   @IsOptional()
   rating?: number;
+
+  @IsOptional()
+  bank_details: BankDetails;
 }
