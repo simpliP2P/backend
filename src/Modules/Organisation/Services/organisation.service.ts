@@ -31,6 +31,12 @@ import { ConfigService } from "@nestjs/config";
 import { createHash } from "crypto";
 import { AuditLogsService } from "src/Modules/AuditLogs/Services/audit-logs.service";
 import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order.entity";
+import { OrganisationCategoryService } from "./organisation-category.service";
+import { OrganisationDepartmentService } from "./organisation-department.service";
+import {
+  DEFAULT_CATEGORIES,
+  DEFAULT_DEPARTMENTS,
+} from "../Enums/defaults.enum";
 
 @Injectable()
 export class OrganisationService {
@@ -54,6 +60,8 @@ export class OrganisationService {
     private readonly logger: AppLogger,
     private readonly configService: ConfigService,
     private readonly auditLogService: AuditLogsService,
+    private readonly organisationCategoryService: OrganisationCategoryService,
+    private readonly organisationDepartmentService: OrganisationDepartmentService,
   ) {}
 
   public async findOrganisation(
@@ -68,56 +76,68 @@ export class OrganisationService {
   ): Promise<Organisation> {
     const { name, address, creator_role } = createOrganisationInput;
 
-    let createdOrg: Organisation;
+    // Start a transaction
+    return this.organisationRepository.manager.transaction(
+      async (transactionalEntityManager) => {
+        try {
+          // Create the organisation entity
+          const organisation = this.organisationRepository.create({
+            name,
+            address,
+          });
 
-    try {
-      /*
-      const hasUserCreatedOrg =
-        !!(await this.userOrganisationRepository.findOne({
-          where: { user: { id: creatorId }, is_creator: true },
-        }));
+          // Save the organisation to the db first
+          const createdOrg = await transactionalEntityManager.save(
+            Organisation,
+            organisation,
+          );
 
-      if (hasUserCreatedOrg) {
-        throw new BadRequestException(
-          "Each user can create only one organization",
-        );
-      }*/
+          // Generate and set the tenant_code
+          const tenant_code = this.generateHashFromId(createdOrg.id);
+          createdOrg.tenant_code = tenant_code;
 
-      const organisation = this.organisationRepository.create({
-        name,
-        address,
-      });
+          // Save the organisation again with the `tenant_code`
+          await transactionalEntityManager.save(Organisation, createdOrg);
 
-      // Save the organisation to the db first
-      createdOrg = await this.organisationRepository.save(organisation);
+          // Save the userOrganisation relation (creator is already validated implicitly)
+          await transactionalEntityManager.save(UserOrganisation, {
+            user: { id: creatorId } as User,
+            organisation: createdOrg,
+            role: creator_role,
+            permissions: [PermissionType.OWNER],
+            is_creator: true,
+          });
 
-      const tenant_code = this.generateHashFromId(createdOrg.id);
-      createdOrg.tenant_code = tenant_code;
+          // Bulk insert default categories
+          await this.organisationCategoryService.bulkCreateCategories(
+            createdOrg.id,
+            DEFAULT_CATEGORIES,
+            transactionalEntityManager,
+          );
 
-      // Save the organisation again with the `tenant_code`
-      await this.organisationRepository.save(createdOrg);
+          // Bulk insert default departments
+          await this.organisationDepartmentService.bulkCreateDepartments(
+            createdOrg.id,
+            DEFAULT_DEPARTMENTS,
+            transactionalEntityManager,
+          );
 
-      // Save the userOrganisation relation (creator is already validated implicitly)
-      await this.userOrganisationRepository.save({
-        user: { id: creatorId } as User,
-        organisation: createdOrg,
-        role: creator_role,
-        permissions: [PermissionType.OWNER],
-        is_creator: true,
-      });
-    } catch (error) {
-      if (error.code === "23505") {
-        throw new OrganisationExists(name);
-      }
+          return createdOrg;
+        } catch (error) {
+          // Handle specific errors
+          if (error.code === "23505") {
+            throw new OrganisationExists(name);
+          }
 
-      if (error.message.includes("creator")) {
-        throw new UserNotFoundException();
-      }
+          if (error.message.includes("creator")) {
+            throw new UserNotFoundException();
+          }
 
-      throw error;
-    }
-
-    return createdOrg;
+          // Re-throw the error to trigger a rollback
+          throw error;
+        }
+      },
+    );
   }
 
   public async updateOrganisationDetails(

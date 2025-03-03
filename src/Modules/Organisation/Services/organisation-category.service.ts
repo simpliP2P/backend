@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { EntityManager, Repository } from "typeorm";
 
 import { OrganisationCategory } from "../Entities/organisation-category.entity";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
@@ -153,5 +153,23 @@ export class OrganisationCategoryService {
     });
     if (!category) throw new NotFoundException("Category not found");
     return category;
+  }
+
+  public async bulkCreateCategories(
+    organisationId: string,
+    data: { name: string }[],
+    transactionalEntityManager?: EntityManager,
+  ) {
+    const categories = data.map((category) =>
+      this.categoryRepo.create({
+        name: category.name,
+        organisation: { id: organisationId },
+      }),
+    );
+
+    const manager = transactionalEntityManager || this.categoryRepo.manager;
+    const result = await manager.insert(OrganisationCategory, categories);
+
+    return result.generatedMaps;
   }
 }

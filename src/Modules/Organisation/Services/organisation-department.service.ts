@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { EntityManager, Repository } from "typeorm";
 import { User } from "src/Modules/User/Entities/user.entity";
 import { OrganisationDepartment } from "../Entities/organisation-department.entity";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
@@ -140,5 +140,23 @@ export class OrganisationDepartmentService {
     }
 
     return department;
+  }
+
+  async bulkCreateDepartments(
+    organisationId: string,
+    data: { name: string }[],
+    transactionalEntityManager?: EntityManager,
+  ) {
+    const departments = data.map((department) =>
+      this.departmentRepo.create({
+        name: department.name,
+        organisation: { id: organisationId },
+      }),
+    );
+
+    const manager = transactionalEntityManager || this.departmentRepo.manager;
+    const result = await manager.insert(OrganisationDepartment, departments);
+
+    return result.generatedMaps;
   }
 }

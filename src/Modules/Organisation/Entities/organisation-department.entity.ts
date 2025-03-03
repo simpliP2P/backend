@@ -28,9 +28,8 @@ export class OrganisationDepartment extends BaseEntity {
   @JoinColumn({ name: "head_of_department_id" })
   head_of_department: User | null;
 
-  @IsNotEmpty()
   @IsString()
-  @Column()
+  @Column({ nullable: true })
   description: string;
 
   @ManyToOne(() => Organisation, (org) => org.departments)

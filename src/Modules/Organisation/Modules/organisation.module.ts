@@ -71,6 +71,7 @@ import { PdfHelper } from "src/Shared/Helpers/pdf-generator.helper";
     PurchaseRequisitionService,
     BudgetService,
     PdfHelper,
+    OrganisationDepartmentService
   ],
   exports: [
     OrganisationService,
