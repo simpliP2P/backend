@@ -4,12 +4,15 @@ import { Repository } from "typeorm";
 import { Supplier } from "../Entities/supplier.entity";
 import { CreateSupplierDto, UpdateSupplierDto } from "../Dtos/supplier.dto";
 import { SupplierExists } from "src/Shared/Exceptions/app.exceptions";
+import { HashHelper } from "src/Shared/Helpers/hash.helper";
 
 @Injectable()
 export class SuppliersService {
   constructor(
     @InjectRepository(Supplier)
     private supplierRepository: Repository<Supplier>,
+
+    private hashHelper: HashHelper,
   ) {}
 
   public async addSupplierToOrganisation(
@@ -22,6 +25,7 @@ export class SuppliersService {
         ...otherDetails,
         organisation: { id: organisationId },
         category: { id: category },
+        supplier_no: await this.generateSupplierNumber(organisationId),
       });
 
       return await this.supplierRepository.save(supplier);
@@ -134,5 +138,28 @@ export class SuppliersService {
 
   public async count(query: any) {
     return await this.supplierRepository.count(query);
+  }
+
+  private async generateSupplierNumber(organisationId: string) {
+    const tenantCode = this.hashHelper.generateHashFromId(organisationId);
+    const now = new Date();
+    const yy = String(now.getFullYear()).slice(-2);
+    const mm = String(now.getMonth() + 1).padStart(2, "0"); // Month as 01, 02, ..., 12
+
+    const lastSupplier = await this.supplierRepository
+      .createQueryBuilder("sup")
+      .where("sup.supplier_no LIKE :pattern", {
+        pattern: `sup-${tenantCode}-${yy}${mm}-%`,
+      })
+      .orderBy("sup.created_at", "DESC")
+      .getOne();
+
+    let sequence = 1;
+    if (lastSupplier) {
+      const lastSeq = lastSupplier.supplier_no.split("-").pop(); // Extract last sequence number
+      sequence = parseInt(lastSeq || "0", 10) + 1;
+    }
+
+    return `SUP-${tenantCode}-${yy}${mm}-${String(sequence).padStart(3, "0")}`;
   }
 }
