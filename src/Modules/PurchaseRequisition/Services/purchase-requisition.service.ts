@@ -13,7 +13,6 @@ import {
   PRApprovalActionType,
   PurchaseRequisitionStatus,
 } from "../Enums/purchase-requisition.enum";
-import { OrganisationService } from "src/Modules/Organisation/Services/organisation.service";
 import {
   ICreatePurchaseRequisition,
   IGetAllPurchaseRequisitionInput,
@@ -22,16 +21,17 @@ import {
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 import { BudgetService } from "src/Modules/Budget/Services/budget.service";
 import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
+import { HashHelper } from "src/Shared/Helpers/hash.helper";
 
 @Injectable()
 export class PurchaseRequisitionService {
   constructor(
     @InjectRepository(PurchaseRequisition)
     private readonly purchaseRequisitionRepository: Repository<PurchaseRequisition>,
-    private readonly organisationService: OrganisationService,
-    private readonly purchaseOrderService: PurchaseOrderService,
 
+    private readonly purchaseOrderService: PurchaseOrderService,
     private readonly budgetService: BudgetService,
+    private readonly hashHelper: HashHelper,
   ) {}
 
   public async checkForUnCompletedRequisition(userId: string) {
@@ -425,8 +425,7 @@ export class PurchaseRequisitionService {
   }
 
   private async generatePrNumber(organisationId: string) {
-    const tenantCode =
-      this.organisationService.generateHashFromId(organisationId);
+    const tenantCode = this.hashHelper.generateHashFromId(organisationId);
     const now = new Date();
     const yy = String(now.getFullYear()).slice(-2); // Get last two digits of the year (e.g., "25" for 2025)
     const mm = String(now.getMonth() + 1).padStart(2, "0"); // Month as 01, 02, ..., 12

@@ -7,6 +7,7 @@ import { OrganisationModule } from "src/Modules/Organisation/Modules/organisatio
 import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 import { BudgetModule } from "src/Modules/Budget/Modules/budget.module";
 import { MailModule } from "src/Modules/Mail/mail.module";
+import { HashHelper } from "src/Shared/Helpers/hash.helper";
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { MailModule } from "src/Modules/Mail/mail.module";
     BudgetModule,
     MailModule,
   ],
-  providers: [PurchaseOrderService],
+  providers: [PurchaseOrderService, HashHelper],
   exports: [PurchaseOrderService],
 })
 export class PurchaseOrderModule {}

@@ -9,7 +9,6 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, Between, MoreThanOrEqual, LessThanOrEqual } from "typeorm";
 import { PurchaseOrder } from "../Entities/purchase-order.entity";
 import { Organisation } from "src/Modules/Organisation/Entities/organisation.entity";
-import { OrganisationService } from "src/Modules/Organisation/Services/organisation.service";
 import {
   IGetAllPurchaseOrdersInput,
   IPurchaseOrder,
@@ -24,6 +23,7 @@ import { EmailServices } from "src/Modules/Mail/Services/mail.service";
 import { PdfHelper } from "src/Shared/Helpers/pdf-generator.helper";
 import { readFileSync } from "fs";
 import { FileManagerService } from "src/Modules/FileManager/Services/upload.service";
+import { HashHelper } from "src/Shared/Helpers/hash.helper";
 
 @Injectable()
 export class PurchaseOrderService {
@@ -34,14 +34,15 @@ export class PurchaseOrderService {
     @InjectRepository(PurchaseItem)
     private readonly purchaseItemRepository: Repository<PurchaseItem>,
 
-    private readonly supplierService: SuppliersService,
-    private readonly organisationService: OrganisationService,
     @Inject(forwardRef(() => PurchaseRequisitionService))
     private readonly purchaseRequisitionService: PurchaseRequisitionService,
+
+    private readonly supplierService: SuppliersService,
     private readonly budgetService: BudgetService,
     private readonly emailService: EmailServices,
     private readonly pdfHelper: PdfHelper,
     private readonly fileManagerService: FileManagerService,
+    private readonly hashHelper: HashHelper,
   ) {}
 
   public async create(
@@ -248,8 +249,7 @@ export class PurchaseOrderService {
     const yy = String(now.getFullYear()).slice(-2);
     const mm = String(now.getMonth() + 1).padStart(2, "0");
 
-    const tenantCode =
-      this.organisationService.generateHashFromId(organisationId);
+    const tenantCode = this.hashHelper.generateHashFromId(organisationId);
 
     const lastPo = await this.purchaseOrderRepository
       .createQueryBuilder("po")

@@ -31,6 +31,7 @@ import { OrganisationBranchController } from "../Controllers/organisation-branch
 import { BudgetService } from "src/Modules/Budget/Services/budget.service";
 import { Budget } from "src/Modules/Budget/Entities/budget.entity";
 import { PdfHelper } from "src/Shared/Helpers/pdf-generator.helper";
+import { HashHelper } from "src/Shared/Helpers/hash.helper";
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { PdfHelper } from "src/Shared/Helpers/pdf-generator.helper";
     BudgetService,
     PdfHelper,
     OrganisationDepartmentService,
+    HashHelper,
   ],
   exports: [
     OrganisationService,

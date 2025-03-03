@@ -28,7 +28,6 @@ import { SuppliersService } from "src/Modules/Supplier/Services/supplier.service
 import { ProductService } from "src/Modules/Product/Services/product.service";
 import { FileManagerService } from "src/Modules/FileManager/Services/upload.service";
 import { ConfigService } from "@nestjs/config";
-import { createHash } from "crypto";
 import { AuditLogsService } from "src/Modules/AuditLogs/Services/audit-logs.service";
 import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order.entity";
 import { OrganisationCategoryService } from "./organisation-category.service";
@@ -37,6 +36,7 @@ import {
   DEFAULT_CATEGORIES,
   DEFAULT_DEPARTMENTS,
 } from "../Enums/defaults.enum";
+import { HashHelper } from "src/Shared/Helpers/hash.helper";
 
 @Injectable()
 export class OrganisationService {
@@ -62,6 +62,7 @@ export class OrganisationService {
     private readonly auditLogService: AuditLogsService,
     private readonly organisationCategoryService: OrganisationCategoryService,
     private readonly organisationDepartmentService: OrganisationDepartmentService,
+    private readonly hashHelper: HashHelper,
   ) {}
 
   public async findOrganisation(
@@ -93,7 +94,7 @@ export class OrganisationService {
           );
 
           // Generate and set the tenant_code
-          const tenant_code = this.generateHashFromId(createdOrg.id);
+          const tenant_code = this.hashHelper.generateHashFromId(createdOrg.id);
           createdOrg.tenant_code = tenant_code;
 
           // Save the organisation again with the `tenant_code`
@@ -502,11 +503,6 @@ export class OrganisationService {
       user: { id: userId },
       organisation: { id: organisationId },
     });
-  }
-
-  public generateHashFromId(id: string): string {
-    const hash = createHash("sha256").update(id).digest("hex");
-    return parseInt(hash.substring(0, 10), 16).toString(36).substring(0, 8); // Convert hex to base36
   }
 
   private generateStrongPassword(): string {
