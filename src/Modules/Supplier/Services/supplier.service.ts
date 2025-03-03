@@ -20,12 +20,15 @@ export class SuppliersService {
     organisationId: string,
   ) {
     const { category, ...otherDetails } = createSupplierDto;
+
+    const supplier_no = await this.generateSupplierNumber(organisationId);
+    
     try {
       const supplier = this.supplierRepository.create({
         ...otherDetails,
         organisation: { id: organisationId },
         category: { id: category },
-        supplier_no: await this.generateSupplierNumber(organisationId),
+        supplier_no,
       });
 
       return await this.supplierRepository.save(supplier);
@@ -149,7 +152,7 @@ export class SuppliersService {
     const lastSupplier = await this.supplierRepository
       .createQueryBuilder("sup")
       .where("sup.supplier_no LIKE :pattern", {
-        pattern: `sup-${tenantCode}-${yy}${mm}-%`,
+        pattern: `SUP-${tenantCode}-${yy}${mm}-%`,
       })
       .orderBy("sup.created_at", "DESC")
       .getOne();
