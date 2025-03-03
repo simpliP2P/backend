@@ -306,15 +306,11 @@ export class PurchaseRequisitionService {
       );
     }
 
-    if (!requisition.supplier?.id) {
+    const supplierId = approvalData?.supplier_id || requisition.supplier?.id;
+
+    if (!supplierId) {
       throw new BadRequestException(
         "No supplier is assigned to the requisition.",
-      );
-    }
-
-    if (!approvalData?.supplier_id) {
-      throw new BadRequestException(
-        "No supplier ID is provided in the approval data.",
       );
     }
 
