@@ -24,7 +24,7 @@ export class Product extends BaseEntity {
   @Column("decimal", { precision: 10, scale: 2 })
   unitPrice: number;
 
-  @Column({ default: "USD" })
+  @Column({ default: "NGN" })
   currency: string;
 
   @Column({ name: "stock_qty" })

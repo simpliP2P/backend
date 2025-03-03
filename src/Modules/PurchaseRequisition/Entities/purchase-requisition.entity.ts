@@ -79,7 +79,7 @@ export class PurchaseRequisition extends BaseEntity {
   items: PurchaseItem[];
 
   @IsString()
-  @Column({ default: "USD" })
+  @Column({ default: "NGN" })
   currency: string;
 
   @ManyToOne(() => Budget, { nullable: true })

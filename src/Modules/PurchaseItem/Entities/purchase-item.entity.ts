@@ -29,7 +29,7 @@ export class PurchaseItem extends BaseEntity {
   @Column({ type: "decimal", precision: 10, scale: 2 }) // For items not in inventory
   unit_price: number;
 
-  @Column({ default: "USD" })
+  @Column({ default: "NGN" })
   currency: string;
 
   @Column({ type: "varchar", nullable: true }) // For items not in inventory
