@@ -22,6 +22,7 @@ import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 import { BudgetService } from "src/Modules/Budget/Services/budget.service";
 import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
 import { HashHelper } from "src/Shared/Helpers/hash.helper";
+import { PurchaseOrderStatus } from "src/Modules/PurchaseOrder/Enums/purchase-order.enum";
 
 @Injectable()
 export class PurchaseRequisitionService {
@@ -348,7 +349,7 @@ export class PurchaseRequisitionService {
         total_amount: requisition.estimated_cost,
         supplier_id: approvalData?.supplier_id,
         created_by: { id: requisition.created_by.id },
-        status: "pending",
+        status: PurchaseOrderStatus.PENDING,
       });
     }
 
