@@ -2,11 +2,13 @@ import { OrganisationBranch } from "src/Modules/Organisation/Entities/organisati
 import { OrganisationDepartment } from "src/Modules/Organisation/Entities/organisation-department.entity";
 import { User } from "src/Modules/User/Entities/user.entity";
 import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
+import { Supplier } from "src/Modules/Supplier/Entities/supplier.entity";
 
 export interface IPurchaseRequisition {
   pr_number: string;
   department: OrganisationDepartment;
   branch?: OrganisationBranch;
+  supplier?: Supplier;
   contact_info: string;
   requestor_name: string;
   request_description: string;

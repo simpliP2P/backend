@@ -53,6 +53,8 @@ import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchas
 import { OrganisationCategoryService } from "../Services/organisation-category.service";
 import { OrganisationDepartment } from "../Entities/organisation-department.entity";
 import { PurchaseOrderStatus } from "src/Modules/PurchaseOrder/Enums/purchase-order.enum";
+import { Supplier } from "src/Modules/Supplier/Entities/supplier.entity";
+import { OrganisationBranch } from "../Entities/organisation-branch.entity";
 
 @Controller("organisations")
 export class OrganisationController {
@@ -803,6 +805,8 @@ export class OrganisationController {
             ...data,
             created_by: { id: userId } as User,
             department: { id: data.department_id } as OrganisationDepartment,
+            supplier: {id: data.supplier_id} as Supplier,
+            branch: { id: data.branch_id } as OrganisationBranch,
             status: PurchaseRequisitionStatus.SAVED_FOR_LATER,
           },
         );

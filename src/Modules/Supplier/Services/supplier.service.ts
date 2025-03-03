@@ -22,7 +22,7 @@ export class SuppliersService {
     const { category, ...otherDetails } = createSupplierDto;
 
     const supplier_no = await this.generateSupplierNumber(organisationId);
-    
+
     try {
       const supplier = this.supplierRepository.create({
         ...otherDetails,
