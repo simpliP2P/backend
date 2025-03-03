@@ -6,8 +6,10 @@ import {
   Min,
   Max,
   IsUUID,
+  IsEnum,
 } from "class-validator";
 import { Address } from "src/Shared/Interfaces/address.interface";
+import { PaymentTerms } from "../Enums/supplier.enum";
 
 export class CreateSupplierDto {
   @IsString()
@@ -27,6 +29,11 @@ export class CreateSupplierDto {
   @IsUUID()
   @IsOptional()
   category?: string;
+
+  @IsString()
+  @IsEnum(PaymentTerms)
+  @IsOptional()
+  payment_term: PaymentTerms;
 
   @IsNumber()
   @Min(0)
@@ -62,6 +69,11 @@ export class UpdateSupplierDto {
   @IsUUID()
   @IsOptional()
   category?: string;
+
+  @IsString()
+  @IsEnum(PaymentTerms)
+  @IsOptional()
+  payment_term: PaymentTerms;
 
   @IsNumber()
   @Min(0)

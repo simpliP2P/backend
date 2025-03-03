@@ -1,11 +1,12 @@
 import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from "typeorm";
 import { Organisation } from "src/Modules/Organisation/Entities/organisation.entity";
-import { IsEmail } from "class-validator";
+import { IsEmail, IsEnum } from "class-validator";
 import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order.entity";
 import { BaseEntity } from "src/Common/entities/base.entity";
 import { BankDetails, SupplierMetadata } from "../Types/supplier.types";
 import { OrganisationCategory } from "src/Modules/Organisation/Entities/organisation-category.entity";
 import { Address } from "src/Shared/Interfaces/address.interface";
+import { PaymentTerms } from "../Enums/supplier.enum";
 
 @Entity("suppliers")
 export class Supplier extends BaseEntity {
@@ -34,6 +35,10 @@ export class Supplier extends BaseEntity {
 
   @Column({ type: "jsonb", nullable: true })
   meta_data: SupplierMetadata;
+
+  @IsEnum(PaymentTerms)
+  @Column({type: "varchar", nullable: true})
+  payment_term: PaymentTerms;
 
   @ManyToOne(() => Organisation, { nullable: false, onDelete: "CASCADE" })
   @JoinColumn({ name: "organisation_id" })
