@@ -24,6 +24,7 @@ import { PdfHelper } from "src/Shared/Helpers/pdf-generator.helper";
 import { readFileSync } from "fs";
 import { FileManagerService } from "src/Modules/FileManager/Services/upload.service";
 import { HashHelper } from "src/Shared/Helpers/hash.helper";
+import { PurchaseOrderStatus } from "../Enums/purchase-order.enum";
 
 @Injectable()
 export class PurchaseOrderService {
@@ -226,12 +227,14 @@ export class PurchaseOrderService {
       throw new NotFoundException("Purchase order not found");
     }
 
-    const budgetId = order.purchase_requisition.budget.id;
-    await this.budgetService.consumeAmount(
-      organisationId,
-      budgetId,
-      order.total_amount,
-    );
+    if (status === PurchaseOrderStatus.APPROVED) {
+      const budgetId = order.purchase_requisition.budget.id;
+      await this.budgetService.consumeAmount(
+        organisationId,
+        budgetId,
+        order.total_amount,
+      );
+    }
 
     order.status = status;
     const { purchase_requisition, ...updatedOrder } =
