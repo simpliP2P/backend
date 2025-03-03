@@ -805,7 +805,7 @@ export class OrganisationController {
             ...data,
             created_by: { id: userId } as User,
             department: { id: data.department_id } as OrganisationDepartment,
-            supplier: {id: data.supplier_id} as Supplier,
+            supplier: { id: data.supplier_id } as Supplier,
             branch: { id: data.branch_id } as OrganisationBranch,
             status: PurchaseRequisitionStatus.SAVED_FOR_LATER,
           },

@@ -1,10 +1,4 @@
-import {
-  Entity,
-  Column,
-  ManyToOne,
-  JoinColumn,
-  BeforeInsert,
-} from "typeorm";
+import { Entity, Column, ManyToOne, JoinColumn, BeforeInsert } from "typeorm";
 import { IsDecimal, IsNotEmpty, IsString } from "class-validator";
 import { OrganisationBranch } from "src/Modules/Organisation/Entities/organisation-branch.entity";
 import { OrganisationDepartment } from "src/Modules/Organisation/Entities/organisation-department.entity";
