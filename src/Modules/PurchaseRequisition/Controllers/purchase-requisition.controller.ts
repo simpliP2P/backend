@@ -5,6 +5,7 @@ import {
   Req,
   SetMetadata,
   UseGuards,
+  Put,
 } from "@nestjs/common";
 import { PurchaseRequisitionService } from "../Services/purchase-requisition.service";
 import { Request } from "express";
@@ -60,7 +61,7 @@ export class PurchaseRequisitionController {
     }
   }
 
-  @Post("finalize")
+  @Put("finalize")
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_PURCHASE_REQUISITIONS,

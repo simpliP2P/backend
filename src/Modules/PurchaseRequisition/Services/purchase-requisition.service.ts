@@ -89,11 +89,13 @@ export class PurchaseRequisitionService {
     }
 
     if (
-      requisition.status !== PurchaseRequisitionStatus.INITIALIZED &&
-      requisition.status !== PurchaseRequisitionStatus.SAVED_FOR_LATER
+      new Set([
+        PurchaseRequisitionStatus.APPROVED,
+        PurchaseRequisitionStatus.REJECTED,
+      ]).has(requisition.status)
     ) {
       throw new BadRequestException(
-        "Purchase Requisition has already been finalized",
+        `Purchase Requisition has already been ${requisition.status.toLowerCase()}`,
       );
     }
 
