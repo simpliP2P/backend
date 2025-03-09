@@ -875,7 +875,7 @@ export class OrganisationController {
 
       return {
         status: "success",
-        message: "Requisitions fetched successfully.",
+        message: "Requisition fetched successfully.",
         data: { requisition },
       };
     } catch (error) {
