@@ -245,7 +245,7 @@ export class PurchaseRequisitionService {
         id: requisitionId,
         status: Not(PurchaseRequisitionStatus.SAVED_FOR_LATER),
       },
-      relations: ["created_by", "items", "department", "branch"],
+      relations: ["created_by", "supplier", "items", "department", "branch"],
       select: {
         created_by: {
           first_name: true,
@@ -257,6 +257,10 @@ export class PurchaseRequisitionService {
         branch: {
           id: true,
           name: true,
+        },
+        supplier: {
+          id: true,
+          full_name: true,
         },
         items: {
           item_name: true,
