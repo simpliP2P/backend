@@ -1,15 +1,14 @@
-import { NestFactory } from "@nestjs/core";
+import { NestFactory, Reflector } from "@nestjs/core";
+import { ValidationPipe } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { DataSource } from "typeorm";
+import * as helmet from "helmet";
 import { AppModule } from "./app.module";
 import { AppExceptionFilter } from "./Shared/Filters/exception.filter";
 import { AppLogger } from "./Logger/logger.service";
-import { ConfigService } from "@nestjs/config";
-import { DataSource } from "typeorm";
-import { ValidationPipe } from "@nestjs/common";
 import { ValidationExceptionFilter } from "./Shared/Filters/validation-exception.filter";
 import { AuthGuard } from "./Guards/auth.guard";
-import { Reflector } from "@nestjs/core";
 import { TokenHelper } from "./Shared/Helpers/token.helper";
-import * as helmet from "helmet";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -50,6 +49,7 @@ async function bootstrap() {
       "Access-Control-Allow-Methods",
       "Access-Control-Allow-Credentials",
       "Oid",
+      "X-Resource-Token",
     ],
     credentials: true,
     maxAge: 86400,
