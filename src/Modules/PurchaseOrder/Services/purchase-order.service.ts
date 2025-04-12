@@ -4,6 +4,7 @@ import {
   forwardRef,
   Injectable,
   NotFoundException,
+  BadRequestException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository, Between, MoreThanOrEqual, LessThanOrEqual } from "typeorm";
@@ -20,11 +21,14 @@ import { PurchaseRequisitionStatus } from "src/Modules/PurchaseRequisition/Enums
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
 import { BudgetService } from "src/Modules/Budget/Services/budget.service";
 import { EmailServices } from "src/Modules/Mail/Services/mail.service";
-import { PdfHelper } from "src/Shared/Helpers/pdf-generator.helper";
-import { readFileSync } from "fs";
-import { FileManagerService } from "src/Modules/FileManager/Services/upload.service";
 import { HashHelper } from "src/Shared/Helpers/hash.helper";
 import { PurchaseOrderStatus } from "../Enums/purchase-order.enum";
+import { ClientHelper } from "src/Shared/Helpers/client.helper";
+import { TokenService } from "src/Modules/Token/Services/token.service";
+import { TokenType } from "src/Modules/Token/Enums/token.enum";
+import { SmsService } from "src/Modules/Sms/Services/sms.service";
+import { NotificationChannels } from "src/Modules/Supplier/Enums/supplier.enum";
+import { INotificationData } from "src/Modules/Supplier/Types/supplier.types";
 
 @Injectable()
 export class PurchaseOrderService {
@@ -41,9 +45,10 @@ export class PurchaseOrderService {
     private readonly supplierService: SuppliersService,
     private readonly budgetService: BudgetService,
     private readonly emailService: EmailServices,
-    private readonly pdfHelper: PdfHelper,
-    private readonly fileManagerService: FileManagerService,
     private readonly hashHelper: HashHelper,
+    private readonly clientHelper: ClientHelper,
+    private readonly tokenService: TokenService,
+    private readonly smsService: SmsService,
   ) {}
 
   public async create(
@@ -68,12 +73,14 @@ export class PurchaseOrderService {
       throw new ForbiddenException("Purchase Requisition not approved");
     }
 
+    // check if supplier exists
     const foundSupplier = await this.supplierService.findOne({
-      where: { id: data.supplier_id },
+      where: { id: data.supplier_id, organisation: { id: organisationId } },
     });
 
     if (!foundSupplier) throw new NotFoundException("Supplier not found");
 
+    // create purchase order
     const po_number = await this.generatePoNumber(organisationId);
 
     const purchaseOrder = this.purchaseOrderRepository.create({
@@ -89,6 +96,13 @@ export class PurchaseOrderService {
 
     const purchaseRequisitionId = pr.id;
 
+    // Generate purchase order Url for supplier to view
+    const poUrl = await this.genPurchaseOrderUrl({
+      organisationId,
+      poId: savedPurchaseOrder.id,
+    });
+
+    // Update purchase items with purchase order id
     this.purchaseItemRepository
       .createQueryBuilder()
       .update(PurchaseItem)
@@ -96,16 +110,20 @@ export class PurchaseOrderService {
       .where("purchase_requisition_id = :purchaseRequisitionId", {
         purchaseRequisitionId,
       })
-      .andWhere("purchase_order_id IS NULL") // Optional: Only update if not already linked
+      .andWhere("purchase_order_id IS NULL")
       .execute();
 
-    this.genPdfAndSendEmail({
-      supplierEmail: foundSupplier.email,
+    const notificationData = {
       organisationName: pr.organisation.name,
-      poId: savedPurchaseOrder.po_number,
-      items: pr.items,
-      expectedDeliveryDate: pr.needed_by_date,
-    });
+      supplier: {
+        name: foundSupplier.full_name,
+        email: foundSupplier.email,
+        phone: foundSupplier.phone,
+      },
+      poUrl,
+    };
+
+    this.notifySupplier(supplier.notification_channel, notificationData);
 
     return savedPurchaseOrder;
   }
@@ -194,17 +212,26 @@ export class PurchaseOrderService {
   ): Promise<PurchaseOrder> {
     const order = await this.purchaseOrderRepository.findOne({
       where: { organisation: { id: organisationId }, id: orderId },
-      relations: ["supplier", "purchase_requisition"],
-      // select: {
-      //   supplier: {
-      //     id: true,
-      //     full_name: true,
-      //     category: {
-      //       id: true,
-      //       name: true,
-      //     },
-      //   },
-      // },
+      relations: ["supplier", "purchase_requisition", "items"],
+      /*
+      select: {
+        items: {
+          item_name: true,
+          unit_price: true,
+          currency: true,
+          pr_quantity: true,
+          po_quantity: true
+        },
+        supplier: {
+          id: true,
+          full_name: true,
+          category: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      */
     });
 
     if (!order) {
@@ -272,60 +299,58 @@ export class PurchaseOrderService {
     return `PO-${tenantCode}-${yy}${mm}-${String(sequence).padStart(3, "0")}`;
   }
 
-  private async purchaseOrderPdf(data: {
-    supplierEmail: string;
-    organisationName: string;
+  /**
+   * Generates a link for the supplier to view the purchase order
+   * @param data
+   */
+  private async genPurchaseOrderUrl(data: {
+    organisationId: string;
     poId: string;
-    items: any[];
-    expectedDeliveryDate: Date;
-  }) {
-    const filePath = `/tmp/po-${data.poId}.pdf`;
-    await this.pdfHelper.generatePurchaseOrderPDF(
-      data.organisationName,
-      data.poId,
-      data.items,
-      data.expectedDeliveryDate,
-      filePath,
+  }): Promise<string> {
+    const currentClientHost = this.clientHelper.getCurrentClient().landingPage;
+
+    const validFor = 30 * 24 * 60; // 30 days in minutes
+
+    // generate resource token
+    const token = await this.tokenService.createToken(
+      "",
+      TokenType.RESOURCE_TOKEN,
+      validFor,
+      { organisationId: data.organisationId, poId: data.poId },
     );
 
-    // Upload PDF to AWS
-    const fileBuffer = readFileSync(filePath);
-
-    const file: Express.Multer.File = {
-      fieldname: "file",
-      originalname: `po-${data.poId}.pdf`,
-      encoding: "7bit",
-      mimetype: "application/pdf",
-      size: fileBuffer.length,
-      buffer: fileBuffer,
-      destination: "",
-      filename: "",
-      path: "",
-      stream: null as any,
-    };
-
-    const key = await this.fileManagerService.uploadFile(file);
-
-    // Generate signed URL
-    const signedUrl = await this.fileManagerService.getSignedUrl(key);
-
-    return signedUrl;
+    return `${currentClientHost}/purchase-orders/${data.poId}?x-resource-token=${token}`;
   }
 
-  private async genPdfAndSendEmail(data: {
-    supplierEmail: string;
-    organisationName: string;
-    poId: string;
-    items: any[];
-    expectedDeliveryDate: Date;
-  }): Promise<void> {
-    const signedUrl = await this.purchaseOrderPdf(data);
+  private async notifySupplier(
+    channel: NotificationChannels,
+    data: INotificationData,
+  ) {
+    const { organisationName, supplier, poUrl } = data;
+    const supplierName = supplier.name;
 
-    await this.emailService.sendPurchaseOrderEmail(data.supplierEmail, {
-      organisationName: data.organisationName,
-      poId: data.poId,
-      expectedDeliveryDate: data.expectedDeliveryDate,
-      signedUrl,
-    });
+    switch (channel) {
+      case NotificationChannels.Email:
+        await this.emailService.sendPurchaseOrderEmail(supplier.email, {
+          organisationName,
+          supplierName,
+          signedUrl: poUrl,
+        });
+
+        break;
+
+      case NotificationChannels.SMS:
+        this.smsService.sendPurchaseOrderSms(supplier.phone, {
+          organisationName,
+          supplierName,
+          poUrl,
+        });
+
+        break;
+
+      default:
+        throw new BadRequestException("Invalid notification channel");
+        break;
+    }
   }
 }
