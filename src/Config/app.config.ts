@@ -13,7 +13,7 @@ export default () => ({
   tokenSecrets: {
     accessToken: {
       secret: process.env.ACCESS_TOKEN_SECRET || "hgjfj",
-      expiresIn: "500h",
+      expiresIn: "1h",
     },
     resetToken: { secret: process.env.RESET_TOKEN_SECRET, expiresIn: "6h" },
     verificationToken: {
