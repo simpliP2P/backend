@@ -63,14 +63,9 @@
       <h1>Purchase Order</h1>
     </div>
     <div class="content">
-      <p>Dear Supplier,</p>
-      <p>Please find the details of your purchase order below:</p>
-      <ul>
-        <li><strong>Organization:</strong> <%= organisationName %></li>
-        <li><strong>PO ID:</strong> <%= poId %></li>
-        <li><strong>Expected Delivery Date:</strong> <%= expectedDeliveryDate %></li>
-      </ul>
-      <p>You can view and download the full purchase order by clicking the button below:</p>
+      <p>Hello <%= supplierName %>,</p>
+      <p>You have a new order from <b><%= organisationName %></b></p>
+      <p>You can view and download the purchase order details by clicking the button below:</p>
       <p style="text-align: center;">
         <a href="<%= signedUrl %>" class="button">View Purchase Order</a>
         <p>Or copy and paste this in your browser: <%= signedUrl %></p>

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { render } from "ejs";
-import { BrevoEmailService } from "../../../Infrastructure/Brevo/brevoMail";
+import { BrevoEmailService } from "../../../Infrastructure/Mail/brevoMail";
 import { AppLogger } from "src/Logger/logger.service";
 import { Injectable } from "@nestjs/common";
 import { emailInvitationData } from "src/Modules/Organisation/Types/organisation.types";
@@ -72,8 +72,7 @@ export class EmailServices {
     email: string,
     data: {
       organisationName: string;
-      poId: string;
-      expectedDeliveryDate: Date;
+      supplierName: string;
       signedUrl: string;
     },
   ) {

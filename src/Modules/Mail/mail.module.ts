@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import BrevoEmailService from "src/Infrastructure/Brevo/brevoMail";
+import BrevoEmailService from "src/Infrastructure/Mail/brevoMail";
 import { AppLogger } from "src/Logger/logger.service";
 import { EmailServices } from "./Services/mail.service";
 
