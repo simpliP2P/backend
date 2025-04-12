@@ -60,4 +60,9 @@ export default () => ({
     port: parseInt(process.env.REDIS_PORT || "6379", 10),
     password: process.env.REDIS_PASSWORD,
   },
+  twilio: {
+    accountSid: process.env.TWILIO_ACCOUNT_SID,
+    authToken: process.env.TWILIO_AUTH_TOKEN,
+    phoneNumber: process.env.TWILIO_PHONE_NUMBER,
+  },
 });
