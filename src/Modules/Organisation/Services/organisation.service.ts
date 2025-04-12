@@ -457,7 +457,7 @@ export class OrganisationService {
       await this.auditLogService.logUpdate(
         "user_organisations",
         userId,
-        `Deactivated account with email ${updateResult.raw[0].user_id.email}`,
+        `Deactivated ${updateResult.raw[0].user_id.email}`,
         { deactivated_at: new Date() },
       );
     }
@@ -489,7 +489,7 @@ export class OrganisationService {
       await this.auditLogService.logUpdate(
         "user_organisations",
         userId,
-        `Reactivated account with email ${updateResult.raw[0].user_id.email}`,
+        `Reactivated ${updateResult.raw[0].user_id.email} account`,
         { deactivated_at: null },
       );
     }
