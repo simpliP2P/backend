@@ -20,14 +20,6 @@ export default () => ({
       secret: process.env.VERIFICATION_TOKEN_SECRET,
       expiresIn: "6h",
     },
-    newsletterSubscription: {
-      secret: process.env.NEWSLETTER_SUBSCRIPTION_SECRET,
-      expiresIn: "24h",
-    },
-  },
-  jwt: {
-    secret: process.env.JWT_SECRET,
-    expiresIn: process.env.JWT_EXPIRES_IN,
   },
   brevo: {
     apiKey: process.env.BREVO_API_KEY,
