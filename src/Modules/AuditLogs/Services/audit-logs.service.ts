@@ -1,8 +1,17 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { AuditLog } from "../Entities/audit-logs.entity";
-import { MoreThan, Repository } from "typeorm";
-import { AuditLogResponse } from "../Types/audit-logs.types";
+import {
+  Between,
+  LessThanOrEqual,
+  MoreThan,
+  MoreThanOrEqual,
+  Repository,
+} from "typeorm";
+import {
+  IAuditLogResponse,
+  IGetAllAuditLogsByOrg,
+} from "../Types/audit-logs.types";
 import { RequestContext } from "src/Shared/Helpers/request-context.helper";
 
 @Injectable()
@@ -38,7 +47,7 @@ export class AuditLogsService {
     page: number,
     pageSize: number,
     startDate: Date,
-  ): Promise<AuditLogResponse> {
+  ): Promise<IAuditLogResponse> {
     let _page = page;
     let _pageSize = pageSize;
     if (isNaN(page) || page < 1) _page = 1;
@@ -76,24 +85,35 @@ export class AuditLogsService {
     };
   }
 
-  public async getAllAuditLogsByOrganisation(
-    organisationId: string,
-    page: number,
-    pageSize: number,
-  ): Promise<AuditLogResponse> {
-    let _page = page;
-    let _pageSize = pageSize;
-    if (isNaN(page) || page < 1) _page = 1;
-    if (isNaN(pageSize) || pageSize < 1) _pageSize = 10;
+  public async getAllAuditLogsByOrganisation({
+    organisationId,
+    page,
+    pageSize,
+    startDate,
+    endDate,
+    exportAll = false,
+  }: IGetAllAuditLogsByOrg): Promise<IAuditLogResponse> {
+    let _page = page && page > 0 ? page : 1;
+    let _pageSize = pageSize && pageSize > 0 ? pageSize : 10;
 
-    const skip = (_page - 1) * _pageSize;
+    const whereConditions: any = {
+      organisation: { id: organisationId },
+    };
 
-    const [data, total] = await this.auditLogRepository.findAndCount({
-      where: {
-        organisation: { id: organisationId },
-      },
-      take: _pageSize,
-      skip,
+    if (startDate && endDate) {
+      whereConditions.created_at = Between(
+        new Date(startDate),
+        new Date(endDate),
+      );
+    } else if (startDate) {
+      whereConditions.created_at = MoreThanOrEqual(new Date(startDate));
+    } else if (endDate) {
+      whereConditions.created_at = LessThanOrEqual(new Date(endDate));
+    }
+
+    // Build query options
+    const queryOptions: any = {
+      where: whereConditions,
       relations: ["user", "user.userOrganisations"],
       select: {
         user: {
@@ -105,10 +125,19 @@ export class AuditLogsService {
           },
         },
       },
-    });
+    };
+
+    // Enforce pagination for normal API calls, bypass when exporting
+    if (!exportAll) {
+      queryOptions.take = _pageSize;
+      queryOptions.skip = (_page - 1) * _pageSize;
+    }
+
+    const [logs, total] =
+      await this.auditLogRepository.findAndCount(queryOptions);
 
     return {
-      logs: data,
+      logs,
       metadata: {
         total,
         page: _page,
@@ -123,7 +152,7 @@ export class AuditLogsService {
     userId: string,
     page: number,
     pageSize: number,
-  ): Promise<AuditLogResponse> {
+  ): Promise<IAuditLogResponse> {
     let _page = page;
     let _pageSize = pageSize;
     if (isNaN(page) || page < 1) _page = 1;
