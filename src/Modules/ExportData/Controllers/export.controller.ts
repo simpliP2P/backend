@@ -19,6 +19,7 @@ import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
 import { AuditLogsService } from "src/Modules/AuditLogs/Services/audit-logs.service";
 import { SuppliersService } from "src/Modules/Supplier/Services/supplier.service";
+import { flattenArrayWithoutId } from "src/Shared/Helpers/flatten-json.helper";
 
 @Controller("organisations/:organisationId/export")
 export class ExportController {
@@ -64,8 +65,9 @@ export class ExportController {
 
     // Remove `id` field from each requisition
     const sanitizedRequisitions = requisitions.map(({ id, ...rest }) => rest);
-
-    if (sanitizedRequisitions.length === 0) {
+    const data = flattenArrayWithoutId(sanitizedRequisitions);
+    
+    if (data.length === 0) {
       throw new BadRequestException("No requisitions found");
     }
 
@@ -74,7 +76,7 @@ export class ExportController {
         if (requisitions.length > this.DATA_THRESHOLD) {
           await this.exportService.addExportJob(
             userId,
-            sanitizedRequisitions,
+            data,
             ExportFileType.CSV,
           );
 
@@ -87,14 +89,14 @@ export class ExportController {
 
         return this.exportHelper.exportCSV(
           fileName,
-          sanitizedRequisitions,
+          data,
           res,
         );
       case ExportFileType.EXCEL:
         if (requisitions.length > this.DATA_THRESHOLD) {
           await this.exportService.addExportJob(
             userId,
-            sanitizedRequisitions,
+            data,
             ExportFileType.EXCEL,
           );
 
@@ -106,7 +108,7 @@ export class ExportController {
 
         return await this.exportHelper.exportExcel(
           fileName,
-          sanitizedRequisitions,
+          data,
           res,
         );
       default:
@@ -144,8 +146,9 @@ export class ExportController {
 
     // Remove `id` field from each order
     const sanitizedOrders = orders.map(({ id, ...rest }) => rest);
+    const data = flattenArrayWithoutId(sanitizedOrders);
 
-    if (sanitizedOrders.length === 0) {
+    if (data.length === 0) {
       throw new BadRequestException("No orders found");
     }
 
@@ -154,7 +157,7 @@ export class ExportController {
         if (orders.length > this.DATA_THRESHOLD) {
           await this.exportService.addExportJob(
             userId,
-            sanitizedOrders,
+            data,
             ExportFileType.CSV,
           );
 
@@ -165,12 +168,12 @@ export class ExportController {
           });
         }
 
-        return this.exportHelper.exportCSV(fileName, sanitizedOrders, res);
+        return this.exportHelper.exportCSV(fileName, data, res);
       case ExportFileType.EXCEL:
         if (orders.length > this.DATA_THRESHOLD) {
           await this.exportService.addExportJob(
             userId,
-            sanitizedOrders,
+            data,
             ExportFileType.EXCEL,
           );
 
@@ -182,7 +185,7 @@ export class ExportController {
 
         return await this.exportHelper.exportExcel(
           fileName,
-          sanitizedOrders,
+          data,
           res,
         );
 
@@ -221,10 +224,12 @@ export class ExportController {
       exportAll: true,
     });
 
+    
     // Remove `id` field from each order
-    const sanitizedLogs = logs.map(({ id, ...rest }) => rest);
+    const _logs = logs.map(({ id, ...rest }) => rest);
+    const data = flattenArrayWithoutId(_logs);
 
-    if (sanitizedLogs.length === 0) {
+    if (data.length === 0) {
       throw new BadRequestException("No logs found");
     }
 
@@ -233,7 +238,7 @@ export class ExportController {
         if (logs.length > this.DATA_THRESHOLD) {
           await this.exportService.addExportJob(
             userId,
-            sanitizedLogs,
+            data,
             ExportFileType.CSV,
           );
 
@@ -244,12 +249,12 @@ export class ExportController {
           });
         }
 
-        return this.exportHelper.exportCSV(fileName, sanitizedLogs, res);
+        return this.exportHelper.exportCSV(fileName, data, res);
       case ExportFileType.EXCEL:
         if (logs.length > this.DATA_THRESHOLD) {
           await this.exportService.addExportJob(
             userId,
-            sanitizedLogs,
+            data,
             ExportFileType.EXCEL,
           );
 
@@ -261,7 +266,7 @@ export class ExportController {
 
         return await this.exportHelper.exportExcel(
           fileName,
-          sanitizedLogs,
+          data,
           res,
         );
 
@@ -301,10 +306,9 @@ export class ExportController {
         exportAll: true,
       });
 
-    // Remove `id` field from each order
-    const sanitizedSuppliers = suppliers.map(({ id, ...rest }) => rest);
+    const data = flattenArrayWithoutId(suppliers);
 
-    if (sanitizedSuppliers.length === 0) {
+    if (suppliers.length === 0) {
       throw new BadRequestException("No suppliers found");
     }
 
@@ -313,7 +317,7 @@ export class ExportController {
         if (suppliers.length > this.DATA_THRESHOLD) {
           await this.exportService.addExportJob(
             userId,
-            sanitizedSuppliers,
+            data,
             ExportFileType.CSV,
           );
 
@@ -324,12 +328,12 @@ export class ExportController {
           });
         }
 
-        return this.exportHelper.exportCSV(fileName, sanitizedSuppliers, res);
+        return this.exportHelper.exportCSV(fileName, data, res);
       case ExportFileType.EXCEL:
         if (suppliers.length > this.DATA_THRESHOLD) {
           await this.exportService.addExportJob(
             userId,
-            sanitizedSuppliers,
+            data,
             ExportFileType.EXCEL,
           );
 
@@ -341,7 +345,7 @@ export class ExportController {
 
         return await this.exportHelper.exportExcel(
           fileName,
-          sanitizedSuppliers,
+          data,
           res,
         );
 
