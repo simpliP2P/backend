@@ -25,3 +25,12 @@ export interface AuditLogResponse {
   logs: AuditLog[];
   metadata: AuditLogMetadata;
 }
+
+export interface IGetAllAuditLogsByOrg {
+  organisationId: string;
+  page: number;
+  pageSize: number;
+  startDate?: string;
+  endDate?: string;
+  exportAll?: boolean;
+}
