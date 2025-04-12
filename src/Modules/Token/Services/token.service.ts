@@ -19,6 +19,7 @@ export class TokenService {
     userId: string,
     type: TokenType,
     mins?: number,
+    metaData?: any,
   ): Promise<string> {
     const token = crypto.randomBytes(40).toString("hex");
 
@@ -27,6 +28,7 @@ export class TokenService {
       type,
       expires_at: new Date(Date.now() + (mins || 15) * 60 * 1000), // 15 minutes
       user_id: userId,
+      meta_data: metaData || null,
     };
 
     await this.save(tokenData);
