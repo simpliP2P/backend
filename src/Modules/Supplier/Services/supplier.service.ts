@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from "typeorm";
 import { Supplier } from "../Entities/supplier.entity";
 import { CreateSupplierDto, UpdateSupplierDto } from "../Dtos/supplier.dto";
 import { SupplierExists } from "src/Shared/Exceptions/app.exceptions";
 import { HashHelper } from "src/Shared/Helpers/hash.helper";
+import { IGetAllOrganisationOrders } from "../Types/supplier.types";
 
 @Injectable()
 export class SuppliersService {
@@ -46,30 +47,53 @@ export class SuppliersService {
     }
   }
 
-  public async findAllByOrganisation(
-    organisationId: string,
-    page: number = 1,
-    pageSize: number = 10,
-  ) {
-    let _page = page;
-    let _pageSize = pageSize;
-    if (isNaN(page) || page < 1) _page = 1;
-    if (isNaN(pageSize) || pageSize < 1) _pageSize = 10;
+  public async findAllByOrganisation({
+    organisationId,
+    page,
+    pageSize,
+    startDate,
+    endDate,
+    exportAll = false,
+  }: IGetAllOrganisationOrders) {
+    let _page = page && page > 0 ? page : 1;
+    let _pageSize = pageSize && pageSize > 0 ? pageSize : 10;
 
-    const skip = (_page - 1) * _pageSize; // Calculate the offset
+    const whereConditions: any = {
+      organisation: { id: organisationId },
+    };
 
-    const [data, total] = await this.supplierRepository.findAndCount({
+    if (startDate && endDate) {
+      whereConditions.created_at = Between(
+        new Date(startDate),
+        new Date(endDate),
+      );
+    } else if (startDate) {
+      whereConditions.created_at = MoreThanOrEqual(new Date(startDate));
+    } else if (endDate) {
+      whereConditions.created_at = LessThanOrEqual(new Date(endDate));
+    }
+
+    // Build query options
+    const queryOptions: any = {
       where: { organisation: { id: organisationId } },
       relations: ["category"],
-      take: _pageSize, // Limit the number of results
-      skip, // Skip the previous results
+      
       select: {
         category: {
           id: true,
           name: true,
         },
       },
-    });
+    };
+
+    // Enforce pagination for normal API calls, bypass when exporting
+    if (!exportAll) {
+      queryOptions.take = _pageSize;
+      queryOptions.skip = (_page - 1) * _pageSize;
+    }
+
+    const [data, total] =
+      await this.supplierRepository.findAndCount(queryOptions);
 
     return {
       data,

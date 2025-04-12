@@ -18,6 +18,7 @@ import { ExportHelper } from "src/Shared/Helpers/export.helper";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
 import { AuditLogsService } from "src/Modules/AuditLogs/Services/audit-logs.service";
+import { SuppliersService } from "src/Modules/Supplier/Services/supplier.service";
 
 @Controller("organisations/:organisationId/export")
 export class ExportController {
@@ -29,6 +30,7 @@ export class ExportController {
     private readonly purchaseRequisitionService: PurchaseRequisitionService,
     private readonly purchaseOrderService: PurchaseOrderService,
     private readonly auditlogService: AuditLogsService,
+    private readonly supplierService: SuppliersService,
   ) {}
 
   @Get("requisitions")
@@ -52,7 +54,7 @@ export class ExportController {
     const userId = req.user.sub;
     const fileName = `requisitions-${startDate}-${endDate}`;
 
-    const { requisitions  } =
+    const { requisitions } =
       await this.purchaseRequisitionService.getAllPurchaseRequisitions({
         organisationId,
         startDate,
@@ -260,6 +262,86 @@ export class ExportController {
         return await this.exportHelper.exportExcel(
           fileName,
           sanitizedLogs,
+          res,
+        );
+
+      default:
+        throw new BadRequestException("Invalid export format");
+    }
+  }
+
+  @Get("suppliers")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_PURCHASE_REQUISITIONS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async exportSuppliers(
+    @Param("organisationId") organisationId: string,
+    @Query("format") format: ExportFileType,
+    @Query("startDate") startDate: string,
+    @Query("endDate") endDate: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    if (!format || !startDate || !endDate) {
+      throw new BadRequestException("Missing required query parameters");
+    }
+
+    const userId = req.user.sub;
+    const fileName = `suppliers-${startDate}-${endDate}`;
+
+    const { data: suppliers } =
+      await this.supplierService.findAllByOrganisation({
+        organisationId,
+        page: 1,
+        pageSize: this.DATA_THRESHOLD,
+        startDate,
+        endDate,
+        exportAll: true,
+      });
+
+    // Remove `id` field from each order
+    const sanitizedSuppliers = suppliers.map(({ id, ...rest }) => rest);
+
+    if (sanitizedSuppliers.length === 0) {
+      throw new BadRequestException("No suppliers found");
+    }
+
+    switch (format) {
+      case ExportFileType.CSV:
+        if (suppliers.length > this.DATA_THRESHOLD) {
+          await this.exportService.addExportJob(
+            userId,
+            sanitizedSuppliers,
+            ExportFileType.CSV,
+          );
+
+          return res.json({
+            status: "success",
+            message:
+              "Your export is being processed. You will be notified when it's ready.",
+          });
+        }
+
+        return this.exportHelper.exportCSV(fileName, sanitizedSuppliers, res);
+      case ExportFileType.EXCEL:
+        if (suppliers.length > this.DATA_THRESHOLD) {
+          await this.exportService.addExportJob(
+            userId,
+            sanitizedSuppliers,
+            ExportFileType.EXCEL,
+          );
+
+          return res.json({
+            message:
+              "Your export is being processed. You will be notified when it's ready.",
+          });
+        }
+
+        return await this.exportHelper.exportExcel(
+          fileName,
+          sanitizedSuppliers,
           res,
         );
 
