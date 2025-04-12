@@ -225,11 +225,11 @@ export class OrganisationController {
     @Query("pageSize") pageSize: number,
   ) {
     try {
-      const data = await this.auditLogsService.getAllAuditLogsByOrganisation(
+      const data = await this.auditLogsService.getAllAuditLogsByOrganisation({
         organisationId,
         page,
         pageSize,
-      );
+      });
 
       return {
         status: "success",
