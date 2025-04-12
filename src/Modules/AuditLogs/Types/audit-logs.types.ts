@@ -1,7 +1,7 @@
 import { Organisation } from "src/Modules/Organisation/Entities/organisation.entity";
 import { User } from "src/Modules/User/Entities/user.entity";
 
-export interface AuditLog {
+export interface IAuditLog {
   id: number;
   organisation: Partial<Organisation>;
   user: Partial<User>;
@@ -14,16 +14,16 @@ export interface AuditLog {
   created_at: Date;
 }
 
-export interface AuditLogMetadata {
+export interface IAuditLogMetadata {
   total: number;
   page: number;
   pageSize: number;
   totalPages: number;
 }
 
-export interface AuditLogResponse {
-  logs: AuditLog[];
-  metadata: AuditLogMetadata;
+export interface IAuditLogResponse {
+  logs: IAuditLog[];
+  metadata: IAuditLogMetadata;
 }
 
 export interface IGetAllAuditLogsByOrg {
