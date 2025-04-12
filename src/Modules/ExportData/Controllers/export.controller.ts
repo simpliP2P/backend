@@ -66,7 +66,7 @@ export class ExportController {
     // Remove `id` field from each requisition
     const sanitizedRequisitions = requisitions.map(({ id, ...rest }) => rest);
     const data = flattenArrayWithoutId(sanitizedRequisitions);
-    
+
     if (data.length === 0) {
       throw new BadRequestException("No requisitions found");
     }
@@ -87,11 +87,7 @@ export class ExportController {
           });
         }
 
-        return this.exportHelper.exportCSV(
-          fileName,
-          data,
-          res,
-        );
+        return this.exportHelper.exportCSV(fileName, data, res);
       case ExportFileType.EXCEL:
         if (requisitions.length > this.DATA_THRESHOLD) {
           await this.exportService.addExportJob(
@@ -106,11 +102,7 @@ export class ExportController {
           });
         }
 
-        return await this.exportHelper.exportExcel(
-          fileName,
-          data,
-          res,
-        );
+        return await this.exportHelper.exportExcel(fileName, data, res);
       default:
         throw new BadRequestException("Invalid export format");
     }
@@ -183,11 +175,7 @@ export class ExportController {
           });
         }
 
-        return await this.exportHelper.exportExcel(
-          fileName,
-          data,
-          res,
-        );
+        return await this.exportHelper.exportExcel(fileName, data, res);
 
       default:
         throw new BadRequestException("Invalid export format");
@@ -224,7 +212,6 @@ export class ExportController {
       exportAll: true,
     });
 
-    
     // Remove `id` field from each order
     const _logs = logs.map(({ id, ...rest }) => rest);
     const data = flattenArrayWithoutId(_logs);
@@ -264,11 +251,7 @@ export class ExportController {
           });
         }
 
-        return await this.exportHelper.exportExcel(
-          fileName,
-          data,
-          res,
-        );
+        return await this.exportHelper.exportExcel(fileName, data, res);
 
       default:
         throw new BadRequestException("Invalid export format");
@@ -343,11 +326,7 @@ export class ExportController {
           });
         }
 
-        return await this.exportHelper.exportExcel(
-          fileName,
-          data,
-          res,
-        );
+        return await this.exportHelper.exportExcel(fileName, data, res);
 
       default:
         throw new BadRequestException("Invalid export format");
