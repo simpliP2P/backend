@@ -48,6 +48,7 @@ export class ExportController {
     }
 
     const userId = req.user.sub;
+    const fileName = `requisitions-${startDate}-${endDate}`;
 
     const { requisitions } =
       await this.purchaseRequisitionService.getAllPurchaseRequisitions({
@@ -81,7 +82,7 @@ export class ExportController {
         }
 
         return this.exportHelper.exportCSV(
-          `purchase-requisitions-${startDate}-${endDate}`,
+          fileName,
           sanitizedRequisitions,
           res,
         );
@@ -99,22 +100,11 @@ export class ExportController {
           });
         }
 
-        return await this.exportHelper.exportExcel(sanitizedRequisitions, res);
-      case ExportFileType.WORD:
-        if (requisitions.length > this.DATA_THRESHOLD) {
-          await this.exportService.addExportJob(
-            userId,
-            sanitizedRequisitions,
-            ExportFileType.WORD,
-          );
-
-          return res.json({
-            message:
-              "Your export is being processed. You will be notified when it's ready.",
-          });
-        }
-        return this.exportHelper.exportWord(sanitizedRequisitions, res);
-
+        return await this.exportHelper.exportExcel(
+          fileName,
+          sanitizedRequisitions,
+          res,
+        );
       default:
         throw new BadRequestException("Invalid export format");
     }
@@ -139,6 +129,7 @@ export class ExportController {
     }
 
     const userId = req.user.sub;
+    const fileName = `orders-${startDate}-${endDate}`;
 
     const { orders } = await this.purchaseOrderService.getOrganisationOrders({
       organisationId,
@@ -170,11 +161,7 @@ export class ExportController {
           });
         }
 
-        return this.exportHelper.exportCSV(
-          `purchase-orders-${startDate}-${endDate}`,
-          sanitizedOrders,
-          res,
-        );
+        return this.exportHelper.exportCSV(fileName, sanitizedOrders, res);
       case ExportFileType.EXCEL:
         if (orders.length > this.DATA_THRESHOLD) {
           await this.exportService.addExportJob(
@@ -189,21 +176,11 @@ export class ExportController {
           });
         }
 
-        return await this.exportHelper.exportExcel(sanitizedOrders, res);
-      case ExportFileType.WORD:
-        if (orders.length > this.DATA_THRESHOLD) {
-          await this.exportService.addExportJob(
-            userId,
-            sanitizedOrders,
-            ExportFileType.WORD,
-          );
-
-          return res.json({
-            message:
-              "Your export is being processed. You will be notified when it's ready.",
-          });
-        }
-        return this.exportHelper.exportWord(sanitizedOrders, res);
+        return await this.exportHelper.exportExcel(
+          fileName,
+          sanitizedOrders,
+          res,
+        );
 
       default:
         throw new BadRequestException("Invalid export format");

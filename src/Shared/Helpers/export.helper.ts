@@ -21,16 +21,24 @@ export class ExportHelper {
         return;
       }
 
-      res.header("Content-Type", "text/csv");
-      res.attachment(`${name}.csv`);
-      res.send(csv);
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${name}.csv"`,
+      );
+      res.setHeader("Content-Type", "text/csv");
+      res.status(200).end(csv);
     } catch (error) {
       console.error("CSV Export Error:", error);
       res.status(500).json({ message: "Failed to export CSV" });
     }
   }
 
-  async exportExcel(data: any[], res: Response, filePath?: string) {
+  async exportExcel(
+    name: string,
+    data: any[],
+    res: Response,
+    filePath?: string,
+  ) {
     try {
       const workbook = new Workbook();
       const worksheet = workbook.addWorksheet("Data");
@@ -46,11 +54,15 @@ export class ExportHelper {
         return;
       }
 
-      res.header(
+      res.setHeader(
         "Content-Type",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       );
-      res.attachment("export.xlsx");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${name}.xlsx"`,
+      );
+
       await workbook.xlsx.write(res);
       res.end();
     } catch (error) {
@@ -87,7 +99,7 @@ export class ExportHelper {
       if (fileType === "csv") {
         this.exportCSV(fileName, data, null as any, filePath);
       } else if (fileType === "excel") {
-        await this.exportExcel(data, null as any, filePath);
+        await this.exportExcel(fileName, data, null as any, filePath);
       } else if (fileType === "word") {
         this.exportWord(data, null as any, filePath);
       } else {
