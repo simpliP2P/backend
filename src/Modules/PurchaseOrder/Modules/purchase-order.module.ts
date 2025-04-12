@@ -8,6 +8,8 @@ import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.en
 import { BudgetModule } from "src/Modules/Budget/Modules/budget.module";
 import { MailModule } from "src/Modules/Mail/mail.module";
 import { HashHelper } from "src/Shared/Helpers/hash.helper";
+import { SmsModule } from "src/Modules/Sms/sms.module";
+import { TokenModule } from "src/Modules/Token/token.module";
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { HashHelper } from "src/Shared/Helpers/hash.helper";
     OrganisationModule,
     BudgetModule,
     MailModule,
+    TokenModule,
+    SmsModule,
   ],
   providers: [PurchaseOrderService, HashHelper],
   exports: [PurchaseOrderService],

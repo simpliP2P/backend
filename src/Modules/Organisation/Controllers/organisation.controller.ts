@@ -631,11 +631,11 @@ export class OrganisationController {
   ) {
     try {
       const { data, metadata } =
-        await this.supplierService.findAllByOrganisation(
+        await this.supplierService.findAllByOrganisation({
           organisationId,
           page,
           pageSize,
-        );
+        });
 
       return {
         status: "success",

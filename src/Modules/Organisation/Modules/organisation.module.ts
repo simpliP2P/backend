@@ -32,6 +32,7 @@ import { BudgetService } from "src/Modules/Budget/Services/budget.service";
 import { Budget } from "src/Modules/Budget/Entities/budget.entity";
 import { PdfHelper } from "src/Shared/Helpers/pdf-generator.helper";
 import { HashHelper } from "src/Shared/Helpers/hash.helper";
+import { SmsModule } from "src/Modules/Sms/sms.module";
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { HashHelper } from "src/Shared/Helpers/hash.helper";
     UserModule,
     TokenModule,
     MailModule,
+    SmsModule,
     SuppliersModule,
     ProductModule,
     FileManagerModule,
@@ -84,6 +86,8 @@ import { HashHelper } from "src/Shared/Helpers/hash.helper";
     PurchaseRequisitionService,
     FileManagerModule,
     PdfHelper,
+    ClientHelper,
+    SuppliersModule,
   ],
 })
 export class OrganisationModule {}
