@@ -10,3 +10,8 @@ export enum PaymentTerms {
   NT90 = "90 days payment after invoice",
   NT120 = "120 days payment after invoice",
 }
+
+export enum NotificationChannels {
+  SMS = "sms",
+  Email = "email",
+}

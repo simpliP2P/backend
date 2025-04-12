@@ -12,3 +12,22 @@ export interface SupplierMetadata {
   total_orders: number;
   total_amount: number;
 }
+
+export interface INotificationData {
+  organisationName: string;
+  supplier: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+  poUrl: string;
+}
+
+export interface IGetAllSuppliersByOrg {
+  organisationId: string;
+  page?: number;
+  pageSize?: number;
+  startDate?: string;
+  endDate?: string;
+  exportAll?: boolean;
+}

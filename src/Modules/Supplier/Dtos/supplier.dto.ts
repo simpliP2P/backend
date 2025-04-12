@@ -9,7 +9,7 @@ import {
   IsEnum,
 } from "class-validator";
 import { Address } from "src/Shared/Interfaces/address.interface";
-import { PaymentTerms } from "../Enums/supplier.enum";
+import { NotificationChannels, PaymentTerms } from "../Enums/supplier.enum";
 import { BankDetails } from "../Types/supplier.types";
 
 export class CreateSupplierDto {
@@ -48,6 +48,11 @@ export class CreateSupplierDto {
 
   @IsOptional()
   bank_details: BankDetails;
+
+  @IsString()
+  @IsOptional()
+  @IsEnum(NotificationChannels)
+  notification_channel: NotificationChannels;
 }
 
 export class UpdateSupplierDto {
@@ -88,4 +93,9 @@ export class UpdateSupplierDto {
 
   @IsOptional()
   bank_details: BankDetails;
+
+  @IsString()
+  @IsEnum(NotificationChannels)
+  @IsOptional()
+  notification_channel: NotificationChannels;
 }

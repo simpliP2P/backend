@@ -6,7 +6,7 @@ import { BaseEntity } from "src/Common/entities/base.entity";
 import { BankDetails, SupplierMetadata } from "../Types/supplier.types";
 import { OrganisationCategory } from "src/Modules/Organisation/Entities/organisation-category.entity";
 import { Address } from "src/Shared/Interfaces/address.interface";
-import { PaymentTerms } from "../Enums/supplier.enum";
+import { NotificationChannels, PaymentTerms } from "../Enums/supplier.enum";
 
 @Entity("suppliers")
 export class Supplier extends BaseEntity {
@@ -45,6 +45,13 @@ export class Supplier extends BaseEntity {
 
   @Column({ type: "varchar", nullable: true })
   lead_time: string;
+
+  @Column({
+    type: "enum",
+    enum: NotificationChannels,
+    default: NotificationChannels.Email,
+  })
+  notification_channel: NotificationChannels;
 
   @ManyToOne(() => Organisation, { nullable: false, onDelete: "CASCADE" })
   @JoinColumn({ name: "organisation_id" })

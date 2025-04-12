@@ -5,7 +5,7 @@ import { Supplier } from "../Entities/supplier.entity";
 import { CreateSupplierDto, UpdateSupplierDto } from "../Dtos/supplier.dto";
 import { SupplierExists } from "src/Shared/Exceptions/app.exceptions";
 import { HashHelper } from "src/Shared/Helpers/hash.helper";
-import { IGetAllOrganisationOrders } from "../Types/supplier.types";
+import { IGetAllSuppliersByOrg } from "../Types/supplier.types";
 
 @Injectable()
 export class SuppliersService {
@@ -54,7 +54,7 @@ export class SuppliersService {
     startDate,
     endDate,
     exportAll = false,
-  }: IGetAllOrganisationOrders) {
+  }: IGetAllSuppliersByOrg) {
     let _page = page && page > 0 ? page : 1;
     let _pageSize = pageSize && pageSize > 0 ? pageSize : 10;
 
@@ -77,7 +77,7 @@ export class SuppliersService {
     const queryOptions: any = {
       where: { organisation: { id: organisationId } },
       relations: ["category"],
-      
+
       select: {
         category: {
           id: true,
