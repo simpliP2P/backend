@@ -350,7 +350,7 @@ export class PurchaseRequisitionService {
       approvalData.action_type === PRApprovalActionType.APPROVE_AND_CREATE_PO
     ) {
       // Create purchase order
-      await this.purchaseOrderService.create(organisationId, {
+      this.purchaseOrderService.create(organisationId, {
         request_id: requisitionId,
         total_amount: requisition.estimated_cost,
         supplier_id: approvalData?.supplier_id,
