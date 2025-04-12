@@ -42,7 +42,7 @@ export class AuditSubscriber implements EntitySubscriberInterface {
           event.metadata.tableName
             .replace(/_/g, " ") // Replace underscores with spaces
             .replace(/(s|es)$/, "") // Remove trailing "s" or "es"
-        } (${event.entity.id})`,
+        } ${event.entity.po_number || event.entity.pr_number || event.entity.id}`,
         created_at: new Date(),
       });
     } catch (error) {
