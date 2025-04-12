@@ -11,6 +11,7 @@ export enum TokenType {
   PASSWORD_RESET = "password_reset",
   ORG_INVITATION = "org_invitation",
   REFRESH_TOKEN = "refresh_token",
+  RESOURCE_TOKEN = "resource_token",
 }
 
 export interface MetaData {
