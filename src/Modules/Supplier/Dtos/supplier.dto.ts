@@ -70,7 +70,7 @@ export class UpdateSupplierDto {
 
   @IsString()
   @IsOptional()
-  address?: string;
+  address?: Address;
 
   @IsUUID()
   @IsOptional()
