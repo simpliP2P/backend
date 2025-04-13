@@ -217,9 +217,9 @@ export class PurchaseOrderService {
       select: {
         organisation: {
           name: true,
-          logo: true
-        }
-      }
+          logo: true,
+        },
+      },
     });
 
     if (!order) {

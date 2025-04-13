@@ -17,7 +17,7 @@ export class PurchaseOrderController {
   /**
    * For suppliers to view purchase-order
    */
-  @Get(":id/view")
+  @Get(":id")
   @Public()
   @UseGuards(ResourceGuard)
   async viewPurchaseOrder(
@@ -31,7 +31,7 @@ export class PurchaseOrderController {
       throw new ForbiddenException("Access to resource denied!");
     }
 
-    const { supplier, purchase_requisition, ...purchaseOrder } =
+    const { purchase_requisition, ...purchaseOrder } =
       await this.purchaseOrderService.getOrganisationOrderById(
         organisationId,
         poId,
