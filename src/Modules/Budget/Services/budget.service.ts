@@ -93,9 +93,7 @@ export class BudgetService {
         organisationId!,
         branchId,
       );
-      if (!branch) {
-        throw new NotFoundException(`Branch with ID ${branchId} not found`);
-      }
+
       budget.branch = branch;
     }
 
@@ -104,11 +102,7 @@ export class BudgetService {
         organisationId!,
         departmentId,
       );
-      if (!department) {
-        throw new NotFoundException(
-          `Department with ID ${departmentId} not found`,
-        );
-      }
+      
       budget.department = department;
     }
 

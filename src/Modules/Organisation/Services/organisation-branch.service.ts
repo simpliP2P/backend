@@ -74,13 +74,16 @@ export class OrganisationBranchService {
     const branch = await this.branchRepo.findOne({
       where: { id: branchId, organisation: { id: organisationId } },
     });
-    if (!branch) throw new NotFoundException("Branch not found");
+
     return branch;
   }
 
   async findOne(organisationId: string, branchId: string) {
-    return await this.branchRepo.findOne({
+    const branch = await this.branchRepo.findOne({
       where: { id: branchId, organisation: { id: organisationId } },
     });
+
+    if (!branch) throw new NotFoundException("Branch not found");
+    return branch;
   }
 }

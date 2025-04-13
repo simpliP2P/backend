@@ -10,6 +10,7 @@ import {
 import {
   BadRequestException,
   EmailExistsException,
+  UserNotFoundException,
 } from "src/Shared/Exceptions/app.exceptions";
 import {
   CreateGoogleAccountInput,
@@ -84,7 +85,7 @@ export class UserService {
     const user = await this.userRepository.findOne({ where: { id: userId } });
 
     if (!user) {
-      throw new NotFoundException("User not found");
+      throw new UserNotFoundException();
     }
 
     // Merge new data into the existing user object
@@ -218,7 +219,7 @@ export class UserService {
     });
 
     if (!user) {
-      throw new NotFoundException("User not found");
+      throw new UserNotFoundException();
     }
 
     return {
