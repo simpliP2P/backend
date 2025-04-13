@@ -96,12 +96,6 @@ export class PurchaseOrderService {
 
     const purchaseRequisitionId = pr.id;
 
-    // Generate purchase order Url for supplier to view
-    const poUrl = await this.genPurchaseOrderUrl({
-      organisationId,
-      poId: savedPurchaseOrder.id,
-    });
-
     // Update purchase items with purchase order id
     this.purchaseItemRepository
       .createQueryBuilder()
@@ -112,6 +106,13 @@ export class PurchaseOrderService {
       })
       .andWhere("purchase_order_id IS NULL")
       .execute();
+
+    // Generate purchase order Url for supplier to view
+    const poUrl = await this.genPurchaseOrderUrl({
+      creatorId: savedPurchaseOrder.created_by.id,
+      organisationId,
+      poId: savedPurchaseOrder.id,
+    });
 
     const notificationData = {
       organisationName: pr.organisation.name,
@@ -212,26 +213,13 @@ export class PurchaseOrderService {
   ): Promise<PurchaseOrder> {
     const order = await this.purchaseOrderRepository.findOne({
       where: { organisation: { id: organisationId }, id: orderId },
-      relations: ["supplier", "purchase_requisition", "items"],
-      /*
+      relations: ["supplier", "purchase_requisition", "items", "organisation"],
       select: {
-        items: {
-          item_name: true,
-          unit_price: true,
-          currency: true,
-          pr_quantity: true,
-          po_quantity: true
-        },
-        supplier: {
-          id: true,
-          full_name: true,
-          category: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-      */
+        organisation: {
+          name: true,
+          logo: true
+        }
+      }
     });
 
     if (!order) {
@@ -304,6 +292,7 @@ export class PurchaseOrderService {
    * @param data
    */
   private async genPurchaseOrderUrl(data: {
+    creatorId: string;
     organisationId: string;
     poId: string;
   }): Promise<string> {
@@ -313,7 +302,7 @@ export class PurchaseOrderService {
 
     // generate resource token
     const token = await this.tokenService.createToken(
-      "",
+      data.creatorId, // use creatorId as userId
       TokenType.RESOURCE_TOKEN,
       validFor,
       { organisationId: data.organisationId, poId: data.poId },

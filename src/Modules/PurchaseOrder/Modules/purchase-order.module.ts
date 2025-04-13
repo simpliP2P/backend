@@ -10,6 +10,7 @@ import { MailModule } from "src/Modules/Mail/mail.module";
 import { HashHelper } from "src/Shared/Helpers/hash.helper";
 import { SmsModule } from "src/Modules/Sms/sms.module";
 import { TokenModule } from "src/Modules/Token/token.module";
+import { PurchaseOrderController } from "../Controllers/purchase-order.controller";
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { TokenModule } from "src/Modules/Token/token.module";
     SmsModule,
   ],
   providers: [PurchaseOrderService, HashHelper],
+  controllers: [PurchaseOrderController],
   exports: [PurchaseOrderService],
 })
 export class PurchaseOrderModule {}

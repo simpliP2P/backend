@@ -1,6 +1,6 @@
 import { Module, NestModule } from "@nestjs/common";
-import { ConfigModule, ConfigService } from "@nestjs/config";
-import { BullModule } from "@nestjs/bullmq"; // Import BullMQ
+import { ConfigModule } from "@nestjs/config";
+// import { BullModule } from "@nestjs/bullmq"; // Import BullMQ
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { AuthModule } from "./Modules/User/Modules/auth.module";
@@ -19,6 +19,7 @@ import { PurchaseRequisitionModule } from "./Modules/PurchaseRequisition/Modules
 import { PurchaseItemModule } from "./Modules/PurchaseItem/Modules/purchase-item.module";
 import { FileManagerModule } from "./Modules/FileManager/Modules/file-manager.module";
 import { ExportModule } from "./Modules/ExportData/Modules/export.module";
+import { PurchaseOrderModule } from "./Modules/PurchaseOrder/Modules/purchase-order.module";
 
 @Module({
   imports: [
@@ -27,17 +28,17 @@ import { ExportModule } from "./Modules/ExportData/Modules/export.module";
       load: [configuration],
       cache: true,
     }),
-    BullModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        connection: {
-          host: configService.get<string>("redis.host"),
-          port: configService.get<number>("redis.port"),
-          password: configService.get<string>("redis.password"),
-        },
-      }),
-      inject: [ConfigService],
-    }),
+    // BullModule.forRootAsync({
+    //   imports: [ConfigModule],
+    //   useFactory: async (configService: ConfigService) => ({
+    //     connection: {
+    //       host: configService.get<string>("redis.host"),
+    //       port: configService.get<number>("redis.port"),
+    //       password: configService.get<string>("redis.password"),
+    //     },
+    //   }),
+    //   inject: [ConfigService],
+    // }),
     DatabaseModule,
     AuthModule,
     OAuthModule,
@@ -47,6 +48,7 @@ import { ExportModule } from "./Modules/ExportData/Modules/export.module";
     PurchaseItemModule,
     FileManagerModule,
     ExportModule,
+    PurchaseOrderModule,
   ],
   controllers: [AppController],
   providers: [
