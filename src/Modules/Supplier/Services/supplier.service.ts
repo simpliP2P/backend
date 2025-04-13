@@ -121,15 +121,15 @@ export class SuppliersService {
       },
     });
 
-    if (!supplier) {
-      throw new NotFoundException(`Supplier with ID ${id} not found`);
-    }
-
     return supplier;
   }
 
   public async findOne(query: any) {
-    return await this.supplierRepository.findOne(query);
+    const supplier = await this.supplierRepository.findOne(query);
+
+    if (!supplier) throw new NotFoundException("Supplier not found");
+
+    return supplier;
   }
 
   public async updateOrganisationSupplier(
@@ -142,10 +142,6 @@ export class SuppliersService {
       organisationId,
     );
 
-    if (!supplier) {
-      throw new NotFoundException(`Supplier not found`);
-    }
-
     Object.assign(supplier, updateSupplierDto);
 
     return await this.supplierRepository.save(supplier);
@@ -156,10 +152,6 @@ export class SuppliersService {
       supplierId,
       organisationId,
     );
-
-    if (!supplier) {
-      throw new NotFoundException(`Supplier with ID ${supplierId} not found`);
-    }
 
     await this.supplierRepository.remove(supplier);
   }

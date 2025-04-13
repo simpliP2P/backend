@@ -420,7 +420,11 @@ export class PurchaseRequisitionService {
   public async getPurchaseRequisition(
     query: any,
   ): Promise<PurchaseRequisition | null> {
-    return await this.purchaseRequisitionRepository.findOne(query);
+    const pr = await this.purchaseRequisitionRepository.findOne(query);
+
+    if (!pr) throw new NotFoundException("Purchase Requisition not found");
+
+    return pr
   }
 
   public async count(query: any) {

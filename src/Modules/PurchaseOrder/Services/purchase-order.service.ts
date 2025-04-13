@@ -67,18 +67,14 @@ export class PurchaseOrderService {
       },
     });
 
-    if (!pr) {
-      throw new NotFoundException("Purchase Requisition not found");
-    } else if (pr.status !== PurchaseRequisitionStatus.APPROVED) {
+    if (pr?.status !== PurchaseRequisitionStatus.APPROVED) {
       throw new ForbiddenException("Purchase Requisition not approved");
     }
 
-    // check if supplier exists
+    // get supplier details
     const foundSupplier = await this.supplierService.findOne({
       where: { id: data.supplier_id, organisation: { id: organisationId } },
     });
-
-    if (!foundSupplier) throw new NotFoundException("Supplier not found");
 
     // create purchase order
     const po_number = await this.generatePoNumber(organisationId);
