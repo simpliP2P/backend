@@ -35,7 +35,7 @@ export class TokenExpiredException extends AppException {
 
 export class InvalidTokenException extends AppException {
   constructor() {
-    super("error", HttpStatus.BAD_REQUEST, "Token expired", null);
+    super("error", HttpStatus.BAD_REQUEST, "Token invalid", null);
   }
 }
 
