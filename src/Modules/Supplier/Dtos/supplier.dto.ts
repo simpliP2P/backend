@@ -68,7 +68,6 @@ export class UpdateSupplierDto {
   @IsOptional()
   phone?: string;
 
-  @IsString()
   @IsOptional()
   address?: Address;
 
