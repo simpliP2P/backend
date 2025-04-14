@@ -102,7 +102,7 @@ export class BudgetService {
         organisationId!,
         departmentId,
       );
-      
+
       budget.department = department;
     }
 
