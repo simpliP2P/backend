@@ -35,10 +35,11 @@ export class PurchaseRequisitionService {
     private readonly hashHelper: HashHelper,
   ) {}
 
-  public async checkForUnCompletedRequisition(userId: string) {
+  public async checkForUnCompletedRequisition(userId: string, organisationId: string) {
     return await this.purchaseRequisitionRepository.findOne({
       where: {
         created_by: { id: userId },
+        organisation: { id: organisationId },
         status: PurchaseRequisitionStatus.INITIALIZED,
       },
     });

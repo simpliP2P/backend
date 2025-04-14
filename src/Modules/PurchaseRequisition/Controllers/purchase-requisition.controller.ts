@@ -33,10 +33,16 @@ export class PurchaseRequisitionController {
   ) {
     try {
       const userId = req.user.sub;
+      const organisationId = req.headers.oid as string;
+
+      if (!organisationId) {
+        throw new BadRequestException("Organisation ID is required.");
+      }
 
       const unCompletedRequisition =
         await this.purchaseRequisitionService.checkForUnCompletedRequisition(
           userId,
+          organisationId,
         );
 
       if (unCompletedRequisition) {
