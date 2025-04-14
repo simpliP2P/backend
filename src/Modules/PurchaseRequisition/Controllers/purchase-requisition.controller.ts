@@ -41,7 +41,7 @@ export class PurchaseRequisitionController {
 
       if (unCompletedRequisition) {
         throw new BadRequestException(
-          "You already have an incomplete purchase requisition. Please finalize it before starting a new one.",
+          "Complete your pending requisition before creating a new one"
         );
       }
 
