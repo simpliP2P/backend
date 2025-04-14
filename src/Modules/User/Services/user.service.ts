@@ -3,7 +3,6 @@ import { User } from "../Entities/user.entity";
 import { FindOneOptions, Repository } from "typeorm";
 import {
   Injectable,
-  NotFoundException,
   UnauthorizedException,
   UnprocessableEntityException,
 } from "@nestjs/common";

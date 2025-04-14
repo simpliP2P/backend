@@ -424,7 +424,7 @@ export class PurchaseRequisitionService {
 
     if (!pr) throw new NotFoundException("Purchase Requisition not found");
 
-    return pr
+    return pr;
   }
 
   public async count(query: any) {
