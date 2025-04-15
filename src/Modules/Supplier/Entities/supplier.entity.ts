@@ -17,10 +17,10 @@ export class Supplier extends BaseEntity {
   full_name: string;
 
   @IsEmail()
-  @Column({ type: "varchar", nullable: true, unique: true })
+  @Column({ type: "varchar", nullable: true })
   email: string;
 
-  @Column({ type: "varchar", nullable: true, unique: true })
+  @Column({ type: "varchar", nullable: true })
   phone: string;
 
   @Column({ type: "jsonb", nullable: true })

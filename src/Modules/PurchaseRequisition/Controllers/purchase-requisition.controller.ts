@@ -43,7 +43,7 @@ export class PurchaseRequisitionController {
 
       if (unCompletedRequisition) {
         throw new BadRequestException(
-          "Complete your pending requisition before creating a new one"
+          "Complete your pending requisition before creating a new one",
         );
       }
 

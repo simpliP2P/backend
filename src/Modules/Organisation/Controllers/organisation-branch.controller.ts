@@ -46,10 +46,7 @@ export class OrganisationBranchController {
   }
 
   @Get()
-  @SetMetadata("permissions", [
-    PermissionType.OWNER,
-    PermissionType.ORG_MEMBER,
-  ])
+  @SetMetadata("permissions", [PermissionType.OWNER, PermissionType.ORG_MEMBER])
   @UseGuards(OrganisationPermissionsGuard)
   async getBranches(
     @Param("organisationId") organisationId: string,
@@ -75,10 +72,7 @@ export class OrganisationBranchController {
   }
 
   @Get(":branchId")
-  @SetMetadata("permissions", [
-    PermissionType.OWNER,
-    PermissionType.ORG_MEMBER,
-  ])
+  @SetMetadata("permissions", [PermissionType.OWNER, PermissionType.ORG_MEMBER])
   @UseGuards(OrganisationPermissionsGuard)
   async getBranchById(
     @Param("organisationId") organisationId: string,

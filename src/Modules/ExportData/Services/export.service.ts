@@ -1,21 +1,19 @@
 import { Injectable } from "@nestjs/common";
-import { InjectQueue } from "@nestjs/bullmq";
-import { Queue } from "bullmq";
 import { ExportFileType } from "../Enums/export.enum";
+import { ExportWorker } from "./export-worker.service";
 
 @Injectable()
 export class ExportService {
-  constructor(
-    @InjectQueue("export-queue") private readonly exportQueue: Queue,
-  ) {}
+  constructor(private readonly exportWorker: ExportWorker) {}
 
   async addExportJob(userId: string, data: any[], fileType: ExportFileType) {
-    console.log("Adding export job to queue");
-    const job = await this.exportQueue.add("export-job", {
+    console.log("Processing export job directly");
+    const fileUrl = await this.exportWorker.handleExportJob(
       userId,
       data,
       fileType,
-    });
-    console.log("Job added:", job.id);
+    );
+    console.log("Export job processed for user:", userId);
+    return fileUrl;
   }
 }
