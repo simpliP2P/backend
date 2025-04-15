@@ -25,6 +25,7 @@ export enum PermissionType {
   UPDATE_PRODUCTS = "update_products",
   DELETE_PRODUCTS = "delete_products",
   MANAGE_DEPARTMENTS = "manage_departments",
+  MANAGE_BRANCHES = "manage_branches",
   MANAGE_BUDGETS = "manage_budgets",
   CREATE_BUDGETS = "create_budgets",
   UPDATE_BUDGETS = "update_budgets",

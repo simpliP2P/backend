@@ -49,7 +49,7 @@ export class OrganisationDepartmentController {
   @Get()
   @SetMetadata("permissions", [
     PermissionType.OWNER,
-    PermissionType.MANAGE_DEPARTMENTS,
+    PermissionType.ORG_MEMBER,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async getDepartments(
@@ -78,7 +78,7 @@ export class OrganisationDepartmentController {
   @Get(":departmentId")
   @SetMetadata("permissions", [
     PermissionType.OWNER,
-    PermissionType.MANAGE_DEPARTMENTS,
+    PermissionType.ORG_MEMBER,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async getDepartmentById(

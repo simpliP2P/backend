@@ -22,7 +22,7 @@ export class OrganisationBranchController {
   @Post()
   @SetMetadata("permissions", [
     PermissionType.OWNER,
-    PermissionType.MANAGE_DEPARTMENTS,
+    PermissionType.MANAGE_BRANCHES,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async createBranch(
@@ -48,7 +48,7 @@ export class OrganisationBranchController {
   @Get()
   @SetMetadata("permissions", [
     PermissionType.OWNER,
-    PermissionType.MANAGE_DEPARTMENTS,
+    PermissionType.ORG_MEMBER,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async getBranches(
@@ -77,7 +77,7 @@ export class OrganisationBranchController {
   @Get(":branchId")
   @SetMetadata("permissions", [
     PermissionType.OWNER,
-    PermissionType.MANAGE_DEPARTMENTS,
+    PermissionType.ORG_MEMBER,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async getBranchById(
