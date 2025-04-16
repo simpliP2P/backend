@@ -8,14 +8,16 @@ class GoogleClientConfig {
 
   constructor(private readonly configService: ConfigService) {
     this.googleClient = new OAuth2Client({
-      clientId: this.configService.get<string>("oauth.google.clientId"),
-      clientSecret: this.configService.get<string>("oauth.google.clientSecret"),
+      clientId: this.configService.getOrThrow<string>("oauth.google.clientId"),
+      clientSecret: this.configService.getOrThrow<string>(
+        "oauth.google.clientSecret",
+      ),
       redirectUri:
-        this.configService.get<string>("branchName") === "master"
-          ? this.configService.get<string>(
+        this.configService.getOrThrow<string>("branchName") === "master"
+          ? this.configService.getOrThrow<string>(
               "oauth.google.redirectUrl.productionLink",
             )
-          : this.configService.get<string>(
+          : this.configService.getOrThrow<string>(
               "oauth.google.redirectUrl.stagingLink",
             ),
     });

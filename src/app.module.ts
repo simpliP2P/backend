@@ -32,9 +32,9 @@ import { PurchaseOrderModule } from "./Modules/PurchaseOrder/Modules/purchase-or
     //   imports: [ConfigModule],
     //   useFactory: async (configService: ConfigService) => ({
     //     connection: {
-    //       host: configService.get<string>("redis.host"),
-    //       port: configService.get<number>("redis.port"),
-    //       password: configService.get<string>("redis.password"),
+    //       host: configService.getOrThrow<string>("redis.host"),
+    //       port: configService.getOrThrow<number>("redis.port"),
+    //       password: configService.getOrThrow<string>("redis.password"),
     //     },
     //   }),
     //   inject: [ConfigService],

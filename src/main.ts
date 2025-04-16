@@ -74,7 +74,7 @@ async function bootstrap() {
     }),
   );
 
-  const port = configService.get<number>("port") || 3000;
+  const port = configService.getOrThrow<number>("port") || 3000;
   await app.listen(port);
   logger.log(`Application is running on PORT: ${port}`);
 }

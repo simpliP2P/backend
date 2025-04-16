@@ -9,10 +9,7 @@ export class BrevoEmailService {
 
   constructor(private readonly configService: ConfigService) {
     this.apiUrl = "https://api.brevo.com/v3/smtp/email";
-    const apiKey = this.configService.get<string>("brevo.apiKey");
-    if (!apiKey) {
-      throw new Error("Brevo API key is not defined in the configuration.");
-    }
+    const apiKey = this.configService.getOrThrow<string>("brevo.apiKey");
     this.apiKey = apiKey;
   }
 
@@ -24,7 +21,7 @@ export class BrevoEmailService {
     return {
       sender: {
         name: "SimpliP2P",
-        email: this.configService.get<string>("brevo.email"),
+        email: this.configService.getOrThrow<string>("brevo.email"),
       },
       to: [
         {

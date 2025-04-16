@@ -29,11 +29,11 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
 
     /*
-    const isProdEnv = this.configService.get<string>("isAppInProduction");
-    const stagingClient = this.configService.get<string>(
+    const isProdEnv = this.configService.getOrThrow<string>("isAppInProduction");
+    const stagingClient = this.configService.getOrThrow<string>(
       "clients.staging.landingPage",
     );
-    const productionClient = this.configService.get<string>(
+    const productionClient = this.configService.getOrThrow<string>(
       "clients.production.landingPage",
     );
 

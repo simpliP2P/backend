@@ -14,13 +14,15 @@ export class FileManagerService {
   private region: string;
 
   constructor(private configService: ConfigService) {
-    this.bucketName = this.configService.get<string>("aws.bucketName")!;
-    this.region = this.configService.get<string>("aws.region")!;
+    this.bucketName = this.configService.getOrThrow<string>("aws.bucketName")!;
+    this.region = this.configService.getOrThrow<string>("aws.region")!;
 
     this.s3 = new S3Client({
       credentials: {
-        accessKeyId: this.configService.get<string>("aws.accessKeyId")!,
-        secretAccessKey: this.configService.get<string>("aws.secretAccessKey")!,
+        accessKeyId: this.configService.getOrThrow<string>("aws.accessKeyId")!,
+        secretAccessKey: this.configService.getOrThrow<string>(
+          "aws.secretAccessKey",
+        )!,
       },
       region: this.region,
     });
