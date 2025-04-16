@@ -19,7 +19,7 @@ export class PurchaseItem extends BaseEntity {
   @JoinColumn({ name: "purchase_order_id" })
   purchase_order: PurchaseOrder;
 
-  @ManyToOne(() => Product, { nullable: true }) // Nullable for non-inventory items
+  @ManyToOne(() => Product, { nullable: true, onDelete: "SET NULL" }) // Nullable for non-inventory items
   @JoinColumn({ name: "product_id" })
   product: Product;
 
