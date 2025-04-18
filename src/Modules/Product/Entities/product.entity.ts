@@ -33,11 +33,14 @@ export class Product extends BaseEntity {
   @Column({ name: "stock_qty_alert", nullable: true })
   stockQtyAlert: number;
 
+  @Column({ name: "unit_of_measure", nullable: true })
+  unitOfMeasure: string;
+
   @ManyToOne(() => OrganisationCategory)
   @JoinColumn({ name: "category_id" })
   category: OrganisationCategory;
 
-  @Column({ unique: true, nullable: true })
+  @Column({ name: 'product_code', unique: true, nullable: true })
   @IsOptional()
   productCode: string;
 

@@ -40,6 +40,10 @@ export class CreateProductDto {
   @IsString()
   @IsOptional()
   image_url: string;
+
+  @IsString()
+  @IsOptional()
+  unitOfMeasure: string;
 }
 
 export class UpdateProductDto {
@@ -78,4 +82,8 @@ export class UpdateProductDto {
   @IsUUID()
   @IsOptional()
   category: string;
+
+  @IsString()
+  @IsOptional()
+  unitOfMeasure: string;
 }
