@@ -43,7 +43,7 @@ class IsValidPermission implements ValidatorConstraintInterface {
   }
 
   defaultMessage(_args: ValidationArguments) {
-    return "Each permission must be a valid PermissionType";
+    return "Each permission must be a valid type";
   }
 }
 
@@ -55,7 +55,7 @@ class AtLeastOneConstraint implements ValidatorConstraintInterface {
   }
 
   defaultMessage(args: ValidationArguments) {
-    return `At least one of the following properties must be provided: ${args.constraints.join(", ")}`;
+    return `At least one of the following properties is required: ${args.constraints.join(", ")}`;
   }
 }
 
