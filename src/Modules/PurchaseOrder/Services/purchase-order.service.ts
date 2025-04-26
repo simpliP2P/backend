@@ -261,12 +261,12 @@ export class PurchaseOrderService {
   }
 
   private async generatePoNumber(organisationId: string) {
-     const lastPo = await this.purchaseOrderRepository
-       .createQueryBuilder("po")
-       .where("po.organisation_id = :orgId", { orgId: organisationId })
-       .orderBy("po.created_at", "DESC")
-       .limit(1)
-       .getOne();
+    const lastPo = await this.purchaseOrderRepository
+      .createQueryBuilder("po")
+      .where("po.organisation_id = :orgId", { orgId: organisationId })
+      .orderBy("po.created_at", "DESC")
+      .limit(1)
+      .getOne();
 
     let sequence = 1;
     if (lastPo) {
