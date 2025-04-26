@@ -28,10 +28,13 @@ export class ProductService {
 
     const { category, ...productData } = createProductDto;
 
+    const invNumber = await this.generateInvNumber(organisationId);
+
     const product = this.productRepository.create({
       ...productData,
       organisation: { id: organisationId },
       category: { id: category },
+      inv_number: invNumber,
     });
     return this.productRepository.save(product);
   }
@@ -133,5 +136,20 @@ export class ProductService {
 
   public async count(query: any) {
     return this.productRepository.count(query);
+  }
+
+  private async generateInvNumber(organisationId: string) {
+    const lastProduct = await this.productRepository.findOne({
+      where: { organisation: { id: organisationId } },
+      order: { created_at: "DESC" },
+    });
+
+    let sequence = 1;
+    if (lastProduct) {
+      const match = lastProduct?.inv_number.match(/^PR-(\d+)$/);
+      sequence = match ? parseInt(match[1], 10) + 1 : 1;
+    }
+
+    return `INV-${String(sequence).padStart(3, "0")}`;
   }
 }

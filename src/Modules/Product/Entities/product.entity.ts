@@ -15,6 +15,9 @@ import { OrganisationCategory } from "src/Modules/Organisation/Entities/organisa
 
 @Entity("products")
 export class Product extends BaseEntity {
+  @Column({ nullable: true })
+  inv_number: string; // INV-001
+
   @Column()
   name: string;
 
