@@ -127,7 +127,7 @@ export class GoogleOAuthServices {
   private async assignSession(account: any, req: Request): Promise<AuthTokens> {
     const userId = account.id;
 
-    const tokens = await this.authService.generateTokens(userId, "", req);
+    const tokens = this.authService.generateTokens(userId, "", req);
 
     await this.userService.updateLastLogin(userId);
 
