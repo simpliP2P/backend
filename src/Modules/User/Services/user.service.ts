@@ -47,7 +47,7 @@ export class UserService {
       throw new EmailExistsException();
     }
 
-    const hashedPassword = await hash(data.password, 12);
+    const hashedPassword = await hash(data.password, 10);
 
     const user = this.userRepository.create({
       ...data,
