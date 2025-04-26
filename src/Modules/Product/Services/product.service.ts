@@ -135,7 +135,7 @@ export class ProductService {
     Object.assign(product, updateProductDto);
 
     try {
-      return this.productRepository.save(product);
+      return await this.productRepository.save(product);
     } catch (error) {
       if (error.code === "23505") {
         // Unique violation
