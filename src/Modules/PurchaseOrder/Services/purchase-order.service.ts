@@ -21,7 +21,6 @@ import { PurchaseRequisitionStatus } from "src/Modules/PurchaseRequisition/Enums
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
 import { BudgetService } from "src/Modules/Budget/Services/budget.service";
 import { EmailServices } from "src/Modules/Mail/Services/mail.service";
-import { HashHelper } from "src/Shared/Helpers/hash.helper";
 import { PurchaseOrderStatus } from "../Enums/purchase-order.enum";
 import { ClientHelper } from "src/Shared/Helpers/client.helper";
 import { TokenService } from "src/Modules/Token/Services/token.service";
@@ -45,7 +44,6 @@ export class PurchaseOrderService {
     private readonly supplierService: SuppliersService,
     private readonly budgetService: BudgetService,
     private readonly emailService: EmailServices,
-    private readonly hashHelper: HashHelper,
     private readonly clientHelper: ClientHelper,
     private readonly tokenService: TokenService,
     private readonly smsService: SmsService,
@@ -262,29 +260,21 @@ export class PurchaseOrderService {
     return this.purchaseOrderRepository.count(query);
   }
 
-  private async generatePoNumber(organisationId: string): Promise<string> {
-    const now = new Date();
-    const yy = String(now.getFullYear()).slice(-2);
-    const mm = String(now.getMonth() + 1).padStart(2, "0");
-
-    const tenantCode = this.hashHelper.generateHashFromId(organisationId);
-
-    const lastPo = await this.purchaseOrderRepository
-      .createQueryBuilder("po")
-      .where("po.po_number LIKE :pattern", {
-        pattern: `PO-${tenantCode}-${yy}${mm}-%`,
-      })
-      .orderBy("po.created_at", "DESC")
-      .limit(1)
-      .getOne();
+  private async generatePoNumber(organisationId: string) {
+     const lastPo = await this.purchaseOrderRepository
+       .createQueryBuilder("po")
+       .where("po.organisation_id = :orgId", { orgId: organisationId })
+       .orderBy("po.created_at", "DESC")
+       .limit(1)
+       .getOne();
 
     let sequence = 1;
     if (lastPo) {
-      const match = lastPo.po_number.match(/-(\d+)$/);
+      const match = lastPo.po_number.match(/^PO-(\d+)$/);
       sequence = match ? parseInt(match[1], 10) + 1 : 1;
     }
 
-    return `PO-${tenantCode}-${yy}${mm}-${String(sequence).padStart(3, "0")}`;
+    return `PO-${String(sequence).padStart(3, "0")}`;
   }
 
   /**
