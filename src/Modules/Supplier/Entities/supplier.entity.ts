@@ -10,7 +10,7 @@ import { NotificationChannels, PaymentTerms } from "../Enums/supplier.enum";
 
 @Entity("suppliers")
 export class Supplier extends BaseEntity {
-  @Column({ type: "varchar", unique: true })
+  @Column({ type: "varchar" })
   supplier_no: string;
 
   @Column({ type: "varchar" })
