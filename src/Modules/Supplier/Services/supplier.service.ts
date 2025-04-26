@@ -4,7 +4,6 @@ import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from "typeorm";
 import { Supplier } from "../Entities/supplier.entity";
 import { CreateSupplierDto, UpdateSupplierDto } from "../Dtos/supplier.dto";
 import { SupplierExists } from "src/Shared/Exceptions/app.exceptions";
-import { HashHelper } from "src/Shared/Helpers/hash.helper";
 import { IGetAllSuppliersByOrg } from "../Types/supplier.types";
 
 @Injectable()
@@ -81,6 +80,9 @@ export class SuppliersService {
           id: true,
           name: true,
         },
+      },
+      order: {
+        created_at: "DESC",
       },
     };
 
