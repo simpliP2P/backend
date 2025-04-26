@@ -13,7 +13,7 @@ export class ProductService {
   ) {}
 
   // Create a new product
-  async addProductToOrganisation(
+  public async addProductToOrganisation(
     organisationId: string,
     createProductDto: CreateProductDto,
   ): Promise<Product> {
@@ -36,7 +36,7 @@ export class ProductService {
     return this.productRepository.save(product);
   }
 
-  async findAllProductsByOrganisation(
+  public async findAllProductsByOrganisation(
     organisationId: string,
     page: number = 1,
     pageSize: number = 10,
@@ -81,7 +81,7 @@ export class ProductService {
   }
 
   // Get a single product
-  async findSingleOrganisationProduct(
+  public async findSingleOrganisationProduct(
     organisationId: string,
     productId: string,
   ): Promise<Product> {
@@ -102,7 +102,7 @@ export class ProductService {
   }
 
   // Update a product
-  async updateOrganisationProduct(
+  public async updateOrganisationProduct(
     organisationId: string,
     productId: string,
     updateProductDto: UpdateProductDto,
@@ -120,7 +120,7 @@ export class ProductService {
   }
 
   // Delete a product
-  async deleteOrganisationProduct(
+  public async deleteOrganisationProduct(
     organisationId: string,
     productId: string,
   ): Promise<void> {
@@ -131,7 +131,7 @@ export class ProductService {
     await this.productRepository.remove(product);
   }
 
-  async count(query: any) {
+  public async count(query: any) {
     return this.productRepository.count(query);
   }
 }
