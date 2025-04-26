@@ -181,6 +181,9 @@ export class PurchaseOrderService {
           category: true,
         },
       },
+      order: {
+        created_at: "DESC",
+      },
     };
 
     // Enforce pagination for normal API calls, bypass when exporting
@@ -238,6 +241,7 @@ export class PurchaseOrderService {
       throw new NotFoundException("Purchase order not found");
     }
 
+    // update the product stock quantity
     if (status === PurchaseOrderStatus.APPROVED) {
       const budgetId = order.purchase_requisition.budget.id;
       await this.budgetService.consumeAmount(

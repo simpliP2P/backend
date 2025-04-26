@@ -217,6 +217,9 @@ export class PurchaseRequisitionService {
           po_quantity: true,
         },
       },
+      order: {
+        created_at: "DESC",
+      },
     };
 
     // Enforce pagination for normal API calls, bypass when exporting
