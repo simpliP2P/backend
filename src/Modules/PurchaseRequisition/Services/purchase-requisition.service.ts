@@ -367,7 +367,9 @@ export class PurchaseRequisitionService {
     return updatedRequisition.raw[0];
   }
 
-  // returns: purchase requisition saved for later
+  /**
+   * @returns saved for later pr
+   */
   public async getSavedPurchaseRequisitions(
     page: number = 1,
     pageSize: number = 10,
