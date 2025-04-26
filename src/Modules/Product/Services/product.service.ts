@@ -139,14 +139,16 @@ export class ProductService {
   }
 
   private async generateInvNumber(organisationId: string) {
-    const lastProduct = await this.productRepository.findOne({
-      where: { organisation: { id: organisationId } },
-      order: { created_at: "DESC" },
-    });
+    const lastProduct = await this.productRepository
+      .createQueryBuilder("product")
+      .where("product.organisation_id = :orgId", { orgId: organisationId })
+      .andWhere("product.inv_number IS NOT NULL")
+      .orderBy("product.created_at", "DESC")
+      .getOne();
 
     let sequence = 1;
     if (lastProduct) {
-      const match = lastProduct?.inv_number.match(/^PR-(\d+)$/);
+      const match = lastProduct.inv_number.match(/^INV-(\d+)$/);
       sequence = match ? parseInt(match[1], 10) + 1 : 1;
     }
 
