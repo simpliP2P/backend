@@ -171,10 +171,8 @@ export class SuppliersService {
 
     let sequence = 1;
     if (lastSupplier) {
-      const match = lastSupplier.supplier_no.match(/^SUP-(\d{3})$/);
-      if (match) {
-        sequence = parseInt(match[1], 10) + 1;
-      }
+      const match = lastSupplier.supplier_no.match(/^SUP-(\d+)$/);
+      sequence = match ? parseInt(match[1], 10) + 1 : 1;
     }
 
     return `SUP-${String(sequence).padStart(3, "0")}`;
