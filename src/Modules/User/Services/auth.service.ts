@@ -19,11 +19,7 @@ import { Repository } from "typeorm";
 import { AppLogger } from "src/Logger/logger.service";
 import { randomUUID, createHash } from "crypto";
 import { Request } from "express";
-import {
-  AuthTokens,
-  SanitizedUser,
-  SanitizedUserOrganisation,
-} from "../Types/auth.types";
+import { AuthTokens, SanitizedUser } from "../Types/auth.types";
 import { randomBytes } from "crypto";
 
 @Injectable()
@@ -60,11 +56,10 @@ export class AuthService {
   public async login(
     loginDto: loginDto,
     req: Request,
-  ): Promise<{ tokens: AuthTokens; user: SanitizedUser }> {
-    // Find and validate user
+  ): Promise<{ tokens: AuthTokens; user: Partial<SanitizedUser> }> {
     const user = await this.findAccountByEmail(loginDto.email);
 
-    const validatedUser = await this.validateUserStatus(user);
+    const validatedUser = this.validateUserStatus(user);
 
     await this.verifyPassword(loginDto.password, validatedUser.password_hash);
 
@@ -168,11 +163,11 @@ export class AuthService {
     return tokens;
   }
 
-  public async generateTokens(
+  public generateTokens(
     userId: string,
     tokenFamilyId: string,
     req: Request,
-  ): Promise<AuthTokens> {
+  ): AuthTokens {
     const accessToken = this.tokenHelper.generateAccessToken({
       sub: userId,
     });
@@ -191,11 +186,13 @@ export class AuthService {
       used: false,
     };
 
-    const refreshToken = await this.generateRefreshToken(userId, metaData);
+    const refreshToken = randomBytes(40).toString("hex");
+
+    this.saveRefreshToken(refreshToken, userId, metaData);
 
     return {
       access_token: accessToken,
-      refresh_token: refreshToken.token,
+      refresh_token: refreshToken,
     };
   }
 
@@ -220,58 +217,40 @@ export class AuthService {
     await this.tokenService.delete({ tokenFamily: familyId });
   }
 
-  private async generateRefreshToken(user_id: string, meta_data: MetaData) {
-    const token = randomBytes(40).toString("hex");
-
-    const refreshToken = await this.tokenService.save({
+  private saveRefreshToken(
+    token: string,
+    user_id: string,
+    meta_data: MetaData,
+  ) {
+    this.tokenService.save({
       token,
       type: TokenType.REFRESH_TOKEN,
       expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
       user_id,
       meta_data,
     });
-
-    return refreshToken;
   }
 
   private async findAccountByEmail(email: string) {
     return await this.userRepository.findOne({
       where: { email },
-      relations: ["userOrganisations", "userOrganisations.organisation"],
+      select: {
+        id: true,
+        email: true,
+        password_hash: true,
+        is_verified: true,
+        provider: true,
+      },
     });
   }
 
-  private sanitizeUser(user: User): SanitizedUser {
-    const {
-      password_hash,
-      created_at,
-      updated_at,
-      deleted_at,
-      is_active,
-      is_verified,
-      verified_at,
-      last_login,
-      userOrganisations,
-      ...sanitizedUser
-    } = user;
-    let sanitizedUserOrgs: SanitizedUserOrganisation[] = [];
+  private sanitizeUser(user: Partial<User>): Partial<SanitizedUser> {
+    const { password_hash, is_verified, provider, ...sanitizedUser } = user;
 
-    sanitizedUserOrgs = userOrganisations.map((userOrg) => ({
-      org_id: userOrg.organisation.id,
-      name: userOrg.organisation.name,
-      role: userOrg.role,
-      logo: userOrg.organisation.logo,
-      permissions: userOrg.permissions,
-      is_creator: userOrg.is_creator,
-      accepted_invitation: userOrg.is_creator
-        ? undefined
-        : userOrg.accepted_invitation,
-    }));
-
-    return { ...sanitizedUser, user_organisations: sanitizedUserOrgs };
+    return sanitizedUser;
   }
 
-  private async validateUserStatus(user: User | null): Promise<User> {
+  private validateUserStatus(user: User | null): User {
     if (!user) {
       // same error message as invalid password to prevent user enumeration
       throw new InvalidCredentialsException();
@@ -302,10 +281,10 @@ export class AuthService {
     req: Request,
   ): Promise<{
     tokens: AuthTokens;
-    user: SanitizedUser;
+    user: Partial<SanitizedUser>;
   }> {
     // tokens
-    const tokens = await this.generateTokens(user.id, "", req);
+    const tokens = this.generateTokens(user.id, "", req);
 
     return {
       tokens,

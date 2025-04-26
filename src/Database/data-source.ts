@@ -23,4 +23,7 @@ export const AppDataSource = new DataSource({
   ssl: {
     rejectUnauthorized: inProd,
   },
+  extra: {
+    max: 20, // Set max connections in pool to 20
+  },
 });
