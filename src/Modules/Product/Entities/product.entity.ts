@@ -43,7 +43,7 @@ export class Product extends BaseEntity {
   @JoinColumn({ name: "category_id" })
   category: OrganisationCategory;
 
-  @Column({ name: "product_code", unique: true, nullable: true })
+  @Column({ name: "product_code", nullable: true })
   @IsOptional()
   productCode: string;
 
