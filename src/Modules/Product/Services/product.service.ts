@@ -44,7 +44,7 @@ export class ProductService {
         // Unique violation
         if (error.constraint === "unique_product_code_per_org") {
           throw new BadRequestException(
-            "Product code already exists for this organisation.",
+            "Product code already exists for this organisation",
           );
         }
       }
@@ -133,7 +133,21 @@ export class ProductService {
       throw new NotFoundException(`Product not found`);
     }
     Object.assign(product, updateProductDto);
-    return this.productRepository.save(product);
+
+    try {
+      return this.productRepository.save(product);
+    } catch (error) {
+      if (error.code === "23505") {
+        // Unique violation
+        if (error.constraint === "unique_product_code_per_org") {
+          throw new BadRequestException(
+            "Product code already exists for this organisation",
+          );
+        }
+      }
+      // For other unexpected errors
+      throw error;
+    }
   }
 
   // Delete a product
