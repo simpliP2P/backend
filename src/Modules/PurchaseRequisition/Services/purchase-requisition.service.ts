@@ -21,7 +21,6 @@ import {
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 import { BudgetService } from "src/Modules/Budget/Services/budget.service";
 import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
-import { HashHelper } from "src/Shared/Helpers/hash.helper";
 import { PurchaseOrderStatus } from "src/Modules/PurchaseOrder/Enums/purchase-order.enum";
 
 @Injectable()
@@ -32,7 +31,6 @@ export class PurchaseRequisitionService {
 
     private readonly purchaseOrderService: PurchaseOrderService,
     private readonly budgetService: BudgetService,
-    private readonly hashHelper: HashHelper,
   ) {}
 
   public async checkForUnCompletedRequisition(
@@ -439,25 +437,18 @@ export class PurchaseRequisitionService {
   }
 
   private async generatePrNumber(organisationId: string) {
-    const tenantCode = this.hashHelper.generateHashFromId(organisationId);
-    const now = new Date();
-    const yy = String(now.getFullYear()).slice(-2); // Get last two digits of the year (e.g., "25" for 2025)
-    const mm = String(now.getMonth() + 1).padStart(2, "0"); // Month as 01, 02, ..., 12
-
     const lastPr = await this.purchaseRequisitionRepository
       .createQueryBuilder("pr")
-      .where("pr.pr_number LIKE :pattern", {
-        pattern: `PR-${tenantCode}-${yy}${mm}-%`,
-      })
+      .where("pr.organisation_id = :orgId", { orgId: organisationId })
       .orderBy("pr.created_at", "DESC")
       .getOne();
 
     let sequence = 1;
     if (lastPr) {
-      const lastSeq = lastPr.pr_number.split("-").pop(); // Extract last sequence number
-      sequence = parseInt(lastSeq || "0", 10) + 1;
+      const match = lastPr.pr_number.match(/^PR-(\d+)$/);
+      sequence = match ? parseInt(match[1], 10) + 1 : 1;
     }
 
-    return `PR-${tenantCode}-${yy}${mm}-${String(sequence).padStart(3, "0")}`;
+    return `PR-${String(sequence).padStart(3, "0")}`;
   }
 }
