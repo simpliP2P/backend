@@ -19,7 +19,7 @@ export const AppDataSource = new DataSource({
   entities: [entityPath],
   migrations: ["dist/Database/migrations/*.js"],
   subscribers: [AuditSubscriber],
-  synchronize: true, // set to false when in production
+  synchronize: false,
   ssl: {
     rejectUnauthorized: inProd,
   },
