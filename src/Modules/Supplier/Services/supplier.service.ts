@@ -12,8 +12,6 @@ export class SuppliersService {
   constructor(
     @InjectRepository(Supplier)
     private supplierRepository: Repository<Supplier>,
-
-    private hashHelper: HashHelper,
   ) {}
 
   public async addSupplierToOrganisation(
@@ -160,26 +158,23 @@ export class SuppliersService {
     return await this.supplierRepository.count(query);
   }
 
-  private async generateSupplierNumber(organisationId: string) {
-    const tenantCode = this.hashHelper.generateHashFromId(organisationId);
-    const now = new Date();
-    const yy = String(now.getFullYear()).slice(-2);
-    const mm = String(now.getMonth() + 1).padStart(2, "0"); // Month as 01, 02, ..., 12
-
+  private async generateSupplierNumber(
+    organisationId: string,
+  ): Promise<string> {
     const lastSupplier = await this.supplierRepository
       .createQueryBuilder("sup")
-      .where("sup.supplier_no LIKE :pattern", {
-        pattern: `SUP-${tenantCode}-${yy}${mm}-%`,
-      })
+      .where("sup.organisation_id = :orgId", { orgId: organisationId })
       .orderBy("sup.created_at", "DESC")
       .getOne();
 
     let sequence = 1;
     if (lastSupplier) {
-      const lastSeq = lastSupplier.supplier_no.split("-").pop(); // Extract last sequence number
-      sequence = parseInt(lastSeq || "0", 10) + 1;
+      const match = lastSupplier.supplier_no.match(/^SUP-(\d{3})$/);
+      if (match) {
+        sequence = parseInt(match[1], 10) + 1;
+      }
     }
 
-    return `SUP-${tenantCode}-${yy}${mm}-${String(sequence).padStart(3, "0")}`;
+    return `SUP-${String(sequence).padStart(3, "0")}`;
   }
 }
