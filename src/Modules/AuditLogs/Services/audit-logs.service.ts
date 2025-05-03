@@ -4,6 +4,7 @@ import { AuditLog } from "../Entities/audit-logs.entity";
 import { MoreThan, Repository } from "typeorm";
 import {
   IAuditLogResponse,
+  IFlattenedAuditLog,
   IGetAllAuditLogsByOrg,
 } from "../Types/audit-logs.types";
 import { RequestContext } from "src/Shared/Helpers/request-context.helper";
@@ -96,12 +97,7 @@ export class AuditLogsService {
       .leftJoin("user.userOrganisations", "uo", "uo.organisation_id = :orgId", {
         orgId: organisationId,
       })
-      .addSelect([
-        "user.id",
-        "user.first_name",
-        "user.last_name",
-        "uo.role",
-      ])
+      .addSelect(["user.id", "user.first_name", "user.last_name", "uo.role"])
       .where("log.organisation_id = :orgId", { orgId: organisationId })
       .andWhere(
         startDate && endDate
@@ -122,7 +118,7 @@ export class AuditLogsService {
 
 
     return {
-      logs,
+      logs: this.flattenLogs(logs),
       metadata: {
         total,
         page: _page,
@@ -182,8 +178,8 @@ export class AuditLogsService {
   }: {
     organisationId: string;
     ids: string[];
-  }): Promise<AuditLog[]> {
-    return await this.auditLogRepository
+  }): Promise<IFlattenedAuditLog[]> {
+    const logs = await this.auditLogRepository
       .createQueryBuilder("log")
       .leftJoinAndSelect("log.user", "user")
       .leftJoinAndSelect(
@@ -196,5 +192,24 @@ export class AuditLogsService {
       .where("log.organisation_id = :orgId", { orgId: organisationId })
       .andWhere("log.id IN (:...ids)", { ids })
       .getMany();
+
+
+    return this.flattenLogs(logs);
+  }
+
+  flattenLogs(logs: AuditLog[]): IFlattenedAuditLog[] {
+    return logs.map((log) => {
+      const { user } = log;
+      const role = user?.userOrganisations?.[0]?.role ?? null;
+      const { userOrganisations, ...restOfUser } = user || {};
+
+      return { 
+        ...log,
+        user: {
+          ...restOfUser,
+          role,
+        },
+      };
+    });
   }
 }

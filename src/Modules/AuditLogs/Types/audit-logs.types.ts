@@ -21,8 +21,25 @@ export interface IAuditLogMetadata {
   totalPages: number;
 }
 
+export interface IFlattenedAuditLog {
+  id: number;
+  entity_type: string;
+  entity_id: string;
+  action: string;
+  changed_fields: Record<string, any>;
+  previous_values: Record<string, any>;
+  description: string;
+  created_at: Date;
+  user: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    role: string;
+  };
+}
+
 export interface IAuditLogResponse {
-  logs: IAuditLog[];
+  logs: IFlattenedAuditLog[];
   metadata: IAuditLogMetadata;
 }
 
