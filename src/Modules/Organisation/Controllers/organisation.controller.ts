@@ -1100,11 +1100,11 @@ export class OrganisationController {
   ) {
     try {
       const { data, metadata } =
-        await this.productService.findAllProductsByOrganisation(
+        await this.productService.findAllProductsByOrganisation({
           organisationId,
           page,
           pageSize,
-        );
+        });
 
       return {
         status: "success",

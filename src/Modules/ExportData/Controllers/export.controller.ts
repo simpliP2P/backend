@@ -20,6 +20,7 @@ import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchas
 import { AuditLogsService } from "src/Modules/AuditLogs/Services/audit-logs.service";
 import { SuppliersService } from "src/Modules/Supplier/Services/supplier.service";
 import { flattenArrayWithoutId } from "src/Shared/Helpers/flatten-json.helper";
+import { ProductService } from "src/Modules/Product/Services/product.service";
 
 @Controller("organisations/:organisationId/export")
 export class ExportController {
@@ -32,6 +33,7 @@ export class ExportController {
     private readonly purchaseOrderService: PurchaseOrderService,
     private readonly auditlogService: AuditLogsService,
     private readonly supplierService: SuppliersService,
+    private readonly productService: ProductService,
   ) {}
 
   @Get("requisitions")
@@ -40,7 +42,7 @@ export class ExportController {
     PermissionType.MANAGE_PURCHASE_REQUISITIONS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
-  async exportRequisitions(
+  public async exportRequisitions(
     @Param("organisationId") organisationId: string,
     @Query("format") format: ExportFileType,
     @Query("startDate") startDate: string,
@@ -114,7 +116,7 @@ export class ExportController {
     PermissionType.MANAGE_PURCHASE_REQUISITIONS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
-  async exportOrders(
+  public async exportOrders(
     @Param("organisationId") organisationId: string,
     @Query("format") format: ExportFileType,
     @Query("startDate") startDate: string,
@@ -188,7 +190,7 @@ export class ExportController {
     PermissionType.MANAGE_PURCHASE_REQUISITIONS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
-  async exportAuditLogs(
+  public async exportAuditLogs(
     @Param("organisationId") organisationId: string,
     @Query("format") format: ExportFileType,
     @Query("startDate") startDate: string,
@@ -264,7 +266,7 @@ export class ExportController {
     PermissionType.MANAGE_PURCHASE_REQUISITIONS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
-  async exportSuppliers(
+  public async exportSuppliers(
     @Param("organisationId") organisationId: string,
     @Query("format") format: ExportFileType,
     @Query("startDate") startDate: string,
@@ -330,6 +332,65 @@ export class ExportController {
 
       default:
         throw new BadRequestException("Invalid export format");
+    }
+  }
+
+  @Get("products")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_PRODUCTS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  public async exportProducts(
+    @Param("organisationId") organisationId: string,
+    @Query("format") format: ExportFileType,
+    @Query("startDate") startDate: string,
+    @Query("endDate") endDate: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    if (!format || !Object.values(ExportFileType).includes(format)) {
+      throw new BadRequestException("Invalid export format!");
+    }
+
+    const userId = req.user.sub;
+    const fileName =
+      startDate && endDate ? `products-${startDate}-${endDate}` : "products";
+
+    const { data: products } =
+      await this.productService.findAllProductsByOrganisation({
+        organisationId,
+        page: 1,
+        pageSize: this.DATA_THRESHOLD,
+        startDate,
+        endDate,
+        exportAll: true,
+      });
+
+    if (!products.length) {
+      throw new BadRequestException("No products found");
+    }
+
+    const data = flattenArrayWithoutId(products);
+    const shouldQueue = products.length > this.DATA_THRESHOLD;
+
+    if (shouldQueue) {
+      await this.exportService.addExportJob(userId, data, format);
+      return res.json({
+        status: "success",
+        message:
+          "Your export is being processed. You will be notified when it's ready.",
+      });
+    }
+
+    switch (format) {
+      case ExportFileType.CSV:
+        return this.exportHelper.exportCSV(fileName, data, res);
+      case ExportFileType.EXCEL:
+        return this.exportHelper.exportExcel(fileName, data, res);
+      default:
+        // Defensive fallback: should never reach here
+        throw new BadRequestException("Unsupported export format");
     }
   }
 }

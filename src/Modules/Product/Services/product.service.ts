@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from "typeorm";
 import { Product } from "../Entities/product.entity";
 import { CreateProductDto, UpdateProductDto } from "../Dtos/product.dto";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
+import { IGetAllProductsInput } from "../Types/product.types";
 
 @Injectable()
 export class ProductService {
@@ -53,11 +54,14 @@ export class ProductService {
     }
   }
 
-  public async findAllProductsByOrganisation(
-    organisationId: string,
-    page: number = 1,
-    pageSize: number = 10,
-  ): Promise<{
+  public async findAllProductsByOrganisation({
+    organisationId,
+    page,
+    pageSize,
+    startDate,
+    endDate,
+    exportAll = false,
+  }: IGetAllProductsInput): Promise<{
     data: Product[];
     metadata: {
       total: number;
@@ -66,15 +70,27 @@ export class ProductService {
       totalPages: number;
     };
   }> {
-    let _page = page;
-    let _pageSize = pageSize;
-    if (isNaN(page) || page < 1) _page = 1;
-    if (isNaN(pageSize) || pageSize < 1) _pageSize = 10;
+    let _page = page && page > 0 ? page : 1;
+    let _pageSize = pageSize && pageSize > 0 ? pageSize : 10;
 
-    const skip = (_page - 1) * _pageSize; // Calculate the offset
+    const whereConditions: any = {
+      organisation: { id: organisationId },
+    };
 
-    const [data, total] = await this.productRepository.findAndCount({
-      where: { organisation: { id: organisationId } },
+    if (startDate && endDate) {
+      whereConditions.created_at = Between(
+        new Date(startDate),
+        new Date(endDate),
+      );
+    } else if (startDate) {
+      whereConditions.created_at = MoreThanOrEqual(new Date(startDate));
+    } else if (endDate) {
+      whereConditions.created_at = LessThanOrEqual(new Date(endDate));
+    }
+
+    // Build query options
+    const queryOptions: any = {
+      where: whereConditions,
       relations: ["category"],
       select: {
         category: {
@@ -82,9 +98,19 @@ export class ProductService {
           name: true,
         },
       },
-      take: _pageSize, // Limit the number of results
-      skip, // Skip the previous results
-    });
+      order: {
+        created_at: "DESC",
+      },
+    };
+
+    // Enforce pagination for normal API calls, bypass when exporting
+    if (!exportAll) {
+      queryOptions.take = _pageSize;
+      queryOptions.skip = (_page - 1) * _pageSize;
+    }
+
+    const [data, total] =
+      await this.productRepository.findAndCount(queryOptions);
 
     return {
       data,

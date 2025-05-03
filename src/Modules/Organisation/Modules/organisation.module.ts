@@ -88,6 +88,7 @@ import { SmsModule } from "src/Modules/Sms/sms.module";
     PdfHelper,
     ClientHelper,
     SuppliersModule,
+    ProductModule,
   ],
 })
 export class OrganisationModule {}
