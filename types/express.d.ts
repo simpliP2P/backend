@@ -5,7 +5,7 @@ declare global {
     interface Request {
       user: {
         sub: string; // user id
-        org_sub: string; // organisation id
+        permissions: string[];
       };
     }
   }
