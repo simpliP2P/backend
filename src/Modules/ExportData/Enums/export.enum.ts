@@ -3,3 +3,11 @@ export enum ExportFileType {
   EXCEL = "excel",
   WORD = "word",
 }
+
+export enum ExportEntityType {
+  REQUISITIONS = "requisitions",
+  ORDERS = "orders",
+  LOGS = "logs",
+  PRODUCTS = "products",
+  SUPPLIERS = "suppliers",
+}

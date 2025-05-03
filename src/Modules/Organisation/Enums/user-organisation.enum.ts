@@ -30,4 +30,5 @@ export enum PermissionType {
   CREATE_BUDGETS = "create_budgets",
   UPDATE_BUDGETS = "update_budgets",
   DELETE_BUDGETS = "delete_budgets",
+  VIEW_LOGS = "view_logs",
 }

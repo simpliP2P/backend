@@ -6,7 +6,7 @@ export function flattenObjTwoLevels(obj: any, parentKey = "", skip?: string) {
     if (skip && key === skip) continue; // Skip the specific key if it matches 'skip'
 
     const value = obj[key];
-    const newKey = parentKey ? `${parentKey}.${key}` : key;
+    const newKey = parentKey ? `${parentKey} ${key}` : key;
 
     if (value && typeof value === "object" && !Array.isArray(value)) {
       // Iterate over the nested object one level deeper
@@ -14,7 +14,7 @@ export function flattenObjTwoLevels(obj: any, parentKey = "", skip?: string) {
         if (skip && subKey === skip) continue; // Skip specific subKey if it matches 'skip'
 
         const subValue = value[subKey];
-        const finalKey = `${newKey}.${subKey}`;
+        const finalKey = `${newKey} ${subKey}`;
 
         if (
           subValue &&
@@ -23,7 +23,7 @@ export function flattenObjTwoLevels(obj: any, parentKey = "", skip?: string) {
         ) {
           // 2nd level flattening
           for (const deepKey in subValue) {
-            result[`${finalKey}.${deepKey}`] = subValue[deepKey];
+            result[`${finalKey} ${deepKey}`] = subValue[deepKey];
           }
         } else {
           result[finalKey] = subValue;

@@ -1,19 +1,22 @@
 import {
   Controller,
   Get,
+  Post,
   Param,
   Query,
   Req,
   Res,
   SetMetadata,
   UseGuards,
+  ForbiddenException,
+  Body,
 } from "@nestjs/common";
 import { ExportService } from "../Services/export.service";
 import { PermissionType } from "src/Modules/Organisation/Enums/user-organisation.enum";
 import { OrganisationPermissionsGuard } from "src/Guards/permissions.guard";
 import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchase-requisition.service";
 import { Request, Response } from "express";
-import { ExportFileType } from "../Enums/export.enum";
+import { ExportEntityType, ExportFileType } from "../Enums/export.enum";
 import { ExportHelper } from "src/Shared/Helpers/export.helper";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
@@ -21,6 +24,8 @@ import { AuditLogsService } from "src/Modules/AuditLogs/Services/audit-logs.serv
 import { SuppliersService } from "src/Modules/Supplier/Services/supplier.service";
 import { flattenArrayWithoutId } from "src/Shared/Helpers/flatten-json.helper";
 import { ProductService } from "src/Modules/Product/Services/product.service";
+import { ExportSelectedDto } from "../Dtos/export.dto";
+import { ExportEntityPermissionMap } from "../Constants/export.constants";
 
 @Controller("organisations/:organisationId/export")
 export class ExportController {
@@ -390,6 +395,90 @@ export class ExportController {
         return this.exportHelper.exportExcel(fileName, data, res);
       default:
         // Defensive fallback: should never reach here
+        throw new BadRequestException("Unsupported export format");
+    }
+  }
+
+  @Post("selected")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_PRODUCTS,
+    PermissionType.MANAGE_PURCHASE_REQUISITIONS,
+    PermissionType.MANAGE_PURCHASE_ORDERS,
+    PermissionType.MANAGE_SUPPLIERS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  public async exportSelected(
+    @Body() body: ExportSelectedDto,
+    @Req() req: Request,
+    @Res() res: Response,
+    @Param("organisationId") organisationId: string,
+  ) {
+    const { entity, format, ids } = body;
+    const userId = req.user.sub;
+    const userPermissions = req.user.permissions;
+
+    const allowedPermissions = ExportEntityPermissionMap[entity];
+    const hasPermission = allowedPermissions.some((p) =>
+      userPermissions.includes(p),
+    );
+
+    if (!hasPermission) {
+      throw new ForbiddenException(
+        `You do not have permission to export ${entity}s`,
+      );
+    }
+
+    const fileName = `${entity}-selected-${Date.now()}`;
+    let data: any[] = [];
+    let queryData = { organisationId, ids };
+
+    switch (entity) {
+      case ExportEntityType.REQUISITIONS:
+        data =
+          await this.purchaseRequisitionService.findOrgPurchaseRequisitionsByIds(
+            queryData,
+          );
+        break;
+      case ExportEntityType.ORDERS:
+        data =
+          await this.purchaseOrderService.findOrgPurchaseOrdersByIds(queryData);
+        break;
+      case ExportEntityType.LOGS:
+        data = await this.auditlogService.findOrgLogsByIds(queryData);
+        break;
+      case ExportEntityType.SUPPLIERS:
+        data = await this.supplierService.findOrgSuppliersByIds(queryData);
+        break;
+      case ExportEntityType.PRODUCTS:
+        data = await this.productService.findOrgProductsByIds(queryData);
+        break;
+      default:
+        throw new BadRequestException("Unsupported export entity type");
+    }
+
+    if (!data.length) {
+      throw new BadRequestException(`No ${entity} found for the provided IDs`);
+    }
+
+    const flattened = flattenArrayWithoutId(data);
+    const shouldQueue = flattened.length > this.DATA_THRESHOLD;
+
+    if (shouldQueue) {
+      await this.exportService.addExportJob(userId, flattened, format);
+      return res.json({
+        status: "success",
+        message:
+          "Your export is being processed. You will be notified when it's ready.",
+      });
+    }
+
+    switch (format) {
+      case ExportFileType.CSV:
+        return this.exportHelper.exportCSV(fileName, flattened, res);
+      case ExportFileType.EXCEL:
+        return this.exportHelper.exportExcel(fileName, flattened, res);
+      default:
         throw new BadRequestException("Unsupported export format");
     }
   }
