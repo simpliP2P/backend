@@ -116,7 +116,6 @@ export class AuditLogsService {
       .skip(exportAll ? undefined : (_page - 1) * _pageSize)
       .getManyAndCount();
 
-
     return {
       logs: this.flattenLogs(logs),
       metadata: {
@@ -172,7 +171,7 @@ export class AuditLogsService {
     };
   }
 
-  async findOrgLogsByIds({
+  public async findOrgLogsByIds({
     organisationId,
     ids,
   }: {
@@ -181,18 +180,14 @@ export class AuditLogsService {
   }): Promise<IFlattenedAuditLog[]> {
     const logs = await this.auditLogRepository
       .createQueryBuilder("log")
-      .leftJoinAndSelect("log.user", "user")
-      .leftJoinAndSelect(
-        "user.userOrganisations",
-        "uo",
-        "uo.organisation_id = :orgId",
-        { orgId: organisationId },
-      )
+      .leftJoin("log.user", "user")
+      .leftJoin("user.userOrganisations", "uo", "uo.organisation_id = :orgId", {
+        orgId: organisationId,
+      })
       .addSelect(["user.first_name", "user.last_name", "uo.role"])
       .where("log.organisation_id = :orgId", { orgId: organisationId })
       .andWhere("log.id IN (:...ids)", { ids })
       .getMany();
-
 
     return this.flattenLogs(logs);
   }
@@ -203,7 +198,7 @@ export class AuditLogsService {
       const role = user?.userOrganisations?.[0]?.role ?? null;
       const { userOrganisations, ...restOfUser } = user || {};
 
-      return { 
+      return {
         ...log,
         user: {
           ...restOfUser,
