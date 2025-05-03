@@ -7,7 +7,13 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, Between, MoreThanOrEqual, LessThanOrEqual } from "typeorm";
+import {
+  Repository,
+  Between,
+  MoreThanOrEqual,
+  LessThanOrEqual,
+  In,
+} from "typeorm";
 import { PurchaseOrder } from "../Entities/purchase-order.entity";
 import { Organisation } from "src/Modules/Organisation/Entities/organisation.entity";
 import {
@@ -258,6 +264,31 @@ export class PurchaseOrderService {
 
   public async count(query: any) {
     return this.purchaseOrderRepository.count(query);
+  }
+
+  public async findOrgPurchaseOrdersByIds({
+    organisationId,
+    ids,
+  }: {
+    organisationId: string;
+    ids: string[];
+  }): Promise<PurchaseOrder[]> {
+    return await this.purchaseOrderRepository.find({
+      where: {
+        id: In(ids),
+        organisation: { id: organisationId },
+      },
+      relations: ["supplier", "purchase_requisition"],
+      select: {
+        supplier: {
+          id: true,
+          full_name: true,
+        },
+      },
+      order: {
+        created_at: "DESC",
+      },
+    });
   }
 
   private async generatePoNumber(organisationId: string) {

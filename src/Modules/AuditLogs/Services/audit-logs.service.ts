@@ -1,13 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { AuditLog } from "../Entities/audit-logs.entity";
-import {
-  Between,
-  LessThanOrEqual,
-  MoreThan,
-  MoreThanOrEqual,
-  Repository,
-} from "typeorm";
+import { MoreThan, Repository } from "typeorm";
 import {
   IAuditLogResponse,
   IGetAllAuditLogsByOrg,
@@ -96,45 +90,36 @@ export class AuditLogsService {
     let _page = page && page > 0 ? page : 1;
     let _pageSize = pageSize && pageSize > 0 ? pageSize : 10;
 
-    const whereConditions: any = {
-      organisation: { id: organisationId },
-    };
-
-    if (startDate && endDate) {
-      whereConditions.created_at = Between(
-        new Date(startDate),
-        new Date(endDate),
-      );
-    } else if (startDate) {
-      whereConditions.created_at = MoreThanOrEqual(new Date(startDate));
-    } else if (endDate) {
-      whereConditions.created_at = LessThanOrEqual(new Date(endDate));
-    }
-
-    // Build query options
-    const queryOptions: any = {
-      where: whereConditions,
-      relations: ["user", "user.userOrganisations"],
-      select: {
-        user: {
-          id: true,
-          first_name: true,
-          last_name: true,
-          userOrganisations: {
-            role: true,
-          },
+    const [logs, total] = await this.auditLogRepository
+      .createQueryBuilder("log")
+      .leftJoin("log.user", "user")
+      .leftJoin("user.userOrganisations", "uo", "uo.organisation_id = :orgId", {
+        orgId: organisationId,
+      })
+      .addSelect([
+        "user.id",
+        "user.first_name",
+        "user.last_name",
+        "uo.role",
+      ])
+      .where("log.organisation_id = :orgId", { orgId: organisationId })
+      .andWhere(
+        startDate && endDate
+          ? "log.created_at BETWEEN :startDate AND :endDate"
+          : startDate
+            ? "log.created_at >= :startDate"
+            : endDate
+              ? "log.created_at <= :endDate"
+              : "1=1",
+        {
+          startDate,
+          endDate,
         },
-      },
-    };
+      )
+      .take(exportAll ? undefined : _pageSize)
+      .skip(exportAll ? undefined : (_page - 1) * _pageSize)
+      .getManyAndCount();
 
-    // Enforce pagination for normal API calls, bypass when exporting
-    if (!exportAll) {
-      queryOptions.take = _pageSize;
-      queryOptions.skip = (_page - 1) * _pageSize;
-    }
-
-    const [logs, total] =
-      await this.auditLogRepository.findAndCount(queryOptions);
 
     return {
       logs,
@@ -189,5 +174,27 @@ export class AuditLogsService {
         totalPages: Math.ceil(total / _pageSize),
       },
     };
+  }
+
+  async findOrgLogsByIds({
+    organisationId,
+    ids,
+  }: {
+    organisationId: string;
+    ids: string[];
+  }): Promise<AuditLog[]> {
+    return await this.auditLogRepository
+      .createQueryBuilder("log")
+      .leftJoinAndSelect("log.user", "user")
+      .leftJoinAndSelect(
+        "user.userOrganisations",
+        "uo",
+        "uo.organisation_id = :orgId",
+        { orgId: organisationId },
+      )
+      .addSelect(["user.first_name", "user.last_name", "uo.role"])
+      .where("log.organisation_id = :orgId", { orgId: organisationId })
+      .andWhere("log.id IN (:...ids)", { ids })
+      .getMany();
   }
 }

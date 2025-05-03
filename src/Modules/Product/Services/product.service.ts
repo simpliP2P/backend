@@ -1,6 +1,12 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from "typeorm";
+import {
+  Between,
+  In,
+  LessThanOrEqual,
+  MoreThanOrEqual,
+  Repository,
+} from "typeorm";
 import { Product } from "../Entities/product.entity";
 import { CreateProductDto, UpdateProductDto } from "../Dtos/product.dto";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
@@ -190,6 +196,30 @@ export class ProductService {
 
   public async count(query: any) {
     return this.productRepository.count(query);
+  }
+
+  public async findOrgProductsByIds({
+    organisationId,
+    ids,
+  }: {
+    organisationId: string;
+    ids: string[];
+  }): Promise<Product[]> {
+    return await this.productRepository.find({
+      where: {
+        id: In(ids),
+        organisation: { id: organisationId },
+      },
+      relations: ["category"],
+      select: {
+        category: {
+          name: true,
+        },
+      },
+      order: {
+        created_at: "DESC",
+      },
+    });
   }
 
   private async generateInvNumber(organisationId: string) {

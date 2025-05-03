@@ -438,6 +438,49 @@ export class PurchaseRequisitionService {
     return await this.purchaseRequisitionRepository.count(query);
   }
 
+  public async findOrgPurchaseRequisitionsByIds({
+    organisationId,
+    ids,
+  }: {
+    organisationId: string;
+    ids: string[];
+  }): Promise<PurchaseRequisition[]> {
+    return await this.purchaseRequisitionRepository.find({
+      where: {
+        id: In(ids),
+        organisation: { id: organisationId },
+      },
+      relations: ["created_by", "supplier", "items", "department", "branch"],
+      select: {
+        created_by: {
+          first_name: true,
+        },
+        department: {
+          id: true,
+          name: true,
+        },
+        branch: {
+          id: true,
+          name: true,
+        },
+        supplier: {
+          id: true,
+          full_name: true,
+        },
+        items: {
+          item_name: true,
+          unit_price: true,
+          currency: true,
+          pr_quantity: true,
+          po_quantity: true,
+        },
+      },
+      order: {
+        created_at: "DESC",
+      },
+    });
+  }
+
   private async generatePrNumber(organisationId: string) {
     const lastPr = await this.purchaseRequisitionRepository
       .createQueryBuilder("pr")

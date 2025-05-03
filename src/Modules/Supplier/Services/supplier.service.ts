@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from "typeorm";
+import { Between, In, LessThanOrEqual, MoreThanOrEqual, Repository } from "typeorm";
 import { Supplier } from "../Entities/supplier.entity";
 import { CreateSupplierDto, UpdateSupplierDto } from "../Dtos/supplier.dto";
 import { SupplierExists } from "src/Shared/Exceptions/app.exceptions";
@@ -74,7 +74,6 @@ export class SuppliersService {
     const queryOptions: any = {
       where: { organisation: { id: organisationId } },
       relations: ["category"],
-
       select: {
         category: {
           id: true,
@@ -159,6 +158,31 @@ export class SuppliersService {
   public async count(query: any) {
     return await this.supplierRepository.count(query);
   }
+
+  public async findOrgSuppliersByIds({
+      organisationId,
+      ids,
+    }: {
+      organisationId: string;
+      ids: string[];
+    }): Promise<Supplier[]> {
+      return await this.supplierRepository.find({
+        where: {
+          id: In(ids),
+          organisation: { id: organisationId },
+        },
+        relations: ["category"],
+        select: {
+          category: {
+            id: true,
+            name: true,
+          },
+        },
+        order: {
+          created_at: "DESC",
+        },
+      });
+    }
 
   private async generateSupplierNumber(
     organisationId: string,
