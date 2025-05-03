@@ -46,6 +46,13 @@ export class OrganisationPermissionsGuard implements CanActivate {
         userId,
         organisationId,
       );
+    const userPermissions = userOrganisation?.permissions;
+    if (!userPermissions) {
+      throw new ForbiddenException("User does not have any permissions");
+    }
+
+    // Attach user permissions to the request object
+    request.user.permissions = userPermissions;
 
     if (userOrganisation?.deactivated_at) {
       throw new ForbiddenException(
@@ -72,7 +79,7 @@ export class OrganisationPermissionsGuard implements CanActivate {
 
     // Check if user has the required permissions
     const hasPermission = requiredPermissions.some((permission) =>
-      userOrganisation?.permissions.includes(permission),
+      userPermissions.includes(permission),
     );
 
     // Return true if the user has the required permissions, otherwise false
