@@ -222,7 +222,7 @@ export class ProductService {
     });
   }
 
-  private async generateInvNumber(organisationId: string) {
+  public async generateInvNumber(organisationId: string) {
     const lastProduct = await this.productRepository
       .createQueryBuilder("product")
       .where("product.organisation_id = :orgId", { orgId: organisationId })
