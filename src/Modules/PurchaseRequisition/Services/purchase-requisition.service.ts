@@ -121,7 +121,7 @@ export class PurchaseRequisitionService {
 
   public async createPurchaseRequisition(
     organisationId: string,
-    data: IPurchaseRequisition,
+    data: Partial<IPurchaseRequisition>,
   ): Promise<PurchaseRequisition> {
     return await this.purchaseRequisitionRepository.manager.transaction(
       async (transactionalEntityManager) => {
