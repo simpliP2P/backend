@@ -2,7 +2,6 @@ import {
   ArrayNotEmpty,
   IsArray,
   IsEmail,
-  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
@@ -151,12 +150,6 @@ export class CreatePurchaseRequisitionDto {
 
   @IsString()
   request_description: string;
-
-  @IsNumber()
-  quantity: number;
-
-  @IsNumber()
-  estimated_cost: number;
 
   @IsString()
   currency: string;
