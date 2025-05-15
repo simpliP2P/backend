@@ -35,13 +35,17 @@ export class PurchaseItemService {
     if (foundItem)
       throw new NotFoundException(`Item already exists in the purchase list.`);
 
+    // Create the new purchase item
     const newItem = this.purchaseItemRepo.create({
       ...data,
+      pr_quantity: data.pr_quantity,
       purchase_requisition: { id: data.pr_id, pr_number: data.pr_number },
       product: { id: data.product_id },
       purchase_order: { id: data.purchase_order_id },
       organisation: { id: organisationId },
     });
+
+    // The subscriber will automatically update the PR quanity & estimated cost
     return await this.purchaseItemRepo.save(newItem);
   }
 
@@ -119,15 +123,27 @@ export class PurchaseItemService {
   ): Promise<PurchaseItem> {
     const item = await this.getPurchaseItemById(organisationId, itemId);
     Object.assign(item, data);
+
+    // The subscriber will handle updating the PR totals
     return await this.purchaseItemRepo.save(item);
   }
 
   async deletePurchaseItem(organisationId: string, id: string): Promise<void> {
-    const result = await this.purchaseItemRepo.delete({
-      id,
-      organisation: { id: organisationId },
+    // Find the item first with the PR relation so we have its data for the subscriber
+    const item = await this.purchaseItemRepo.findOne({
+      where: {
+        id,
+        organisation: { id: organisationId },
+      },
+      relations: ["purchase_requisition"],
     });
-    if (result.affected === 0) throw new NotFoundException(`Item not found.`);
+
+    if (!item) {
+      throw new NotFoundException(`Purchase item with ID ${id} not found.`);
+    }
+
+    // Remove the item - the subscriber will update the PR totals
+    await this.purchaseItemRepo.remove(item);
   }
 
   async approvePurchaseItem(
