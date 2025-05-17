@@ -38,6 +38,9 @@ export class PurchaseRequisition extends BaseEntity {
   @Column({ default: "N/A" })
   requestor_name: string;
 
+  @Column({ default: "" })
+  requestor_email: string;
+
   @IsNotEmpty()
   @IsString()
   @Column({ default: "N/A" })
