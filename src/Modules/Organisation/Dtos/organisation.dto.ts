@@ -128,7 +128,6 @@ export class PurchaseItem {
   image_url?: string;
 }
 
-// Custom validation function to check if the date is today or later
 export function IsDateAtLeastToday(validationOptions?: ValidationOptions) {
   return function (object: any, propertyName: string) {
     registerDecorator({
@@ -138,12 +137,15 @@ export function IsDateAtLeastToday(validationOptions?: ValidationOptions) {
       options: validationOptions,
       validator: {
         validate(value: any, _: ValidationArguments) {
-          // Compare the given date to today's date
+          // Convert the value to a Date object if it's a string
+          const date = new Date(value);
+
+          // Get today's date and set time to 00:00:00 for comparison
           const today = new Date();
-          today.setHours(0, 0, 0, 0); // Set today's time to 00:00:00 for comparison
+          today.setHours(0, 0, 0, 0);
 
           // Return false if the given date is earlier than today
-          return value >= today;
+          return date >= today;
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} should be at least today's date`;
@@ -152,6 +154,7 @@ export function IsDateAtLeastToday(validationOptions?: ValidationOptions) {
     });
   };
 }
+
 
 
 export class CreatePurchaseRequisitionDto {
