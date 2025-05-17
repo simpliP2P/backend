@@ -11,6 +11,8 @@ import {
   ValidationArguments,
   ValidatorConstraint,
   ValidatorConstraintInterface,
+  registerDecorator,
+  ValidationOptions,
 } from "class-validator";
 import { PermissionType } from "../Enums/user-organisation.enum";
 import { Type } from "class-transformer";
@@ -126,6 +128,32 @@ export class PurchaseItem {
   image_url?: string;
 }
 
+// Custom validation function to check if the date is today or later
+export function IsDateAtLeastToday(validationOptions?: ValidationOptions) {
+  return function (object: any, propertyName: string) {
+    registerDecorator({
+      name: "isDateAtLeastToday",
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: any, _: ValidationArguments) {
+          // Compare the given date to today's date
+          const today = new Date();
+          today.setHours(0, 0, 0, 0); // Set today's time to 00:00:00 for comparison
+
+          // Return false if the given date is earlier than today
+          return value >= today;
+        },
+        defaultMessage(args: ValidationArguments) {
+          return `${args.property} should be at least today's date`;
+        },
+      },
+    });
+  };
+}
+
+
 export class CreatePurchaseRequisitionDto {
   @IsString()
   pr_number: string;
@@ -148,6 +176,10 @@ export class CreatePurchaseRequisitionDto {
   @IsString()
   requestor_name: string;
 
+  // @IsEmail()
+  // @IsOptional()
+  // requestor_email: string;
+
   @IsString()
   request_description: string;
 
@@ -157,6 +189,12 @@ export class CreatePurchaseRequisitionDto {
   @IsString()
   justification: string;
 
-  @IsString()
+  // @IsString()
+  // @IsOptional()
+  // shipping_address: string;
+
+  @IsDateAtLeastToday({
+    message: "Needed by date must be today or in the future",
+  })
   needed_by_date: Date;
 }
