@@ -3,7 +3,7 @@ import {
   EventSubscriber,
   InsertEvent,
   UpdateEvent,
-  RemoveEvent,  
+  RemoveEvent,
 } from "typeorm";
 import { PurchaseItem } from "../Entities/purchase-item.entity";
 import { PurchaseRequisition } from "../../PurchaseRequisition/Entities/purchase-requisition.entity";

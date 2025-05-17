@@ -108,34 +108,33 @@ export class EmailServices {
   }
 
   async sendProductsBulkUploadResultEmail(
-  email: string,
-  data: {
-    organisationName: string;
-    result: {
-      totalProcessed: number;
-      successCount: number;
-      failedCount: number;
-      failedRows: Array<{
-        rowNumber: number;
-        error: string;
-        data: { name: string };
-      }>;
-    };
-  },
-) {
-  const subject = "Bulk Upload Result for " + data.organisationName;
-  const templateName = "bulkUploadResultEmail"; // should match your .ejs file name
+    email: string,
+    data: {
+      organisationName: string;
+      result: {
+        totalProcessed: number;
+        successCount: number;
+        failedCount: number;
+        failedRows: Array<{
+          rowNumber: number;
+          error: string;
+          data: { name: string };
+        }>;
+      };
+    },
+  ) {
+    const subject = "Bulk Upload Result for " + data.organisationName;
+    const templateName = "bulkUploadResultEmail"; // should match your .ejs file name
 
-  const sendEmailParams = await this.buildSendEmailParams(
-    email,
-    subject,
-    templateName,
-    data,
-  );
+    const sendEmailParams = await this.buildSendEmailParams(
+      email,
+      subject,
+      templateName,
+      data,
+    );
 
-  return this.sendEmail(sendEmailParams);
-}
-
+    return this.sendEmail(sendEmailParams);
+  }
 
   private async sendEmail(params: {
     toAddress: string;

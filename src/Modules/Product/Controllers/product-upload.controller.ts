@@ -92,10 +92,6 @@ export class ProductUploadController {
         throw new BadRequestException("Please upload a file");
       }
 
-      this.logger.log(
-        `File received: ${file.originalname}, size: ${file.size}, mimetype: ${file.mimetype}`,
-      );
-
       // Process the file upload
       await this.productBulkUploadService.processProductFileUpload(
         file,
