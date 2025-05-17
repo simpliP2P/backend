@@ -130,7 +130,11 @@ export class OrganisationCategoryService {
     const skip = (_page - 1) * _pageSize; // Calculate the offset
 
     const [data, total] = await this.categoryRepo.findAndCount({
-      where: { organisation: { id: organisationId } },
+      where: { organisation: { id: organisationId }, deactivated_at: undefined },
+      select: {
+        name: true,
+        deactivated_at: true,
+      },
       // relations: ["organisation"],
       skip,
       take: _pageSize,
