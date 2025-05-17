@@ -240,8 +240,12 @@ export class ProductBulkUploadService {
       failedRows: [],
     };
 
+    this.logger.log(
+      `Starting bulk product creation for organisationId: ${organisationId}`,
+    );
+    
     try {
-      // Fetch all product names for deduplication check
+      // 1. Deduplication: Fetch existing product names
       const existingProducts = await this.productRepository.find({
         where: {
           organisation: { id: organisationId },
@@ -249,37 +253,57 @@ export class ProductBulkUploadService {
         },
         select: { name: true },
       });
-
       const existingProductNames = new Set(existingProducts.map((p) => p.name));
 
-      // Fetch all categories for this organization
+      // 2. Fetch existing categories
       const categoryNames = [...new Set(productsData.map((p) => p.category))];
-      const categories = await this.categoryRepository.find({
+      const existingCategories = await this.categoryRepository.find({
         where: {
           organisation: { id: organisationId },
           name: In(categoryNames),
         },
       });
+      const categoryMap = new Map(existingCategories.map((c) => [c.name, c]));
 
-      const categoryMap = new Map(categories.map((c) => [c.name, c]));
-
-      // Check if all categories exist
-      const missingCategories = categoryNames.filter(
+      // 3. Identify missing categories
+      const missingCategoryNames = categoryNames.filter(
         (name) => !categoryMap.has(name),
       );
-      if (missingCategories.length > 0) {
-        this.logger.warn(
-          `Categories not found: ${missingCategories.join(", ")}`,
-        );
+
+      // 4. Insert missing categories (bulk, ignore duplicates)
+      if (missingCategoryNames.length > 0) {
+        await this.categoryRepository
+          .createQueryBuilder()
+          .insert()
+          .into(OrganisationCategory)
+          .values(
+            missingCategoryNames.map((name) => ({
+              name,
+              organisation: { id: organisationId },
+            })),
+          )
+          .orIgnore()
+          .execute();
       }
 
-      // Generate INV numbers in bulk (assuming this method exists)
+      // 5. Re-fetch all categories for updated mapping
+      const allCategories = await this.categoryRepository.find({
+        where: {
+          organisation: { id: organisationId },
+          name: In(categoryNames),
+        },
+      });
+      allCategories.forEach((c) => {
+        categoryMap.set(c.name, c);
+      });
+
+      // 6. Generate INV number
       const startingInvNumber =
         await this.productService.generateInvNumber(organisationId);
       const invNumberPrefix = startingInvNumber.split("-")[0];
       const startingNumber = parseInt(startingInvNumber.split("-")[1]);
 
-      // Process products in batches for better performance
+      // 7. Validate and prepare products
       const batchSize = 100;
       const validProducts: Product[] = [];
 
@@ -287,20 +311,17 @@ export class ProductBulkUploadService {
         const productData = productsData[i];
 
         try {
-          // Skip existing products
           if (existingProductNames.has(productData.name)) {
             throw new Error(
               `Product with name "${productData.name}" already exists`,
             );
           }
 
-          // Check if category exists
           const category = categoryMap.get(productData.category);
           if (!category) {
             throw new Error(`Category "${productData.category}" not found`);
           }
 
-          // Create product entity
           const product = this.productRepository.create({
             name: productData.name,
             description: productData.description,
@@ -321,14 +342,14 @@ export class ProductBulkUploadService {
         } catch (error) {
           result.failedCount++;
           result.failedRows.push({
-            rowNumber: i + 1, // +1 because spreadsheets are 1-indexed
+            rowNumber: i + 1,
             data: productData,
             error: error.message,
           });
         }
       }
 
-      // Save products in batches
+      // 8. Save products in batches
       if (validProducts.length) {
         for (let i = 0; i < validProducts.length; i += batchSize) {
           const batch = validProducts.slice(i, i + batchSize);
@@ -345,6 +366,7 @@ export class ProductBulkUploadService {
       );
     }
 
+    // 9. Fetch user org info
     const userOrganisation =
       await this.userOrganisationRepository.findByUserAndOrganisation(
         userId,
@@ -358,18 +380,14 @@ export class ProductBulkUploadService {
       return;
     }
 
-    // send email
+    // 10. Send email result
     await this.emailService.sendProductsBulkUploadResultEmail(
-      userOrganisation?.user.email,
+      userOrganisation.user.email,
       {
-        organisationName: userOrganisation?.organisation.name,
-        result: {
-          ...result,
-        },
+        organisationName: userOrganisation.organisation.name,
+        result,
       },
     );
-
-    // return result;
   }
 
   /**
