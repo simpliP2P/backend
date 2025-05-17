@@ -32,7 +32,7 @@ export class ProductBulkUploadService {
   /**
    * Process file upload and convert to product data
    */
-  async processProductFileUpload(
+  public async processProductFileUpload(
     file: Express.Multer.File,
     organisationId: string,
     userId: string,
@@ -94,141 +94,9 @@ export class ProductBulkUploadService {
   }
 
   /**
-   * Parse CSV file buffer to product data
-   */
-  private parseCSV(buffer: Buffer): Promise<ProductUploadDto[]> {
-    return new Promise((resolve, reject) => {
-      try {
-        const stream = new Readable();
-        stream.push(buffer);
-        stream.push(null);
-
-        Papa.parse(stream, {
-          header: true,
-          dynamicTyping: true,
-          skipEmptyLines: true,
-          transformHeader: (header) => header.trim(),
-          complete: (results) => {
-            if (results.errors && results.errors.length > 0) {
-              this.logger.error("CSV parsing errors:", results.errors);
-              reject(
-                new BadRequestException(
-                  `CSV parsing error: ${results.errors[0].message}`,
-                ),
-              );
-              return;
-            }
-
-            try {
-              const transformedData = this.validateAndTransformProducts(
-                results.data,
-              );
-              resolve(transformedData);
-            } catch (error) {
-              reject(
-                new BadRequestException(
-                  `Data validation error: ${error.message}`,
-                ),
-              );
-            }
-          },
-          error: (error) => {
-            this.logger.error("Papa Parse error:", error);
-            reject(
-              new BadRequestException(`CSV parsing error: ${error.message}`),
-            );
-          },
-        });
-      } catch (error) {
-        reject(new BadRequestException(`Error reading CSV: ${error.message}`));
-      }
-    });
-  }
-
-  /**
-   * Parse Excel file buffer to product data
-   */
-  private parseExcel(buffer: Buffer): ProductUploadDto[] {
-    try {
-      const workbook = XLSX.read(buffer, { type: "buffer" });
-
-      if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
-        throw new BadRequestException("No sheets found in the Excel file");
-      }
-
-      const firstSheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheetName];
-
-      const data = XLSX.utils.sheet_to_json(worksheet, {
-        raw: false,
-        defval: "",
-      });
-
-      return this.validateAndTransformProducts(data);
-    } catch (error) {
-      this.logger.error("Excel processing error:", error);
-      throw new BadRequestException(`Excel processing error: ${error.message}`);
-    }
-  }
-
-  /**
-   * Validate and transform raw data to product DTOs
-   */
-  private validateAndTransformProducts(data: any[]): ProductUploadDto[] {
-    if (!data || data.length === 0) {
-      throw new BadRequestException("No data found in the uploaded file");
-    }
-
-    return data.map((row, index) => {
-      try {
-        // Map CSV/Excel columns to DTO properties
-        // Handle potential different column naming conventions
-        const product: ProductUploadDto = {
-          name:
-            row.name || row.Name || row.PRODUCT_NAME || row.product_name || "",
-          description:
-            row.description || row.Description || row.DESCRIPTION || "",
-          unitPrice: parseFloat(
-            row.unitPrice || row.unit_price || row.price || row.Price || 0,
-          ),
-          currency: row.currency || row.Currency || "NGN",
-          stockQty: parseInt(
-            row.stockQty || row.stock_qty || row.quantity || row.Quantity || 0,
-            10,
-          ),
-          stockQtyAlert: row.stockQtyAlert || row.stock_qty_alert || null,
-          unitOfMeasure:
-            row.unitOfMeasure || row.unit_of_measure || row.UOM || null,
-          category: row.category || row.Category || row.CATEGORY || "",
-          productCode:
-            row.productCode || row.product_code || row.sku || row.SKU || null,
-          image_url: row.image_url || row.imageUrl || row.image || null,
-        };
-
-        // Basic validation
-        if (!product.name)
-          throw new Error(`Row ${index + 1}: Product name is required`);
-        if (!product.description)
-          throw new Error(`Row ${index + 1}: Product description is required`);
-        if (isNaN(product.unitPrice) || product.unitPrice <= 0)
-          throw new Error(`Row ${index + 1}: Valid product price is required`);
-        if (isNaN(product.stockQty) || product.stockQty < 0)
-          throw new Error(`Row ${index + 1}: Valid stock quantity is required`);
-        if (!product.category)
-          throw new Error(`Row ${index + 1}: Product category is required`);
-
-        return product;
-      } catch (error) {
-        // Add row number for better error messages
-        throw new Error(`Row ${index + 1}: ${error.message}`);
-      }
-    });
-  }
-
-  /**
    * Bulk create products with optimized database operations
    */
-  async bulkCreateProducts(
+  public async bulkCreateProducts(
     productsData: ProductUploadDto[],
     organisationId: string,
     userId: string,
@@ -243,7 +111,7 @@ export class ProductBulkUploadService {
     this.logger.log(
       `Starting bulk product creation for organisationId: ${organisationId}`,
     );
-    
+
     try {
       // 1. Deduplication: Fetch existing product names
       const existingProducts = await this.productRepository.find({
@@ -388,6 +256,138 @@ export class ProductBulkUploadService {
         result,
       },
     );
+  }
+
+  /**
+   * Parse CSV file buffer to product data
+   */
+  private parseCSV(buffer: Buffer): Promise<ProductUploadDto[]> {
+    return new Promise((resolve, reject) => {
+      try {
+        const stream = new Readable();
+        stream.push(buffer);
+        stream.push(null);
+
+        Papa.parse(stream, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+          transformHeader: (header) => header.trim(),
+          complete: (results) => {
+            if (results.errors && results.errors.length > 0) {
+              this.logger.error("CSV parsing errors:", results.errors);
+              reject(
+                new BadRequestException(
+                  `CSV parsing error: ${results.errors[0].message}`,
+                ),
+              );
+              return;
+            }
+
+            try {
+              const transformedData = this.validateAndTransformProducts(
+                results.data,
+              );
+              resolve(transformedData);
+            } catch (error) {
+              reject(
+                new BadRequestException(
+                  `Data validation error: ${error.message}`,
+                ),
+              );
+            }
+          },
+          error: (error) => {
+            this.logger.error("Papa Parse error:", error);
+            reject(
+              new BadRequestException(`CSV parsing error: ${error.message}`),
+            );
+          },
+        });
+      } catch (error) {
+        reject(new BadRequestException(`Error reading CSV: ${error.message}`));
+      }
+    });
+  }
+
+  /**
+   * Parse Excel file buffer to product data
+   */
+  private parseExcel(buffer: Buffer): ProductUploadDto[] {
+    try {
+      const workbook = XLSX.read(buffer, { type: "buffer" });
+
+      if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+        throw new BadRequestException("No sheets found in the Excel file");
+      }
+
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+
+      const data = XLSX.utils.sheet_to_json(worksheet, {
+        raw: false,
+        defval: "",
+      });
+
+      return this.validateAndTransformProducts(data);
+    } catch (error) {
+      this.logger.error("Excel processing error:", error);
+      throw new BadRequestException(`Excel processing error: ${error.message}`);
+    }
+  }
+
+  /**
+   * Validate and transform raw data to product DTOs
+   */
+  private validateAndTransformProducts(data: any[]): ProductUploadDto[] {
+    if (!data || data.length === 0) {
+      throw new BadRequestException("No data found in the uploaded file");
+    }
+
+    return data.map((row, index) => {
+      try {
+        // Map CSV/Excel columns to DTO properties
+        // Handle potential different column naming conventions
+        const product: ProductUploadDto = {
+          name:
+            row.name || row.Name || row.PRODUCT_NAME || row.product_name || "",
+          description:
+            row.description || row.Description || row.DESCRIPTION || "",
+          unitPrice: parseFloat(
+            row.unitPrice || row.unit_price || row.price || row.Price || 0,
+          ),
+          currency: row.currency || row.Currency || "NGN",
+          stockQty: parseInt(
+            row.stockQty || row.stock_qty || row.quantity || row.Quantity || 0,
+            10,
+          ),
+          stockQtyAlert: row.stockQtyAlert || row.stock_qty_alert || null,
+          unitOfMeasure:
+            row.unitOfMeasure || row.unit_of_measure || row.UOM || null,
+          category: row.category || row.Category || row.CATEGORY || "",
+          productCode:
+            row.productCode || row.product_code || row.sku || row.SKU || null,
+          image_url: row.image_url || row.imageUrl || row.image || null,
+        };
+
+        // Basic validation
+        if (!product.name)
+          throw new Error(`Row ${index + 1}: Product name is required`);
+        if (!product.description)
+          throw new Error(`Row ${index + 1}: Product description is required`);
+        if (isNaN(product.unitPrice) || product.unitPrice <= 0)
+          throw new Error(`Row ${index + 1}: Valid product price is required`);
+        if (isNaN(product.stockQty) || product.stockQty < 0)
+          throw new Error(`Row ${index + 1}: Valid stock quantity is required`);
+        if (!product.category)
+          throw new Error(`Row ${index + 1}: Product category is required`);
+
+        return product;
+      } catch (error) {
+        // Add row number for better error messages
+        throw new Error(`Row ${index + 1}: ${error.message}`);
+      }
+    });
   }
 
   /**
