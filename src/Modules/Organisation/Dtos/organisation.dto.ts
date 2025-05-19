@@ -171,8 +171,8 @@ export class CreatePurchaseRequisitionDto {
   @IsOptional()
   supplier_id: string;
 
-  @IsEmail()
-  contact_info: string;
+  @IsString()
+  requestor_phone: string;
 
   @IsString()
   requestor_name: string;

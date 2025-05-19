@@ -31,7 +31,7 @@ export class PurchaseRequisition extends BaseEntity {
   @IsNotEmpty()
   @IsString()
   @Column({ default: "N/A" })
-  contact_info: string;
+  requestor_phone: string;
 
   @IsNotEmpty()
   @IsString()

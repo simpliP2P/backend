@@ -9,7 +9,8 @@ export interface IPurchaseRequisition {
   department: OrganisationDepartment;
   branch?: OrganisationBranch;
   supplier?: Supplier;
-  contact_info: string;
+  requestor_phone: string;
+  requestor_email?: string;
   requestor_name: string;
   request_description: string;
   quantity: number;
@@ -23,7 +24,8 @@ export interface ICreatePurchaseRequisition {
   department_id?: string;
   branch_id?: string;
   supplier_id?: string;
-  contact_info: string;
+  requestor_phone: string;
+  requestor_email: string;
   requestor_name: string;
   request_description: string;
   justification: string;
