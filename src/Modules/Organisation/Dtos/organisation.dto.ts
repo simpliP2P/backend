@@ -155,8 +155,6 @@ export function IsDateAtLeastToday(validationOptions?: ValidationOptions) {
   };
 }
 
-
-
 export class CreatePurchaseRequisitionDto {
   @IsString()
   pr_number: string;
@@ -179,9 +177,9 @@ export class CreatePurchaseRequisitionDto {
   @IsString()
   requestor_name: string;
 
-  // @IsEmail()
-  // @IsOptional()
-  // requestor_email: string;
+  @IsEmail()
+  @IsOptional()
+  requestor_email: string;
 
   @IsString()
   request_description: string;
