@@ -262,6 +262,7 @@ export class PurchaseRequisitionService {
         branch: {
           id: true,
           name: true,
+          address: true,
         },
         supplier: {
           id: true,
