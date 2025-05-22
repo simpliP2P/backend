@@ -59,7 +59,7 @@ export class TokenHelper {
       return this.jwt.verify(token, { secret });
     } catch (error) {
       if (error.name === "TokenExpiredError") {
-        throw new Error("Token has expired. Request a new token.");
+        throw new Error("Session expired");
       } else {
         throw new Error("Token verification failed.");
       }
