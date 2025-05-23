@@ -19,7 +19,6 @@ import {
   acceptInvitationDto,
   addUserToOrgDto,
   CreateOrganisationDto,
-  CreatePurchaseRequisitionDto,
   UpdateOrganisationDto,
   updateUserDetailsDto,
 } from "../Dtos/organisation.dto";
@@ -55,6 +54,7 @@ import { OrganisationDepartment } from "../Entities/organisation-department.enti
 import { PurchaseOrderStatus } from "src/Modules/PurchaseOrder/Enums/purchase-order.enum";
 import { Supplier } from "src/Modules/Supplier/Entities/supplier.entity";
 import { OrganisationBranch } from "../Entities/organisation-branch.entity";
+import { CreatePurchaseRequisitionDto } from "src/Modules/PurchaseRequisition/Dtos/purchase-requisition.dto";
 
 @Controller("organisations")
 export class OrganisationController {

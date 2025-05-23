@@ -13,7 +13,7 @@ import { InitializePurchaseRequisitionDto } from "../Dtos/purchase-requisition.d
 import { PermissionType } from "src/Modules/Organisation/Enums/user-organisation.enum";
 import { OrganisationPermissionsGuard } from "src/Guards/permissions.guard";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
-import { CreatePurchaseRequisitionDto } from "src/Modules/Organisation/Dtos/organisation.dto";
+import { CreatePurchaseRequisitionDto } from "../Dtos/purchase-requisition.dto";
 
 @Controller("purchase-requisitions")
 export class PurchaseRequisitionController {
