@@ -176,36 +176,46 @@ export class PurchaseItemService {
     organisationId: string,
     id: string,
   ): Promise<{ item: {}; purchase_requisition: Partial<PurchaseRequisition> }> {
-    // Find the item first with the PR relation so we have its data for the subscriber
-    const item = await this.purchaseItemRepo.findOne({
-      where: {
-        id,
-        organisation: { id: organisationId },
-      },
-      relations: ["purchase_requisition"],
-    });
+    try {
+      const itemRows = await this.purchaseItemRepo.query(
+        `
+        SELECT 
+          pi.id, pi.pr_quantity, pi.unit_price, 
+          pr.id AS pr_id, pr.estimated_cost, pr.quantity 
+        FROM purchase_items pi
+        INNER JOIN purchase_requisitions pr 
+          ON pi.purchase_requisition_id = pr.id
+        WHERE pi.id = $1 AND pi.organisation_id = $2
+        LIMIT 1
+        `,
+        [id, organisationId],
+      );
 
-    if (!item) {
-      throw new NotFoundException(`puchase item not found`);
+      if (!itemRows.length) {
+        throw new NotFoundException(`Purchase item not found`);
+      }
+
+      const item = itemRows[0];
+      const itemTotalPrice = item.pr_quantity * item.unit_price;
+      const prTotalQty = item.quantity - item.pr_quantity;
+      const prTotalCost = item.estimated_cost - itemTotalPrice;
+
+      await this.purchaseItemRepo.query(
+        `DELETE FROM purchase_items WHERE id = $1 AND organisation_id = $2`,
+        [id, organisationId],
+      );
+
+      return {
+        item: {},
+        purchase_requisition: {
+          id: item.pr_id,
+          estimated_cost: prTotalCost,
+          quantity: prTotalQty,
+        },
+      };
+    } catch (error) {
+      throw error;
     }
-
-    const pr = item.purchase_requisition;
-    const itemTotalPrice = item.pr_quantity * item.unit_price;
-
-    const prTotalQty = pr.quantity - item.pr_quantity;
-    const prTotalCost = pr.estimated_cost - itemTotalPrice;
-
-    // Remove the item - the subscriber will update the PR totals
-    await this.purchaseItemRepo.remove(item);
-
-    return {
-      item: {},
-      purchase_requisition: {
-        id: pr.id,
-        estimated_cost: prTotalCost,
-        quantity: prTotalQty,
-      },
-    };
   }
 
   async approvePurchaseItem(
