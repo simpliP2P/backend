@@ -36,7 +36,7 @@ export class PurchaseItemController {
     try {
       const organisationId = req.headers["oid"] as string;
 
-      const item = await this.purchaseItemService.createPurchaseItem(
+      const createdData = await this.purchaseItemService.createPurchaseItem(
         organisationId,
         data,
       );
@@ -44,7 +44,7 @@ export class PurchaseItemController {
       return {
         status: "success",
         message: "Item added successfully",
-        data: { item },
+        data: createdData,
       };
     } catch (error) {
       throw error;
@@ -160,11 +160,12 @@ export class PurchaseItemController {
     try {
       const organisationId = req.headers["oid"] as string;
 
-      await this.purchaseItemService.deletePurchaseItem(organisationId, id);
+      const data = await this.purchaseItemService.deletePurchaseItem(organisationId, id);
 
       return {
         status: "success",
         message: "Item deleted successfully",
+        data
       };
     } catch (error) {
       throw error;

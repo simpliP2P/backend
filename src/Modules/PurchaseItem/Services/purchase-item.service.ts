@@ -7,12 +7,15 @@ import {
   UpdatePurchaseItemDto,
 } from "../Dtos/purchase-item.dto";
 import { PurchaseItemStatus } from "../Enums/purchase-item.enum";
+import { PurchaseRequisition } from "../../PurchaseRequisition/Entities/purchase-requisition.entity";
 
 @Injectable()
 export class PurchaseItemService {
   constructor(
     @InjectRepository(PurchaseItem)
     private readonly purchaseItemRepo: Repository<PurchaseItem>,
+    @InjectRepository(PurchaseRequisition)
+    private readonly prRepo: Repository<PurchaseRequisition>,
   ) {}
 
   async insertBulkPurchaseItems(items: PurchaseItemDto[]): Promise<void> {
@@ -22,31 +25,53 @@ export class PurchaseItemService {
   async createPurchaseItem(
     organisationId: string,
     data: PurchaseItemDto,
-  ): Promise<PurchaseItem> {
-    const foundItem = await this.purchaseItemRepo.findOne({
-      where: {
-        product: { id: data.product_id },
-        item_name: data.item_name,
-        organisation: { id: organisationId },
-        purchase_requisition: { id: data.pr_id, pr_number: data.pr_number },
-      },
-    });
+  ): Promise<{
+    item: PurchaseItem;
+    purchase_requisition: Partial<PurchaseRequisition>;
+  }> {
+    const [itemExists, pr] = await Promise.all([
+      this.purchaseItemRepo.findOne({
+        where: {
+          product: { id: data.product_id },
+          item_name: data.item_name,
+          organisation: { id: organisationId },
+          purchase_requisition: { id: data.pr_id },
+        },
+      }),
+      this.prRepo.findOne({
+        where: { id: data.pr_id, organisation: { id: organisationId } },
+        select: { id: true, estimated_cost: true, quantity: true },
+      }),
+    ]);
 
-    if (foundItem)
-      throw new NotFoundException(`Item already exists in the purchase list.`);
+    if (itemExists) throw new NotFoundException(`Item already exists in PR`);
+    if (!pr) throw new NotFoundException(`PR not found`);
 
-    // Create the new purchase item
+    const newItemCost = data.pr_quantity * data.unit_price;
+    const prTotalQty = pr.quantity + data.pr_quantity;
+    const prTotalCost = pr.estimated_cost + newItemCost;
+
     const newItem = this.purchaseItemRepo.create({
       ...data,
       pr_quantity: data.pr_quantity,
-      purchase_requisition: { id: data.pr_id, pr_number: data.pr_number },
+      purchase_requisition: { id: data.pr_id },
       product: { id: data.product_id },
       purchase_order: { id: data.purchase_order_id },
       organisation: { id: organisationId },
     });
 
-    // The subscriber will automatically update the PR quanity & estimated cost
-    return await this.purchaseItemRepo.save(newItem);
+    const savedItem = await this.purchaseItemRepo.save(newItem);
+    savedItem.purchase_requisition = undefined as any;
+    savedItem.purchase_order = undefined as any;
+    savedItem.product = undefined as any;
+
+    const purchase_requisition = {
+      id: pr.id,
+      estimated_cost: prTotalCost,
+      quantity: prTotalQty,
+    };
+
+    return { item: savedItem, purchase_requisition };
   }
 
   async getAllPurchaseItems(
@@ -128,7 +153,10 @@ export class PurchaseItemService {
     return await this.purchaseItemRepo.save(item);
   }
 
-  async deletePurchaseItem(organisationId: string, id: string): Promise<void> {
+  async deletePurchaseItem(
+    organisationId: string,
+    id: string,
+  ): Promise<{ item: {}; purchase_requisition: Partial<PurchaseRequisition> }> {
     // Find the item first with the PR relation so we have its data for the subscriber
     const item = await this.purchaseItemRepo.findOne({
       where: {
@@ -139,11 +167,26 @@ export class PurchaseItemService {
     });
 
     if (!item) {
-      throw new NotFoundException(`Purchase item with ID ${id} not found.`);
+      throw new NotFoundException(`puchase item not found`);
     }
+
+    const pr = item.purchase_requisition;
+    const itemTotalPrice = item.pr_quantity * item.unit_price;
+
+    const prTotalQty = pr.quantity - item.pr_quantity;
+    const prTotalCost = pr.estimated_cost - itemTotalPrice;
 
     // Remove the item - the subscriber will update the PR totals
     await this.purchaseItemRepo.remove(item);
+
+    return {
+      item: {},
+      purchase_requisition: {
+        id: pr.id,
+        estimated_cost: prTotalCost,
+        quantity: prTotalQty,
+      },
+    };
   }
 
   async approvePurchaseItem(
