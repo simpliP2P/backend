@@ -30,6 +30,7 @@ export class PurchaseItemService {
     item: PurchaseItem;
     purchase_requisition: Partial<PurchaseRequisition>;
   }> {
+    // Raw SQL is used here to avoid the overhead of TypeORM's entity manager
     try {
       const prRows = await this.prRepo.query(
         `SELECT id, estimated_cost, quantity, currency FROM purchase_requisitions WHERE id = $1 AND organisation_id = $2 LIMIT 1`,
