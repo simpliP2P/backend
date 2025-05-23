@@ -8,6 +8,7 @@ import {
 } from "../Dtos/purchase-item.dto";
 import { PurchaseItemStatus } from "../Enums/purchase-item.enum";
 import { PurchaseRequisition } from "../../PurchaseRequisition/Entities/purchase-requisition.entity";
+import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 
 @Injectable()
 export class PurchaseItemService {
@@ -29,49 +30,66 @@ export class PurchaseItemService {
     item: PurchaseItem;
     purchase_requisition: Partial<PurchaseRequisition>;
   }> {
-    const [itemExists, pr] = await Promise.all([
-      this.purchaseItemRepo.findOne({
-        where: {
-          product: { id: data.product_id },
-          item_name: data.item_name,
-          organisation: { id: organisationId },
-          purchase_requisition: { id: data.pr_id },
+    try {
+      const prRows = await this.prRepo.query(
+        `SELECT id, estimated_cost, quantity, currency FROM purchase_requisitions WHERE id = $1 AND organisation_id = $2 LIMIT 1`,
+        [data.pr_id, organisationId],
+      );
+
+      if (!prRows.length) throw new NotFoundException(`PR not found`);
+      const pr = prRows[0] as PurchaseRequisition;
+
+      const newItemCost = data.pr_quantity * data.unit_price;
+      const prTotalQty = pr.quantity + data.pr_quantity;
+      const prTotalCost = pr.estimated_cost + newItemCost;
+
+      const [savedItem] = await this.purchaseItemRepo.query(
+        `
+        INSERT INTO purchase_items (
+          item_name,
+          unit_price,
+          pr_quantity,
+          currency,
+          image_url,
+          purchase_requisition_id,
+          product_id,
+          purchase_order_id,
+          organisation_id
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        RETURNING id, item_name, unit_price, pr_quantity;
+        `,
+        [
+          data.item_name,
+          data.unit_price,
+          data.pr_quantity,
+          data.currency || "NGN",
+          data.image_url,
+          data.pr_id,
+          data.product_id,
+          data.purchase_order_id,
+          organisationId,
+        ],
+      );
+
+      return {
+        item: savedItem,
+        purchase_requisition: {
+          id: pr.id,
+          estimated_cost: prTotalCost,
+          quantity: prTotalQty,
+          currency: pr.currency,
         },
-      }),
-      this.prRepo.findOne({
-        where: { id: data.pr_id, organisation: { id: organisationId } },
-        select: { id: true, estimated_cost: true, quantity: true },
-      }),
-    ]);
+      };
+    } catch (error) {
+      if (
+        error.code === "23505" &&
+        error.constraint === "unique_item_per_org_pr"
+      ) {
+        throw new BadRequestException("Item exist in PR");
+      }
 
-    if (itemExists) throw new NotFoundException(`Item already exists in PR`);
-    if (!pr) throw new NotFoundException(`PR not found`);
-
-    const newItemCost = data.pr_quantity * data.unit_price;
-    const prTotalQty = pr.quantity + data.pr_quantity;
-    const prTotalCost = pr.estimated_cost + newItemCost;
-
-    const newItem = this.purchaseItemRepo.create({
-      ...data,
-      pr_quantity: data.pr_quantity,
-      purchase_requisition: { id: data.pr_id },
-      product: { id: data.product_id },
-      purchase_order: { id: data.purchase_order_id },
-      organisation: { id: organisationId },
-    });
-
-    const savedItem = await this.purchaseItemRepo.save(newItem);
-    savedItem.purchase_requisition = undefined as any;
-    savedItem.purchase_order = undefined as any;
-    savedItem.product = undefined as any;
-
-    const purchase_requisition = {
-      id: pr.id,
-      estimated_cost: prTotalCost,
-      quantity: prTotalQty,
-    };
-
-    return { item: savedItem, purchase_requisition };
+      throw error;
+    }
   }
 
   async getAllPurchaseItems(

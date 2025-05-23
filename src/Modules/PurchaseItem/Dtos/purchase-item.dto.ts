@@ -13,10 +13,6 @@ export class PurchaseItemDto {
   pr_id: string;
 
   @IsOptional()
-  @IsString()
-  pr_number: string;
-
-  @IsOptional()
   @IsUUID()
   purchase_order_id?: string;
 
@@ -24,7 +20,6 @@ export class PurchaseItemDto {
   @IsUUID()
   product_id?: string;
 
-  // @IsOptional()
   @IsString()
   item_name: string;
 

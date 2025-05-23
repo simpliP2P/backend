@@ -160,12 +160,15 @@ export class PurchaseItemController {
     try {
       const organisationId = req.headers["oid"] as string;
 
-      const data = await this.purchaseItemService.deletePurchaseItem(organisationId, id);
+      const data = await this.purchaseItemService.deletePurchaseItem(
+        organisationId,
+        id,
+      );
 
       return {
         status: "success",
         message: "Item deleted successfully",
-        data
+        data,
       };
     } catch (error) {
       throw error;
