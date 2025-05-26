@@ -444,7 +444,7 @@ export class ExportController {
       throw new BadRequestException(`No ${entity} found for the provided IDs`);
     }
 
-    const flattened = flattenArrayWithoutId(data);
+    const flattened = flattenArrayWithoutIdEnhanced(data);
     const shouldQueue = flattened.length > this.DATA_THRESHOLD;
 
     if (shouldQueue) {
