@@ -12,6 +12,7 @@
     "start:dev": "npm run format && nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
+    "migration:run": "npx typeorm migration:run --dataSource dist/Database/data-source.js",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest --config jest.config.ts",
     "test:watch": "jest --watch",
