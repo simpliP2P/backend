@@ -122,18 +122,19 @@ export class BudgetService {
     await this.budgetRepository.remove(budget);
   }
 
-  async consumeAmount(
+  async consumeReservedAmount(
     organisationId: string,
     budgetId: string,
     amount: number,
   ): Promise<Budget> {
     const budget = await this.findOne(organisationId, budgetId);
+    const amountReserved = Number(budget.amount_reserved);
 
-    if (budget.balance < amount) {
-      throw new Error("Insufficient balance");
+    if (amountReserved < amount) {
+      throw new Error("Insufficient reserved amount");
     }
 
-    budget.balance -= amount;
+    budget.amount_reserved = amountReserved - amount;
 
     return this.budgetRepository.save(budget);
   }

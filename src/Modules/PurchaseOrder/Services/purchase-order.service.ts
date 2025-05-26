@@ -248,7 +248,7 @@ export class PurchaseOrderService {
     // update the product stock quantity
     if (status === PurchaseOrderStatus.APPROVED) {
       const budgetId = order.purchase_requisition.budget.id;
-      await this.budgetService.consumeAmount(
+      await this.budgetService.consumeReservedAmount(
         organisationId,
         budgetId,
         order.total_amount,
