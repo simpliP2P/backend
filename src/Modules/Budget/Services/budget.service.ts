@@ -130,7 +130,7 @@ export class BudgetService {
     const budget = await this.findOne(organisationId, budgetId);
 
     if (budget.balance < amount) {
-      throw new Error("Insufficient remaining budget");
+      throw new Error("Insufficient balance");
     }
 
     budget.balance -= amount;
@@ -145,13 +145,15 @@ export class BudgetService {
     amount: number,
   ): Promise<Budget> {
     const budget = await this.findOne(organisationId, id);
+    const balance = Number(budget.balance);
+    const amountReserved = Number(budget.amount_reserved);
 
-    if (budget.balance < amount) {
-      throw new BadRequestException("Insufficient remaining budget");
+    if (balance < amount) {
+      throw new BadRequestException("Insufficient balance");
     }
 
-    budget.amount_reserved += amount;
-    budget.balance -= amount;
+    budget.amount_reserved = amountReserved + amount;
+    budget.balance = balance - amount;
 
     return this.budgetRepository.save(budget);
   }
