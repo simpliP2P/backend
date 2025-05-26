@@ -24,7 +24,7 @@ import { AuditLogsService } from "src/Modules/AuditLogs/Services/audit-logs.serv
 import { SuppliersService } from "src/Modules/Supplier/Services/supplier.service";
 import { flattenArrayWithoutId } from "src/Shared/Helpers/flatten-json.helper";
 import { ProductService } from "src/Modules/Product/Services/product.service";
-import { ExportSelectedDto } from "../Dtos/export.dto";
+import { ExportQueryDto, ExportSelectedDto } from "../Dtos/export.dto";
 import { ExportEntityPermissionMap } from "../Constants/export.constants";
 
 @Controller("organisations/:organisationId/export")
@@ -48,16 +48,12 @@ export class ExportController {
   ])
   @UseGuards(OrganisationPermissionsGuard)
   public async exportRequisitions(
+    @Query() query: ExportQueryDto,
     @Param("organisationId") organisationId: string,
-    @Query("format") format: ExportFileType,
-    @Query("startDate") startDate: string,
-    @Query("endDate") endDate: string,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    if (!format || !startDate || !endDate) {
-      throw new BadRequestException("Missing required query parameters");
-    }
+    const { format, startDate, endDate } = query;
 
     const userId = req.user.sub;
     const fileName = `requisitions-${startDate}-${endDate}`;
@@ -122,16 +118,12 @@ export class ExportController {
   ])
   @UseGuards(OrganisationPermissionsGuard)
   public async exportOrders(
+    @Query() query: ExportQueryDto,
     @Param("organisationId") organisationId: string,
-    @Query("format") format: ExportFileType,
-    @Query("startDate") startDate: string,
-    @Query("endDate") endDate: string,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    if (!format || !startDate || !endDate) {
-      throw new BadRequestException("Missing required query parameters");
-    }
+    const { format, startDate, endDate } = query;
 
     const userId = req.user.sub;
     const fileName = `orders-${startDate}-${endDate}`;
@@ -197,15 +189,11 @@ export class ExportController {
   @UseGuards(OrganisationPermissionsGuard)
   public async exportAuditLogs(
     @Param("organisationId") organisationId: string,
-    @Query("format") format: ExportFileType,
-    @Query("startDate") startDate: string,
-    @Query("endDate") endDate: string,
+    @Query() query: ExportQueryDto,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    if (!format || !startDate || !endDate) {
-      throw new BadRequestException("Missing required query parameters");
-    }
+    const { format, startDate, endDate } = query;
 
     const userId = req.user.sub;
     const fileName = `logs-${startDate}-${endDate}`;
@@ -273,15 +261,11 @@ export class ExportController {
   @UseGuards(OrganisationPermissionsGuard)
   public async exportSuppliers(
     @Param("organisationId") organisationId: string,
-    @Query("format") format: ExportFileType,
-    @Query("startDate") startDate: string,
-    @Query("endDate") endDate: string,
+    @Query() query: ExportQueryDto,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    if (!format || !startDate || !endDate) {
-      throw new BadRequestException("Missing required query parameters");
-    }
+    const { format, startDate, endDate } = query;
 
     const userId = req.user.sub;
     const fileName = `suppliers-${startDate}-${endDate}`;
@@ -348,15 +332,11 @@ export class ExportController {
   @UseGuards(OrganisationPermissionsGuard)
   public async exportProducts(
     @Param("organisationId") organisationId: string,
-    @Query("format") format: ExportFileType,
-    @Query("startDate") startDate: string,
-    @Query("endDate") endDate: string,
+    @Query() query: ExportQueryDto,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    if (!format || !Object.values(ExportFileType).includes(format)) {
-      throw new BadRequestException("Invalid export format!");
-    }
+    const { format, startDate, endDate } = query;
 
     const userId = req.user.sub;
     const fileName =

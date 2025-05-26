@@ -1,4 +1,4 @@
-import { ArrayNotEmpty, IsArray, IsEnum } from "class-validator";
+import { ArrayNotEmpty, IsArray, IsDateString, IsEnum } from "class-validator";
 import { ExportEntityType, ExportFileType } from "../Enums/export.enum";
 
 export class ExportSelectedDto {
@@ -11,4 +11,15 @@ export class ExportSelectedDto {
   @IsArray()
   @ArrayNotEmpty()
   ids: string[];
+}
+
+export class ExportQueryDto {
+  @IsDateString()
+  startDate: string;
+
+  @IsDateString()
+  endDate: string;
+
+  @IsEnum(ExportFileType)
+  format: ExportFileType;
 }
