@@ -101,6 +101,4 @@ export const flattenArrayWithoutId = (array: any[]) =>
   array.map((item) => flattenObjTwoLevels(item, "", "id"));
 
 export const flattenArrayWithoutIdEnhanced = (array: any[]) =>
-  array.map((item) =>
-    flattenObjTwoLevelsEnhanced(item, "", "id"),
-  );
+  array.map((item) => flattenObjTwoLevelsEnhanced(item, "", "id"));
