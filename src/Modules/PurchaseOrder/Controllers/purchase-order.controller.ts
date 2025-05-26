@@ -37,6 +37,10 @@ export class PurchaseOrderController {
         poId,
       );
 
-    return purchaseOrder;
+    return {
+      ...purchaseOrder,
+      branch: purchase_requisition.branch,
+    };
+    
   }
 }
