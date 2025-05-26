@@ -165,13 +165,15 @@ export class BudgetService {
     amount: number,
   ): Promise<Budget> {
     const budget = await this.findOne(organisationId, id);
+    const balance = Number(budget.balance);
+    const amountReserved = Number(budget.amount_reserved);
 
     if (budget.amount_reserved < amount) {
       throw new Error("Insufficient reserved amount");
     }
 
-    budget.amount_reserved -= amount;
-    budget.balance += amount;
+    budget.amount_reserved = amountReserved - amount;
+    budget.balance = balance + amount;
 
     return this.budgetRepository.save(budget);
   }
