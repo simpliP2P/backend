@@ -51,6 +51,9 @@ export class PurchaseRequisition extends BaseEntity {
   @Column({ default: 0 })
   quantity: number;
 
+  @Column({ default: 0 })
+  total_items: number;
+
   @IsNotEmpty()
   @IsNumber()
   @Column({ default: 0 })
