@@ -22,7 +22,10 @@ import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
 import { AuditLogsService } from "src/Modules/AuditLogs/Services/audit-logs.service";
 import { SuppliersService } from "src/Modules/Supplier/Services/supplier.service";
-import { flattenArrayWithoutId } from "src/Shared/Helpers/flatten-json.helper";
+import {
+  flattenArrayWithoutId,
+  flattenArrayWithoutIdEnhanced,
+} from "src/Shared/Helpers/flatten-json.helper";
 import { ProductService } from "src/Modules/Product/Services/product.service";
 import { ExportQueryDto, ExportSelectedDto } from "../Dtos/export.dto";
 import { ExportEntityPermissionMap } from "../Constants/export.constants";
@@ -68,7 +71,7 @@ export class ExportController {
 
     // Remove `id` field from each requisition
     const sanitizedRequisitions = requisitions.map(({ id, ...rest }) => rest);
-    const data = flattenArrayWithoutId(sanitizedRequisitions);
+    const data = flattenArrayWithoutIdEnhanced(sanitizedRequisitions);
 
     if (data.length === 0) {
       throw new BadRequestException("No requisitions found");
