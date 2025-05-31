@@ -41,6 +41,5 @@ export class PurchaseOrderController {
       ...purchaseOrder,
       branch: purchase_requisition.branch,
     };
-    
   }
 }

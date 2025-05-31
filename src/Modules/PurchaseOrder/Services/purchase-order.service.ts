@@ -216,7 +216,13 @@ export class PurchaseOrderService {
   ): Promise<PurchaseOrder> {
     const order = await this.purchaseOrderRepository.findOne({
       where: { organisation: { id: organisationId }, id: orderId },
-      relations: ["supplier", "purchase_requisition", "purchase_requisition.branch", "items", "organisation"],
+      relations: [
+        "supplier",
+        "purchase_requisition",
+        "purchase_requisition.branch",
+        "items",
+        "organisation",
+      ],
       select: {
         organisation: {
           name: true,
