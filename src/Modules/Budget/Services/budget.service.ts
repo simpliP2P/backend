@@ -98,7 +98,7 @@ export class BudgetService {
     }
 
     if (departmentId) {
-      const department = await this.departmentService.findOne(
+      const department = await this.departmentService.getDepartmentById(
         organisationId!,
         departmentId,
       );
