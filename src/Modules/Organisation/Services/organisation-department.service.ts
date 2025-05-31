@@ -43,7 +43,7 @@ export class OrganisationDepartmentService {
 
     if (foundDepartment)
       throw new BadRequestException(
-        "Department exists. Check 'name', 'department code' or 'description'.",
+        "Department exists. Check 'name', 'department code' or 'description'",
       );
 
     let headOfDepartment = null;
@@ -81,11 +81,10 @@ export class OrganisationDepartmentService {
 
     const [data, total] = await this.departmentRepo.findAndCount({
       where: { organisation: { id: organisation_id } },
-      relations: ["organisation", "head_of_department"],
+      relations: ["head_of_department"],
       select: {
         id: true,
         name: true,
-        deleted_at: true,
         head_of_department: {
           id: true,
           first_name: true,
@@ -110,11 +109,8 @@ export class OrganisationDepartmentService {
   async getDepartmentById(organisationId: string, departmentId: string) {
     const department = await this.departmentRepo.findOne({
       where: { id: departmentId, organisation: { id: organisationId } },
-      relations: ["organisation", "head_of_department"],
+      relations: ["head_of_department"],
       select: {
-        organisation: {
-          id: true,
-        },
         head_of_department: {
           id: true,
           first_name: true,
