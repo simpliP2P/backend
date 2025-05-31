@@ -7,9 +7,14 @@ import {
   Query,
   UseGuards,
   SetMetadata,
+  Put,
+  Delete,
 } from "@nestjs/common";
 import { OrganisationDepartmentService } from "../Services/organisation-department.service";
-import { CreateDepartmentDto } from "../Dtos/organisation-department.dto";
+import {
+  CreateDepartmentDto,
+  UpdateDepartmentDto,
+} from "../Dtos/organisation-department.dto";
 import { OrganisationPermissionsGuard } from "src/Guards/permissions.guard";
 import { PermissionType } from "../Enums/user-organisation.enum";
 
@@ -90,6 +95,60 @@ export class OrganisationDepartmentController {
         status: "success",
         message: "Department fetched successfully",
         data: department,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Put(":departmentId")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_DEPARTMENTS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async updateDepartment(
+    @Param("organisationId") organisationId: string,
+    @Param("departmentId") departmentId: string,
+    @Body() data: UpdateDepartmentDto,
+  ) {
+    try {
+      const department =
+        await this.organisationDepartmentService.updateDepartment(
+          organisationId,
+          departmentId,
+          data,
+        );
+
+      return {
+        status: "success",
+        message: "Department updated successfully",
+        data: department,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Delete(":departmentId")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_DEPARTMENTS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async deleteDepartment(
+    @Param("organisationId") organisationId: string,
+    @Param("departmentId") departmentId: string,
+  ) {
+    try {
+      await this.organisationDepartmentService.deleteDepartment(
+        organisationId,
+        departmentId,
+      );
+
+      return {
+        status: "success",
+        message: "Department deleted successfully",
       };
     } catch (error) {
       throw error;

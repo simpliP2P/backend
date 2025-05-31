@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { EntityManager, Repository } from "typeorm";
+import { EntityManager, EntityNotFoundError, Repository } from "typeorm";
 import { User } from "src/Modules/User/Entities/user.entity";
 import { OrganisationDepartment } from "../Entities/organisation-department.entity";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
@@ -85,6 +85,12 @@ export class OrganisationDepartmentService {
       select: {
         id: true,
         name: true,
+        deleted_at: true,
+        head_of_department: {
+          id: true,
+          first_name: true,
+          last_name: true,
+        },
       },
       skip,
       take: _pageSize,
@@ -120,28 +126,6 @@ export class OrganisationDepartmentService {
     return department;
   }
 
-  async findOne(
-    organisationId: string,
-    id: string,
-  ): Promise<OrganisationDepartment> {
-    const department = await this.departmentRepo.findOne({
-      where: { id, organisation: { id: organisationId } },
-      relations: ["head_of_department"],
-      select: {
-        head_of_department: {
-          first_name: true,
-          last_name: true,
-        },
-      },
-    });
-
-    if (!department) {
-      throw new NotFoundException(`Department with ID ${id} not found`);
-    }
-
-    return department;
-  }
-
   async bulkCreateDepartments(
     organisationId: string,
     data: { name: string }[],
@@ -158,5 +142,63 @@ export class OrganisationDepartmentService {
     const result = await manager.insert(OrganisationDepartment, departments);
 
     return result.generatedMaps;
+  }
+
+  async updateDepartment(
+    organisationId: string,
+    departmentId: string,
+    data: {
+      name?: string;
+      department_code?: string;
+      description?: string;
+      branch_id?: string;
+      hod_id?: string;
+    },
+  ) {
+    const department = await this.departmentRepo.findOne({
+      where: { id: departmentId, organisation: { id: organisationId } },
+      relations: ["organisation", "head_of_department"],
+    });
+
+    if (!department) throw new NotFoundException("Department not found");
+
+    if (data.hod_id) {
+      const headOfDepartment = await this.userRepo.findOne({
+        where: { id: data.hod_id },
+      });
+
+      if (!headOfDepartment)
+        throw new NotFoundException("Head of department not found");
+
+      department.head_of_department = headOfDepartment;
+    }
+
+    Object.assign(department, data);
+    return (await this.departmentRepo.save(department)).reload();
+  }
+
+  async deleteDepartment(
+    organisationId: string,
+    departmentId: string,
+  ) {
+    try {
+      const department = await this.departmentRepo.manager.findOneOrFail(OrganisationDepartment, {
+        where: { id: departmentId, organisation: { id: organisationId } },
+      });
+
+      // Clear relationships first
+      department.head_of_department = null;
+      await this.departmentRepo.manager.save(department);
+
+      // Soft delete the department
+      await this.departmentRepo.manager.softDelete(OrganisationDepartment, { id: departmentId });
+
+      return { message: "Department deleted successfully" };
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        throw new NotFoundException("Department not found");
+      }
+      throw error; // Bubble up other errors to abort transaction
+    }
   }
 }
