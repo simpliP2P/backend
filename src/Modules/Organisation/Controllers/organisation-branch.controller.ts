@@ -7,9 +7,11 @@ import {
   Query,
   UseGuards,
   SetMetadata,
+  Put,
+  Delete,
 } from "@nestjs/common";
 import { OrganisationBranchService } from "../Services/organisation-branch.service";
-import { CreateBranchDto } from "../Dtos/organisation-branch.dto";
+import { CreateBranchDto, UpdateBranchDto } from "../Dtos/organisation-branch.dto";
 import { OrganisationPermissionsGuard } from "src/Guards/permissions.guard";
 import { PermissionType } from "../Enums/user-organisation.enum";
 
@@ -88,6 +90,59 @@ export class OrganisationBranchController {
         status: "success",
         message: "Branch fetched successfully",
         data: branch,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Put(":branchId")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_BRANCHES,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async updateBranch(
+    @Param("organisationId") organisationId: string,
+    @Param("branchId") branchId: string,
+    @Body() data: UpdateBranchDto,
+  ) {
+    try {
+      const branch = await this.organisationBranchService.updateBranch(
+        organisationId,
+        branchId,
+        data,
+      );
+
+      return {
+        status: "success",
+        message: "Branch updated successfully",
+        data: branch,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Delete(":branchId")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_BRANCHES,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async deleteBranch(
+    @Param("organisationId") organisationId: string,
+    @Param("branchId") branchId: string,
+  ) {
+    try {
+      await this.organisationBranchService.deleteBranch(
+        organisationId,
+        branchId,
+      );
+
+      return {
+        status: "success",
+        message: "Branch deleted successfully",
       };
     } catch (error) {
       throw error;

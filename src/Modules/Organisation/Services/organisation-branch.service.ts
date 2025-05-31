@@ -86,4 +86,32 @@ export class OrganisationBranchService {
     if (!branch) throw new NotFoundException("Branch not found");
     return branch;
   }
+
+  async updateBranch(
+    organisationId: string,
+    branchId: string,
+    data: { name?: string; address?: string },
+  ): Promise<OrganisationBranch> {
+    const branch = await this.branchRepo.findOne({
+      where: { id: branchId, organisation: { id: organisationId } },
+    });
+
+    if (!branch) throw new NotFoundException("Branch not found");
+
+    if (data.name) branch.name = data.name;
+    if (data.address) branch.address = data.address;
+
+    return await this.branchRepo.save(branch);
+  }
+
+  async deleteBranch(organisationId: string, branchId: string): Promise<void> {
+    const result = await this.branchRepo.softDelete({
+      id: branchId,
+      organisation: { id: organisationId },
+    });
+
+    if (result.affected === 0) {
+      throw new NotFoundException("Branch not found");
+    }
+  }
 }
