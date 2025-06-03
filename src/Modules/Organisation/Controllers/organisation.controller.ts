@@ -396,6 +396,33 @@ export class OrganisationController {
     }
   }
 
+  @Delete(":organisationId/categories/:categoryId")
+  @SetMetadata("permissions", [PermissionType.OWNER])
+  @UseGuards(OrganisationPermissionsGuard)
+  async deleteCategory(
+    @Param("organisationId") organisationId: string,
+    @Param("categoryId") categoryId: string,
+    @Req() req: Request,
+  ) {
+    try {
+      const userId = req.user.sub;
+
+      await this.organisationCategoryService.deleteCategory(
+        userId,
+        categoryId,
+        organisationId,
+      );
+
+      return {
+        status: "success",
+        message: "Category deleted successfully",
+        data: {},
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Patch(":organisationId/categories/:categoryId/reactivate")
   @SetMetadata("permissions", [PermissionType.OWNER])
   @UseGuards(OrganisationPermissionsGuard)

@@ -174,4 +174,27 @@ export class OrganisationCategoryService {
 
     return result.generatedMaps;
   }
+
+  public async deleteCategory(
+    userId: string,
+    categoryId: string,
+    organisationId: string,
+  ): Promise<void> {
+    const deleteResult = await this.categoryRepo.softDelete({
+      id: categoryId,
+      organisation: { id: organisationId },
+    });
+
+    if (deleteResult.affected && deleteResult.affected > 0) {
+      const user = await this.userService.findAccount({
+        where: { id: userId },
+      });
+
+      await this.auditLogService.logUpdate(
+        "organisation_categories",
+        categoryId,
+        `${user?.email} deleted category with ID ${categoryId}`,
+      );
+    }
+  }
 }
