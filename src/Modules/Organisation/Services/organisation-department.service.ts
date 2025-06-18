@@ -85,6 +85,7 @@ export class OrganisationDepartmentService {
       select: {
         id: true,
         name: true,
+        description: true,
         head_of_department: {
           id: true,
           first_name: true,
@@ -111,6 +112,7 @@ export class OrganisationDepartmentService {
       where: { id: departmentId, organisation: { id: organisationId } },
       relations: ["head_of_department"],
       select: {
+        description: true,
         head_of_department: {
           id: true,
           first_name: true,
