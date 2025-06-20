@@ -15,15 +15,24 @@ export class ValidationExceptionFilter implements ExceptionFilter {
     // Get the validation errors from the exception response
     const responseBody = exception.getResponse();
 
-    let validationErrors: any;
+    let validationErrors: string[] | string = [];
+
     if (typeof responseBody === "object" && "message" in responseBody) {
-      validationErrors = (responseBody as any).message[0];
+      const message = (responseBody as any).message;
+
+      if (Array.isArray(message)) {
+        validationErrors = message[0];
+      } else if (typeof message === "string") {
+        validationErrors = message;
+      } else {
+        validationErrors = "An unknown validation error occurred";
+      }
     }
 
     response.status(400).json({
       status: "error",
-      message: "validation failed",
-      error: validationErrors,
+      error: "validation failed",
+      message: validationErrors,
     });
   }
 }
