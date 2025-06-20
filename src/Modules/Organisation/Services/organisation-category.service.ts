@@ -133,7 +133,7 @@ export class OrganisationCategoryService {
       await this.auditLogService.logUpdate(
         "organisation_categories",
         categoryId,
-        `${user?.email} deleted category with ID ${categoryId}`,
+        `${user?.first_name} deleted category with ID ${categoryId}`,
       );
     }
   }
