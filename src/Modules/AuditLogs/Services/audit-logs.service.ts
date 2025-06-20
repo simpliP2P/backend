@@ -67,6 +67,9 @@ export class AuditLogsService {
           },
         },
       },
+      order: {
+        created_at: "DESC",
+      },
     });
 
     return {
@@ -114,6 +117,7 @@ export class AuditLogsService {
       )
       .take(exportAll ? undefined : _pageSize)
       .skip(exportAll ? undefined : (_page - 1) * _pageSize)
+      .orderBy("log.created_at", "DESC")
       .getManyAndCount();
 
     return {
