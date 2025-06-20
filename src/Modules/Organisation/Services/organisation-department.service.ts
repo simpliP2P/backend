@@ -23,48 +23,64 @@ export class OrganisationDepartmentService {
     branch_id?: string;
     hod_id?: string;
   }) {
-    // find organisation department by name or department code
-    const foundDepartment = await this.departmentRepo.findOne({
-      where: [
-        {
-          organisation: { id: data.organisation_id },
-          name: data.name,
-        },
-        {
-          organisation: { id: data.organisation_id },
-          department_code: data.department_code,
-        },
-        {
-          organisation: { id: data.organisation_id },
-          description: data.description,
-        },
-      ],
-    });
-
-    if (foundDepartment)
-      throw new BadRequestException(
-        "Department exists. Check 'name', 'department code' or 'description'",
-      );
-
-    let headOfDepartment = null;
-    if (data.hod_id) {
-      headOfDepartment = await this.userRepo.findOne({
-        where: { id: data.hod_id },
+    try {
+      /*
+      // find organisation department by name or department code
+      const foundDepartment = await this.departmentRepo.findOne({
+        where: [
+          {
+            organisation: { id: data.organisation_id },
+            name: data.name,
+          },
+          {
+            organisation: { id: data.organisation_id },
+            department_code: data.department_code,
+          },
+          {
+            organisation: { id: data.organisation_id },
+            description: data.description,
+          },
+        ],
       });
-      if (!headOfDepartment)
-        throw new NotFoundException("Head of department not found");
+
+      if (foundDepartment)
+        throw new BadRequestException(
+          "Department exists. Check 'name', 'department code' or 'description'",
+        );
+
+      */
+     
+      let headOfDepartment = null;
+      if (data.hod_id) {
+        headOfDepartment = await this.userRepo.findOne({
+          where: { id: data.hod_id },
+        });
+        if (!headOfDepartment)
+          throw new NotFoundException("Head of department not found");
+      }
+
+      const department = this.departmentRepo.create({
+        name: data.name,
+        department_code: data.department_code,
+        description: data.description,
+        organisation: { id: data.organisation_id },
+        branch: { id: data.branch_id },
+        head_of_department: { id: data.hod_id },
+      });
+
+      return await this.departmentRepo.save(department);
+    } catch (error) {
+      if (error.code === "23505") {
+        // Unique violation
+        if (error.constraint === "unique_department_org") {
+          throw new BadRequestException(
+            "department exists",
+          );
+        }
+      }
+
+      throw error;
     }
-
-    const department = this.departmentRepo.create({
-      name: data.name,
-      department_code: data.department_code,
-      description: data.description,
-      organisation: { id: data.organisation_id },
-      branch: { id: data.branch_id },
-      head_of_department: { id: data.hod_id },
-    });
-
-    return await this.departmentRepo.save(department);
   }
 
   async getDepartmentsByOrganisation(
@@ -175,21 +191,23 @@ export class OrganisationDepartmentService {
     return (await this.departmentRepo.save(department)).reload();
   }
 
-  async deleteDepartment(
-    organisationId: string,
-    departmentId: string,
-  ) {
+  async deleteDepartment(organisationId: string, departmentId: string) {
     try {
-      const department = await this.departmentRepo.manager.findOneOrFail(OrganisationDepartment, {
-        where: { id: departmentId, organisation: { id: organisationId } },
-      });
+      const department = await this.departmentRepo.manager.findOneOrFail(
+        OrganisationDepartment,
+        {
+          where: { id: departmentId, organisation: { id: organisationId } },
+        },
+      );
 
       // Clear relationships first
       department.head_of_department = null;
       await this.departmentRepo.manager.save(department);
 
       // Soft delete the department
-      await this.departmentRepo.manager.softDelete(OrganisationDepartment, { id: departmentId });
+      await this.departmentRepo.manager.softDelete(OrganisationDepartment, {
+        id: departmentId,
+      });
 
       return { message: "Department deleted successfully" };
     } catch (error) {
