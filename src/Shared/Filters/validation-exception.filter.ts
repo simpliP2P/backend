@@ -25,7 +25,7 @@ export class ValidationExceptionFilter implements ExceptionFilter {
       } else if (typeof message === "string") {
         validationErrors = message;
       } else {
-        validationErrors = "An unknown validation error occurred";
+        validationErrors = "bad input";
       }
     }
 
