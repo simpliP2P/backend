@@ -369,33 +369,6 @@ export class OrganisationController {
     }
   }
 
-  @Patch(":organisationId/categories/:categoryId/deactivate")
-  @SetMetadata("permissions", [PermissionType.OWNER])
-  @UseGuards(OrganisationPermissionsGuard)
-  async deactivateCategory(
-    @Param("organisationId") organisationId: string,
-    @Param("categoryId") categoryId: string,
-    @Req() req: Request,
-  ) {
-    try {
-      const userId = req.user.sub;
-
-      await this.organisationCategoryService.deactivateCategory(
-        userId,
-        categoryId,
-        organisationId,
-      );
-
-      return {
-        status: "success",
-        message: "Category deactivated successfully",
-        data: {},
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
-
   @Delete(":organisationId/categories/:categoryId")
   @SetMetadata("permissions", [PermissionType.OWNER])
   @UseGuards(OrganisationPermissionsGuard)
@@ -416,33 +389,6 @@ export class OrganisationController {
       return {
         status: "success",
         message: "Category deleted successfully",
-        data: {},
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  @Patch(":organisationId/categories/:categoryId/reactivate")
-  @SetMetadata("permissions", [PermissionType.OWNER])
-  @UseGuards(OrganisationPermissionsGuard)
-  async reactivateCategory(
-    @Param("organisationId") organisationId: string,
-    @Param("categoryId") categoryId: string,
-    @Req() req: Request,
-  ) {
-    try {
-      const userId = req.user.sub;
-
-      await this.organisationCategoryService.reactivateCategory(
-        userId,
-        organisationId,
-        categoryId,
-      );
-
-      return {
-        status: "success",
-        message: "Category reactivated successfully",
         data: {},
       };
     } catch (error) {

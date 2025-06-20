@@ -57,66 +57,6 @@ export class OrganisationCategoryService {
     return updatedCategory;
   }
 
-  public async deactivateCategory(
-    userId: string,
-    categoryId: string,
-    organisationId: string,
-  ): Promise<void> {
-    const updateResult = await this.categoryRepo
-      .createQueryBuilder()
-      .update(OrganisationCategory)
-      .set({ deactivated_at: new Date() })
-      .where("id = :categoryId AND organisation_id = :organisationId", {
-        categoryId,
-        organisationId,
-      })
-      .returning("id, name")
-      .execute();
-
-    if (updateResult.affected && updateResult.affected > 0) {
-      const user = await this.userService.findAccount({
-        where: { id: userId },
-      });
-
-      this.auditLogService.logUpdate(
-        "organisation_categories",
-        updateResult.raw[0].id,
-        `${user?.email} deactivated ${updateResult.raw[0].name} category`,
-        { deactivated_at: new Date() },
-      );
-    }
-  }
-
-  public async reactivateCategory(
-    userId: string,
-    categoryId: string,
-    organisationId: string,
-  ): Promise<void> {
-    const updateResult = await this.categoryRepo
-      .createQueryBuilder()
-      .update(OrganisationCategory)
-      .set({ deactivated_at: null })
-      .where("id = :categoryId AND organisation_id = :organisationId", {
-        categoryId,
-        organisationId,
-      })
-      .returning("id, name")
-      .execute();
-
-    if (updateResult.affected && updateResult.affected > 0) {
-      const user = await this.userService.findAccount({
-        where: { id: userId },
-      });
-
-      await this.auditLogService.logUpdate(
-        "organisation_categories",
-        updateResult.raw[0].id,
-        `${user?.email} reactivated ${updateResult.raw[0].name} category`,
-        { deactivated_at: null },
-      );
-    }
-  }
-
   public async getCategoriesByOrganisation(
     organisationId: string,
     page: number,
