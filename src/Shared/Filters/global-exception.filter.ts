@@ -39,7 +39,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         status: RESPONSE_STATUS.ERROR,
         message: "Unexpected error occurred",
         error: typeof theResponse === "string" ? theResponse : null,
-        statusCode: 500,
       });
     }
 
@@ -56,7 +55,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
           status: RESPONSE_STATUS.ERROR,
           message: "Bad input data",
           error: this.reprocessError(message),
-          statusCode: 422,
         });
       }
 
@@ -64,7 +62,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         status: RESPONSE_STATUS.ERROR,
         message,
         error: message,
-        statusCode: 400,
       });
     }
 
@@ -89,7 +86,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         : RESPONSE_STATUS.ERROR,
       message: finalMessage,
       error: null,
-      statusCode: finalStatus,
     });
   }
 

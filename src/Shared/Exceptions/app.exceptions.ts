@@ -1,16 +1,15 @@
-import { HttpStatus } from "@nestjs/common";
+import { HttpException, HttpStatus } from "@nestjs/common";
 
-export class AppException extends Error {
-  public readonly error: string | null; // Declare the error field
+export class AppException extends HttpException {
+  public readonly error: string | null;
 
   constructor(
-    public readonly status: string,
-    public readonly statusCode: number,
+    public readonly appStatus: string,
+    statusCode: number,
     message: string,
     error: any,
   ) {
-    super();
-    this.message = message;
+    super({ status: appStatus, message, error, statusCode }, statusCode);
     this.error = error;
   }
 }
