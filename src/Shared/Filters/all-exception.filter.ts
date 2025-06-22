@@ -22,6 +22,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
+    const message =
+      exception instanceof HttpException
+        ? exception.getResponse()
+        : (exception as any)?.message || "Internal server error";
 
     // Log full error
     this.logger.error(
@@ -29,13 +33,17 @@ export class AllExceptionsFilter implements ExceptionFilter {
       (exception as any)?.stack || JSON.stringify(exception),
     );
 
+    this.logger.error(
+      `Error response: ${JSON.stringify({
+        status,
+        message,
+      })}`,
+    );
+
     // Return standard response
     response.status(status).json({
-      //   statusCode: status,
       status: "error",
       message: "An unexpected error occurred",
-      //   path: request.url,
-      //   timestamp: new Date().toISOString(),
     });
   }
 }
