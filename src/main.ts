@@ -6,10 +6,9 @@ import * as helmet from "helmet";
 import { AppModule } from "./app.module";
 import { AppExceptionFilter } from "./Shared/Filters/exception.filter";
 import { AppLogger } from "./Logger/logger.service";
-import { ValidationExceptionFilter } from "./Shared/Filters/validation-exception.filter";
 import { AuthGuard } from "./Guards/auth.guard";
 import { TokenHelper } from "./Shared/Helpers/token.helper";
-import { AllExceptionsFilter } from "./Shared/Filters/all-exception.filter";
+import { GlobalExceptionFilter } from "./Shared/Filters/global-exception.filter";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -64,8 +63,7 @@ async function bootstrap() {
 
   app.useGlobalFilters(
     new AppExceptionFilter(),
-    new ValidationExceptionFilter(),
-    new AllExceptionsFilter(),
+    new GlobalExceptionFilter(),
   );
   // Enable global validation
   app.useGlobalPipes(
