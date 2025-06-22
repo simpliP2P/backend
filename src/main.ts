@@ -4,7 +4,6 @@ import { ConfigService } from "@nestjs/config";
 import { DataSource } from "typeorm";
 import * as helmet from "helmet";
 import { AppModule } from "./app.module";
-import { AppExceptionFilter } from "./Shared/Filters/exception.filter";
 import { AppLogger } from "./Logger/logger.service";
 import { AuthGuard } from "./Guards/auth.guard";
 import { TokenHelper } from "./Shared/Helpers/token.helper";
@@ -59,13 +58,9 @@ async function bootstrap() {
 
   const reflector = app.get(Reflector);
   const tokenHelper = app.get(TokenHelper);
-  app.useGlobalGuards(new AuthGuard(reflector, tokenHelper));
 
-  app.useGlobalFilters(
-    new AppExceptionFilter(),
-    new GlobalExceptionFilter(),
-  );
-  // Enable global validation
+  app.useGlobalGuards(new AuthGuard(reflector, tokenHelper));
+  app.useGlobalFilters(new GlobalExceptionFilter());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true, // Removes properties that are not defined in the DTO
