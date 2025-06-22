@@ -1,70 +1,109 @@
 import {
-  ExceptionFilter,
-  Catch,
   ArgumentsHost,
+  Catch,
+  ExceptionFilter,
   HttpException,
-  BadRequestException,
   HttpStatus,
   Logger,
 } from "@nestjs/common";
-import { Request, Response } from "express";
+import { Response } from "express";
+import { RESPONSE_STATUS_CODE } from "../Interfaces/response.enum";
+import { RESPONSE_STATUS } from "../Interfaces/response.enum";
+
+const AppLogger = new Logger("GlobalException");
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger(GlobalExceptionFilter.name);
-
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest<Request>();
+    const response: Response = ctx.getResponse<Response>();
 
-    let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message: any = "Internal server error";
+    const isHttpException = exception instanceof HttpException;
+    const theResponse = isHttpException
+      ? exception.getResponse()
+      : (exception as any)?.message || "Unexpected server error";
 
-    if (exception instanceof BadRequestException) {
-      const responseBody = exception.getResponse();
-      status = exception.getStatus();
+    const status = isHttpException
+      ? exception.getStatus()
+      : HttpStatus.INTERNAL_SERVER_ERROR;
 
-      if (typeof responseBody === "object" && "message" in responseBody) {
-        const extracted = (responseBody as any).message;
-        if (Array.isArray(extracted)) {
-          message = extracted[0];
-        } else if (typeof extracted === "string") {
-          message = extracted;
-        } else {
-          message = "Validation failed";
-        }
-      } else {
-        message = "Bad request";
+    if (status === 500) {
+      AppLogger.error(
+        `INTERNAL ERROR:`,
+        typeof exception === "object" && exception
+          ? (exception as any)?.stack || JSON.stringify(exception)
+          : String(exception),
+      );
+
+      return response.status(500).json({
+        status: RESPONSE_STATUS.ERROR,
+        message: "Unexpected error occurred",
+        error: typeof theResponse === "string" ? theResponse : null,
+        statusCode: 500,
+      });
+    }
+
+    if (status === 400) {
+      const message =
+        typeof theResponse === "object" && "message" in theResponse
+          ? (theResponse as any).message
+          : "Bad request";
+
+      AppLogger.warn(`BAD REQUEST: ${JSON.stringify(message)}`);
+
+      if (Array.isArray(message)) {
+        return response.status(422).json({
+          status: RESPONSE_STATUS.ERROR,
+          message: "Bad input data",
+          error: this.reprocessError(message),
+          statusCode: 422,
+        });
       }
 
-      response.status(status).json({
-        status: "error",
-        error: "Validation failed",
+      return response.status(400).json({
+        status: RESPONSE_STATUS.ERROR,
         message,
+        error: message,
+        statusCode: 400,
       });
-      return;
     }
 
-    if (exception instanceof HttpException) {
-      status = exception.getStatus();
-      const responseBody = exception.getResponse();
-      message =
-        typeof responseBody === "string"
-          ? responseBody
-          : (responseBody as any).message || exception.message;
-    } else if (typeof exception === "object" && exception !== null) {
-      message = (exception as any).message || "Unhandled error occurred";
-    }
+    // All other known non-500 exceptions
+    const finalStatus =
+      typeof (theResponse as any)?.statusCode === "number"
+        ? (theResponse as any).statusCode
+        : status;
 
-    this.logger.error(
-      `Unhandled error on ${request.method} ${request.url}`,
-      (exception as any)?.stack || JSON.stringify(exception),
-    );
+    const finalMessage =
+      typeof theResponse === "object" && "message" in theResponse
+        ? (theResponse as any).message
+        : theResponse;
 
-    response.status(status).json({
-      status: "error",
-      message,
+    AppLogger.log(`Response: ${finalMessage} [statusCode: ${finalStatus}]`);
+
+    return response.status(finalStatus).json({
+      status: [RESPONSE_STATUS_CODE.OK, RESPONSE_STATUS_CODE.CREATED].includes(
+        finalStatus,
+      )
+        ? RESPONSE_STATUS.SUCCESS
+        : RESPONSE_STATUS.ERROR,
+      message: finalMessage,
+      error: null,
+      statusCode: finalStatus,
     });
+  }
+
+  private reprocessError(theErrors: string[]): Record<string, string> {
+    const errorField = theErrors.map((err) => err.split(" ")[0]);
+    const errorMap: Record<string, string> = {};
+
+    for (const field of new Set(errorField)) {
+      const matchedError = theErrors.find((err) => err.startsWith(field));
+      if (matchedError) {
+        errorMap[field] = matchedError;
+      }
+    }
+
+    return errorMap;
   }
 }
