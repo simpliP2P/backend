@@ -1,5 +1,6 @@
-import { IsEmail, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsEmail, IsEnum, IsOptional, IsString, IsUUID } from "class-validator";
 import { IsDateAtLeastToday } from "src/Modules/Organisation/Dtos/organisation.dto";
+import { PRApprovalActionType, PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
 
 export class InitializePurchaseRequisitionDto {
   @IsUUID()
@@ -57,4 +58,22 @@ export class CreatePurchaseRequisitionDto {
     message: "Needed by date must be today or in the future",
   })
   needed_by_date: Date;
+}
+
+export class ApprovalDataDto {
+  @IsEnum(PurchaseRequisitionStatus)
+  status: PurchaseRequisitionStatus;
+
+  @IsString()
+  approval_justification: string;
+
+  @IsUUID()
+  budget_id: string;
+
+  @IsEnum(PRApprovalActionType)
+  action_type: PRApprovalActionType;
+
+  @IsUUID()
+  @IsOptional()
+  supplier_id?: string;
 }
