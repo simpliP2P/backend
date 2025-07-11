@@ -49,7 +49,7 @@ export class OrganisationDepartmentService {
         );
 
       */
-     
+
       let headOfDepartment = null;
       if (data.hod_id) {
         headOfDepartment = await this.userRepo.findOne({
@@ -73,9 +73,7 @@ export class OrganisationDepartmentService {
       if (error.code === "23505") {
         // Unique violation
         if (error.constraint === "unique_department_org") {
-          throw new BadRequestException(
-            "department exists",
-          );
+          throw new BadRequestException("department exists");
         }
       }
 

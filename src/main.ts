@@ -7,7 +7,6 @@ import { AppLogger } from "./Logger/logger.service";
 import { AuthGuard } from "./Guards/auth.guard";
 import { TokenHelper } from "./Shared/Helpers/token.helper";
 import { GlobalExceptionFilter } from "./Shared/Filters/global-exception.filter";
-// import { TenantGuard } from "./Guards/tenant.guard";
 import * as helmet from "helmet";
 
 async function bootstrap() {
@@ -62,10 +61,7 @@ async function bootstrap() {
   const reflector = app.get(Reflector);
   const tokenHelper = app.get(TokenHelper);
 
-  app.useGlobalGuards(
-    new AuthGuard(reflector, tokenHelper),
-    // new TenantGuard(dataSource),
-  );
+  app.useGlobalGuards(new AuthGuard(reflector, tokenHelper));
   app.useGlobalFilters(new GlobalExceptionFilter());
   app.useGlobalPipes(
     new ValidationPipe({
