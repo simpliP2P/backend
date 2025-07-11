@@ -19,7 +19,7 @@ export const AppDataSource = new DataSource({
   password: dbConfig.password,
   database: dbConfig.name,
   entities: [entityPath],
-  migrations: ["dist/Database/migrations/*.js"],
+  migrations: ["dist/src/Database/migrations/*.js"],
   subscribers: [subscriberPath],
   synchronize: false,
   ssl: {
