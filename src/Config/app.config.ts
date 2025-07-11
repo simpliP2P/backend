@@ -1,4 +1,5 @@
 export default () => ({
+  appClientSK: process.env.APP_CLIENT_SECRET_KEY,
   env: process.env.NODE_ENV || "development",
   isAppInProduction: process.env.NODE_ENV === "production",
   branchName: process.env.BRANCH_NAME,
