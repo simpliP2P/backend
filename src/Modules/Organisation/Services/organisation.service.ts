@@ -38,9 +38,12 @@ import {
 } from "../Enums/defaults.enum";
 import { HashHelper } from "src/Shared/Helpers/hash.helper";
 import { generateSubdomain } from "src/Shared/Helpers/subdomain.helper";
+import { verifyReqSignature } from "src/Shared/Helpers/verify-req-signature";
 
 @Injectable()
 export class OrganisationService {
+  private readonly clientSecretKey: string;
+
   constructor(
     @InjectRepository(Organisation)
     private organisationRepository: Repository<Organisation>,
@@ -64,7 +67,9 @@ export class OrganisationService {
     private readonly organisationCategoryService: OrganisationCategoryService,
     private readonly organisationDepartmentService: OrganisationDepartmentService,
     private readonly hashHelper: HashHelper,
-  ) {}
+  ) {
+    this.clientSecretKey = this.configService.getOrThrow("appClientSK");
+  }
 
   public async findOrganisation(
     query: FindOneOptions,
@@ -505,6 +510,26 @@ export class OrganisationService {
       user: { id: userId },
       organisation: { id: organisationId },
     });
+  }
+
+  public async verifyOrgSubdomain(
+    subdomain: string,
+    reqSignature: string,
+    timestamp: string,
+  ): Promise<{ name: string | null }> {
+    verifyReqSignature(
+      this.clientSecretKey,
+      subdomain,
+      reqSignature,
+      timestamp,
+    );
+
+    const organisation = await this.organisationRepository.findOne({
+      where: { subdomain },
+      select: ["name"],
+    });
+
+    return { name: organisation?.name || null };
   }
 
   private generateStrongPassword(): string {
