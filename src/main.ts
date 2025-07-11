@@ -64,7 +64,7 @@ async function bootstrap() {
 
   app.useGlobalGuards(
     new AuthGuard(reflector, tokenHelper),
-    new TenantGuard(dataSource),
+    // new TenantGuard(dataSource),
   );
   app.useGlobalFilters(new GlobalExceptionFilter());
   app.useGlobalPipes(
