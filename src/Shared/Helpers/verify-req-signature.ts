@@ -30,8 +30,6 @@ function isTimestampValid(
     const timestampMs = parseInt(timestamp) * 1000;
     const now = Date.now();
     const diff = Math.abs(now - timestampMs);
-    console.log(`Timestamp difference: ${diff} ms`);
-    console.log(`Tolerance: ${toleranceInSeconds * 1000} ms`);
 
     return diff <= toleranceInSeconds * 1000;
   } catch (error) {
