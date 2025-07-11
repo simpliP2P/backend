@@ -1,23 +1,30 @@
-import { Body, Controller, Post } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Organisation } from "../Entities/organisation.entity";
-import { Repository } from "typeorm";
+import { Body, Controller, Headers, Post } from "@nestjs/common";
+import { Public } from "src/Shared/Decorators/custom.decorator";
+import { OrganisationService } from "../Services/organisation.service";
 
 @Controller("subdomains")
 export class SubdomainController {
   constructor(
-    @InjectRepository(Organisation)
-    private organisationRepository: Repository<Organisation>,
+    private readonly organisationService: OrganisationService,
   ) {}
 
   @Post("verify")
-  async verifySubdomain(@Body("subdomain") subdomain: string) {
-    const organisation = await this.organisationRepository.findOne({
-      where: { subdomain },
-      select: ["name"],
-    });
+  @Public()
+  async verifySubdomain(
+    @Body() body: { subdomain: string },
+    @Headers() headers: Record<string, string>,
+  ) {
+    const reqSignature = headers["x-signature"];
+    const timestamp = headers["x-timestamp"];
 
-    if (!organisation) {
+    const { name: subdomainName } =
+      await this.organisationService.verifyOrgSubdomain(
+        body.subdomain,
+        reqSignature,
+        timestamp,
+      );
+
+    if (!subdomainName) {
       return {
         status: "error",
         message: "Subdomain does not exist",
@@ -31,7 +38,7 @@ export class SubdomainController {
     return {
       status: "success",
       message: "Subdomain exists",
-      data: { valid: true, exists: true, organization: organisation.name },
+      data: { valid: true, exists: true, organization: subdomainName },
     };
   }
 }
