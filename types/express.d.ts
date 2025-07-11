@@ -6,6 +6,11 @@ declare global {
       user: {
         sub: string; // user id
         permissions: string[];
+      }
+      tenant?: {
+        id: string;
+        orgName: string;
+        subdomain: string | null;
       };
     }
   }

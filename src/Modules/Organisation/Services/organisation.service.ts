@@ -37,6 +37,7 @@ import {
   DEFAULT_DEPARTMENTS,
 } from "../Enums/defaults.enum";
 import { HashHelper } from "src/Shared/Helpers/hash.helper";
+import { generateSubdomain } from "src/Shared/Helpers/subdomain.helper";
 
 @Injectable()
 export class OrganisationService {
@@ -96,6 +97,7 @@ export class OrganisationService {
           // Generate and set the tenant_code
           const tenant_code = this.hashHelper.generateHashFromId(createdOrg.id);
           createdOrg.tenant_code = tenant_code;
+          createdOrg.subdomain = generateSubdomain(name);
 
           // Save the organisation again with the `tenant_code`
           await transactionalEntityManager.save(Organisation, createdOrg);

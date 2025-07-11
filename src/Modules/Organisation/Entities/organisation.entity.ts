@@ -1,5 +1,4 @@
 import { Entity, Column, OneToMany } from "typeorm";
-import { MinLength, IsNotEmpty } from "class-validator";
 import { Supplier } from "src/Modules/Supplier/Entities/supplier.entity";
 import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order.entity";
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
@@ -12,10 +11,11 @@ import { OrganisationCategory } from "./organisation-category.entity";
 
 @Entity("organisations")
 export class Organisation extends BaseEntity {
-  @MinLength(2)
-  @IsNotEmpty()
   @Column({ type: "varchar", unique: true })
   name: string;
+
+  @Column({ type: "varchar", unique: true })
+  subdomain: string;
 
   @Column({ type: "varchar", unique: true, default: "" })
   tenant_code: string;
@@ -25,6 +25,9 @@ export class Organisation extends BaseEntity {
 
   @Column({ nullable: true })
   logo: string;
+
+  @Column({ default: true })
+  is_active: boolean;
 
   @OneToMany(() => Product, (product) => product.organisation)
   products: Product[];

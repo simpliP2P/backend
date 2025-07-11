@@ -33,6 +33,7 @@ import { Budget } from "src/Modules/Budget/Entities/budget.entity";
 import { PdfHelper } from "src/Shared/Helpers/pdf-generator.helper";
 import { HashHelper } from "src/Shared/Helpers/hash.helper";
 import { SmsModule } from "src/Modules/Sms/sms.module";
+import { SubdomainController } from "../Controllers/subdomain.controller";
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { SmsModule } from "src/Modules/Sms/sms.module";
     OrganisationController,
     OrganisationDepartmentController,
     OrganisationBranchController,
+    SubdomainController,
   ],
   providers: [
     OrganisationService,
