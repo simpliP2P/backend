@@ -11,6 +11,7 @@ import { Product } from "../Entities/product.entity";
 import { CreateProductDto, UpdateProductDto } from "../Dtos/product.dto";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 import { IGetAllProductsInput } from "../Types/product.types";
+import { OrganisationCategory } from "src/Modules/Organisation/Entities/organisation-category.entity";
 
 @Injectable()
 export class ProductService {
@@ -95,28 +96,47 @@ export class ProductService {
     }
 
     // Build query options
-    const queryOptions: any = {
-      where: whereConditions,
-      relations: ["category"],
-      select: {
-        category: {
-          id: true,
-          name: true,
-        },
-      },
-      order: {
-        created_at: "DESC",
-      },
-    };
+    const qb = this.productRepository
+      .createQueryBuilder("product")
+      .leftJoinAndMapOne(
+        "product.category",
+        OrganisationCategory,
+        "category",
+        "category.id = product.category_id",
+      )
+      .addSelect(["category.id", "category.name", "category.deleted_at"])
+      .withDeleted()
+      .where("product.organisation_id = :organisationId", { organisationId });
 
-    // Enforce pagination for normal API calls, bypass when exporting
-    if (!exportAll) {
-      queryOptions.take = _pageSize;
-      queryOptions.skip = (_page - 1) * _pageSize;
+    if (startDate && endDate) {
+      qb.andWhere("product.created_at BETWEEN :start AND :end", {
+        start: new Date(startDate),
+        end: new Date(endDate),
+      });
+    } else if (startDate) {
+      qb.andWhere("product.created_at >= :start", {
+        start: new Date(startDate),
+      });
+    } else if (endDate) {
+      qb.andWhere("product.created_at <= :end", { end: new Date(endDate) });
     }
 
-    const [data, total] =
-      await this.productRepository.findAndCount(queryOptions);
+    qb.orderBy("product.created_at", "DESC");
+
+    if (!exportAll) {
+      qb.take(_pageSize).skip((_page - 1) * _pageSize);
+    }
+
+    const [data, total] = await qb.getManyAndCount();
+
+    // // Enforce pagination for normal API calls, bypass when exporting
+    // if (!exportAll) {
+    //   queryOptions.take = _pageSize;
+    //   queryOptions.skip = (_page - 1) * _pageSize;
+    // }
+
+    // const [data, total] =
+    //   await this.productRepository.findAndCount(queryOptions);
 
     return {
       data,

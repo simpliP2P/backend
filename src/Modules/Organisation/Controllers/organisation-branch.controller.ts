@@ -11,7 +11,10 @@ import {
   Delete,
 } from "@nestjs/common";
 import { OrganisationBranchService } from "../Services/organisation-branch.service";
-import { CreateBranchDto, UpdateBranchDto } from "../Dtos/organisation-branch.dto";
+import {
+  CreateBranchDto,
+  UpdateBranchDto,
+} from "../Dtos/organisation-branch.dto";
 import { OrganisationPermissionsGuard } from "src/Guards/permissions.guard";
 import { PermissionType } from "../Enums/user-organisation.enum";
 

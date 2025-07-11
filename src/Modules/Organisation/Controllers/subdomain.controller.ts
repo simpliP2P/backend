@@ -4,9 +4,7 @@ import { OrganisationService } from "../Services/organisation.service";
 
 @Controller("subdomains")
 export class SubdomainController {
-  constructor(
-    private readonly organisationService: OrganisationService,
-  ) {}
+  constructor(private readonly organisationService: OrganisationService) {}
 
   @Post("verify")
   @Public()

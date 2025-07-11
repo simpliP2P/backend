@@ -14,7 +14,6 @@ export class CreateDepartmentDto {
   department_code?: string;
 
   @IsOptional()
-  @IsNotEmpty()
   @IsString()
   description: string;
 

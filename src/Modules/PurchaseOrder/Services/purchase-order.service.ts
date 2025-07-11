@@ -60,73 +60,77 @@ export class PurchaseOrderService {
     data: Partial<IPurchaseOrder>,
   ): Promise<Partial<PurchaseOrder>> {
     // check if PR is approved
-    const pr = await this.purchaseRequisitionService.getPurchaseRequisition({
-      where: { id: data.request_id },
-      relations: ["items", "organisation"],
-      select: {
-        organisation: {
-          id: true,
-          name: true,
+    try {
+      const pr = await this.purchaseRequisitionService.getPurchaseRequisition({
+        where: { id: data.request_id },
+        relations: ["items", "organisation"],
+        select: {
+          organisation: {
+            id: true,
+            name: true,
+          },
         },
-      },
-    });
+      });
 
-    if (pr?.status !== PurchaseRequisitionStatus.APPROVED) {
-      throw new ForbiddenException("Purchase Requisition not approved");
+      if (pr?.status !== PurchaseRequisitionStatus.APPROVED) {
+        throw new ForbiddenException("Purchase Requisition not approved");
+      }
+
+      // get supplier details
+      const foundSupplier = await this.supplierService.findOne({
+        where: { id: data.supplier_id, organisation: { id: organisationId } },
+      });
+
+      // create purchase order
+      const po_number = await this.generatePoNumber(organisationId);
+
+      const purchaseOrder = this.purchaseOrderRepository.create({
+        ...data,
+        po_number,
+        purchase_requisition: { id: data.request_id } as PurchaseRequisition,
+        organisation: { id: organisationId } as Organisation,
+        supplier: foundSupplier,
+      });
+
+      const { supplier, ...savedPurchaseOrder } =
+        await this.purchaseOrderRepository.save(purchaseOrder);
+
+      const purchaseRequisitionId = pr.id;
+
+      // Update purchase items with purchase order id
+      this.purchaseItemRepository
+        .createQueryBuilder()
+        .update(PurchaseItem)
+        .set({ purchase_order: { id: savedPurchaseOrder.id } })
+        .where("purchase_requisition_id = :purchaseRequisitionId", {
+          purchaseRequisitionId,
+        })
+        .andWhere("purchase_order_id IS NULL")
+        .execute();
+
+      // Generate purchase order Url for supplier to view
+      const poUrl = await this.genPurchaseOrderUrl({
+        creatorId: savedPurchaseOrder.created_by.id,
+        organisationId,
+        poId: savedPurchaseOrder.id,
+      });
+
+      const notificationData = {
+        organisationName: pr.organisation.name,
+        supplier: {
+          name: foundSupplier.full_name,
+          email: foundSupplier.email,
+          phone: foundSupplier.phone,
+        },
+        poUrl,
+      };
+
+      this.notifySupplier(supplier.notification_channel, notificationData);
+
+      return savedPurchaseOrder;
+    } catch (error) {
+      throw new Error(`Failed to create purchase order: ${error.message}`);
     }
-
-    // get supplier details
-    const foundSupplier = await this.supplierService.findOne({
-      where: { id: data.supplier_id, organisation: { id: organisationId } },
-    });
-
-    // create purchase order
-    const po_number = await this.generatePoNumber(organisationId);
-
-    const purchaseOrder = this.purchaseOrderRepository.create({
-      ...data,
-      po_number,
-      purchase_requisition: { id: data.request_id } as PurchaseRequisition,
-      organisation: { id: organisationId } as Organisation,
-      supplier: foundSupplier,
-    });
-
-    const { supplier, ...savedPurchaseOrder } =
-      await this.purchaseOrderRepository.save(purchaseOrder);
-
-    const purchaseRequisitionId = pr.id;
-
-    // Update purchase items with purchase order id
-    this.purchaseItemRepository
-      .createQueryBuilder()
-      .update(PurchaseItem)
-      .set({ purchase_order: { id: savedPurchaseOrder.id } })
-      .where("purchase_requisition_id = :purchaseRequisitionId", {
-        purchaseRequisitionId,
-      })
-      .andWhere("purchase_order_id IS NULL")
-      .execute();
-
-    // Generate purchase order Url for supplier to view
-    const poUrl = await this.genPurchaseOrderUrl({
-      creatorId: savedPurchaseOrder.created_by.id,
-      organisationId,
-      poId: savedPurchaseOrder.id,
-    });
-
-    const notificationData = {
-      organisationName: pr.organisation.name,
-      supplier: {
-        name: foundSupplier.full_name,
-        email: foundSupplier.email,
-        phone: foundSupplier.phone,
-      },
-      poUrl,
-    };
-
-    this.notifySupplier(supplier.notification_channel, notificationData);
-
-    return savedPurchaseOrder;
   }
 
   /**

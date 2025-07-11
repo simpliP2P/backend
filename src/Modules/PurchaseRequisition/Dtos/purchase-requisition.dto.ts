@@ -1,6 +1,9 @@
 import { IsEmail, IsEnum, IsOptional, IsString, IsUUID } from "class-validator";
 import { IsDateAtLeastToday } from "src/Modules/Organisation/Dtos/organisation.dto";
-import { PRApprovalActionType, PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
+import {
+  PRApprovalActionType,
+  PurchaseRequisitionStatus,
+} from "../Enums/purchase-requisition.enum";
 
 export class InitializePurchaseRequisitionDto {
   @IsUUID()

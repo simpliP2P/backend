@@ -40,7 +40,7 @@ export class AuditSubscriber implements EntitySubscriberInterface {
         changed_fields: filteredFields,
         description: `Created new ${
           event.metadata.tableName
-            .replace(/_/g, " ") // Replace underscores with spaces
+            .replace(/(organisation|_)/g, " ") // Replace underscores with spaces
             .replace(/(s|es)$/, "") // Remove trailing "s" or "es"
         } ${event.entity.po_number || event.entity.pr_number || event.entity.id}`,
         created_at: new Date(),
@@ -68,6 +68,9 @@ export class AuditSubscriber implements EntitySubscriberInterface {
     // Ensure event.entity is available, else fallback to databaseEntity
     const newValues = event.entity || {};
     const oldValues = event?.databaseEntity;
+
+    console.log("newValues:", JSON.stringify(newValues, null, 2));
+    console.log("oldValues:", JSON.stringify(oldValues, null, 2));
 
     Object.keys(oldValues).forEach((column) => {
       const oldValue = oldValues[column];
@@ -159,7 +162,7 @@ export class AuditSubscriber implements EntitySubscriberInterface {
       "purchase_requisitions",
       "purchase_orders",
       "suppliers",
-      "user_organisations",
+      // "user_organisations",
       "products",
       "organisation_departments",
       "organisation_branches",

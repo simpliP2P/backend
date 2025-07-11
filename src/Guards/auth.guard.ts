@@ -63,9 +63,7 @@ export class AuthGuard implements CanActivate {
       request.user = decoded; // Attach the decoded user to the request
       return true;
     } catch (error) {
-      throw new UnauthorizedException(
-        error.message,
-      );
+      throw new UnauthorizedException(error.message);
     }
   }
 }

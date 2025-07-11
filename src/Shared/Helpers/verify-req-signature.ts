@@ -12,8 +12,8 @@ export function verifyReqSignature(
   const signaturePayload = `${timestamp}.${payload}`;
 
   const expected = createHmac("sha256", clientSecretKey)
-  .update(signaturePayload)
-  .digest("hex");
+    .update(signaturePayload)
+    .digest("hex");
 
   const isValid = expected === receivedSignature;
 

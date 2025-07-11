@@ -33,9 +33,7 @@ import {
 } from "src/Modules/Supplier/Dtos/supplier.dto";
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
 import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchase-requisition.service";
-import {
-  PurchaseRequisitionStatus,
-} from "src/Modules/PurchaseRequisition/Enums/purchase-requisition.enum";
+import { PurchaseRequisitionStatus } from "src/Modules/PurchaseRequisition/Enums/purchase-requisition.enum";
 import { User } from "src/Modules/User/Entities/user.entity";
 import { ProductService } from "src/Modules/Product/Services/product.service";
 import {
@@ -53,7 +51,10 @@ import { OrganisationDepartment } from "../Entities/organisation-department.enti
 import { PurchaseOrderStatus } from "src/Modules/PurchaseOrder/Enums/purchase-order.enum";
 import { Supplier } from "src/Modules/Supplier/Entities/supplier.entity";
 import { OrganisationBranch } from "../Entities/organisation-branch.entity";
-import { ApprovalDataDto, CreatePurchaseRequisitionDto } from "src/Modules/PurchaseRequisition/Dtos/purchase-requisition.dto";
+import {
+  ApprovalDataDto,
+  CreatePurchaseRequisitionDto,
+} from "src/Modules/PurchaseRequisition/Dtos/purchase-requisition.dto";
 
 @Controller("organisations")
 export class OrganisationController {
