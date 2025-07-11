@@ -2,13 +2,13 @@ import { NestFactory, Reflector } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { DataSource } from "typeorm";
-import * as helmet from "helmet";
 import { AppModule } from "./app.module";
 import { AppLogger } from "./Logger/logger.service";
 import { AuthGuard } from "./Guards/auth.guard";
 import { TokenHelper } from "./Shared/Helpers/token.helper";
 import { GlobalExceptionFilter } from "./Shared/Filters/global-exception.filter";
 import { TenantGuard } from "./Guards/tenant.guard";
+import * as helmet from "helmet";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -50,6 +50,8 @@ async function bootstrap() {
       "Access-Control-Allow-Credentials",
       "Oid",
       "X-Resource-Token",
+      "X-Timestamp",
+      "X-Signature",
     ],
     credentials: true,
     maxAge: 86400,
