@@ -35,15 +35,14 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     if (status === 500) {
       AppLogger.error(
         `INTERNAL ERROR:`,
-        typeof exception === "object" && exception
-          ? (exception as any)?.stack || JSON.stringify(exception)
-          : String(exception),
+        theResponse,
       );
 
       return response.status(500).json({
         status: RESPONSE_STATUS.ERROR,
         message: "Unexpected error occurred",
-        error: typeof theResponse === "string" ? theResponse : null,
+        // error: typeof theResponse === "string" ? theResponse : null,
+        error: theResponse,
         statusCode: 500,
       });
     }
