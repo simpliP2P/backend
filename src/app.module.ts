@@ -1,6 +1,5 @@
 import { Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-// import { BullModule } from "@nestjs/bullmq"; // Import BullMQ
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { AuthModule } from "./Modules/User/Modules/auth.module";
@@ -12,7 +11,7 @@ import { AppLogger } from "./Logger/logger.service";
 import { OAuthModule } from "./Modules/Oauth/oauth.module";
 import { CloudinaryConfig } from "./Config/cloudinaryClient.config";
 import { OrganisationModule } from "./Modules/Organisation/Modules/organisation.module";
-import { APP_INTERCEPTOR } from "@nestjs/core";
+import { APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { RequestContextInterceptor } from "./Interceptors/request-context.interceptor";
 import { CommentModule } from "./Modules/Comments/Modules/comment.module";
 import { PurchaseRequisitionModule } from "./Modules/PurchaseRequisition/Modules/purchase-requisition.module";
@@ -20,6 +19,7 @@ import { PurchaseItemModule } from "./Modules/PurchaseItem/Modules/purchase-item
 import { FileManagerModule } from "./Modules/FileManager/Modules/file-manager.module";
 import { ExportModule } from "./Modules/ExportData/Modules/export.module";
 import { PurchaseOrderModule } from "./Modules/PurchaseOrder/Modules/purchase-order.module";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 
 @Module({
   imports: [
@@ -28,17 +28,14 @@ import { PurchaseOrderModule } from "./Modules/PurchaseOrder/Modules/purchase-or
       load: [configuration],
       cache: true,
     }),
-    // BullModule.forRootAsync({
-    //   imports: [ConfigModule],
-    //   useFactory: async (configService: ConfigService) => ({
-    //     connection: {
-    //       host: configService.getOrThrow<string>("redis.host"),
-    //       port: configService.getOrThrow<number>("redis.port"),
-    //       password: configService.getOrThrow<string>("redis.password"),
-    //     },
-    //   }),
-    //   inject: [ConfigService],
-    // }),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 1,
+          limit: 1,
+        },
+      ],
+    }),
     DatabaseModule,
     AuthModule,
     OAuthModule,
@@ -55,6 +52,10 @@ import { PurchaseOrderModule } from "./Modules/PurchaseOrder/Modules/purchase-or
     {
       provide: APP_INTERCEPTOR,
       useClass: RequestContextInterceptor,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
     AppService,
     AppLogger,
