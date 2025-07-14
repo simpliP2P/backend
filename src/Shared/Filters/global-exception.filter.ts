@@ -8,8 +8,8 @@ import {
 } from "@nestjs/common";
 import { Response } from "express";
 import {
-  RESPONSE_STATUS_CODE,
   RESPONSE_STATUS,
+  RESPONSE_STATUS_CODE,
 } from "../Interfaces/response.enum";
 
 const AppLogger = new Logger("GlobalException");
@@ -33,10 +33,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     // Handle internal server errors
     if (status === 500) {
-      AppLogger.error(
-        `INTERNAL ERROR:`,
-        theResponse,
-      );
+      AppLogger.error(`INTERNAL ERROR: ${JSON.stringify(theResponse, null, 2)}`);
 
       return response.status(500).json({
         status: RESPONSE_STATUS.ERROR,
