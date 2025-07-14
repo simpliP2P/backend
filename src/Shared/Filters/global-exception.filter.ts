@@ -33,7 +33,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     // Handle internal server errors
     if (status === 500) {
-      AppLogger.error(`INTERNAL ERROR: ${JSON.stringify(theResponse, null, 2)}`);
+      AppLogger.error(
+        `INTERNAL ERROR: ${JSON.stringify(theResponse, null, 2)}`,
+      );
 
       return response.status(500).json({
         status: RESPONSE_STATUS.ERROR,

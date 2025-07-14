@@ -17,9 +17,6 @@ export class Organisation extends BaseEntity {
   @Column({ type: "varchar", unique: true })
   subdomain: string;
 
-  @Column({ type: "varchar", unique: true, default: "" })
-  tenant_code: string;
-
   @Column({ type: "varchar" })
   address: string;
 
