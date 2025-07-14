@@ -36,7 +36,6 @@ import {
   DEFAULT_CATEGORIES,
   DEFAULT_DEPARTMENTS,
 } from "../Enums/defaults.enum";
-import { HashHelper } from "src/Shared/Helpers/hash.helper";
 import { generateSubdomain } from "src/Shared/Helpers/subdomain.helper";
 import { verifyReqSignature } from "src/Shared/Helpers/verify-req-signature";
 
@@ -66,7 +65,6 @@ export class OrganisationService {
     private readonly auditLogService: AuditLogsService,
     private readonly organisationCategoryService: OrganisationCategoryService,
     private readonly organisationDepartmentService: OrganisationDepartmentService,
-    private readonly hashHelper: HashHelper,
   ) {
     this.clientSecretKey = this.configService.getOrThrow("appClientSK");
   }
@@ -93,19 +91,23 @@ export class OrganisationService {
             address,
           });
 
+          const subdomain = generateSubdomain(name);
+          organisation.subdomain = subdomain;
+
           // Save the organisation to the db first
           const createdOrg = await transactionalEntityManager.save(
             Organisation,
             organisation,
           );
 
+          /*
           // Generate and set the tenant_code
           const tenant_code = this.hashHelper.generateHashFromId(createdOrg.id);
           createdOrg.tenant_code = tenant_code;
-          createdOrg.subdomain = generateSubdomain(name);
 
           // Save the organisation again with the `tenant_code`
           await transactionalEntityManager.save(Organisation, createdOrg);
+          */
 
           // Save the userOrganisation relation (creator is already validated implicitly)
           await transactionalEntityManager.save(UserOrganisation, {
