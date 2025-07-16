@@ -31,7 +31,7 @@ export default () => ({
       landingPage: "http://localhost:3000",
     },
     production: {
-      landingPage: "https://simplip2p.vercel.app",
+      landingPage: "https://app.simplip2p.com",
     },
   },
   oauth: {
@@ -40,7 +40,7 @@ export default () => ({
       clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET,
       redirectUrl: {
         stagingLink: "http://localhost:3000/auth/google/callback",
-        productionLink: "https://simplip2p.vercel.app/auth/google/callback",
+        productionLink: "https://app.simplip2p.com/auth/google/callback",
       },
     },
   },
