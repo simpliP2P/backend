@@ -8,7 +8,7 @@ import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.en
 import { BudgetModule } from "src/Modules/Budget/Modules/budget.module";
 import { MailModule } from "src/Modules/Mail/mail.module";
 import { HashHelper } from "src/Shared/Helpers/hash.helper";
-import { NotificationsModule } from "src/Modules/Notifications/notifications.module";
+import { SmsModule } from "src/Modules/Sms/sms.module";
 import { TokenModule } from "src/Modules/Token/token.module";
 import { PurchaseOrderController } from "../Controllers/purchase-order.controller";
 
@@ -20,7 +20,7 @@ import { PurchaseOrderController } from "../Controllers/purchase-order.controlle
     BudgetModule,
     MailModule,
     TokenModule,
-    NotificationsModule,
+    SmsModule,
   ],
   providers: [PurchaseOrderService, HashHelper],
   controllers: [PurchaseOrderController],

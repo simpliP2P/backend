@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { OrganisationService } from "../Services/organisation.service";
+import { OrganisationController } from "../Controllers/organisation.controller";
 import { Organisation } from "../Entities/organisation.entity";
 import { UserOrganisation } from "../Entities/user-organisation.entity";
 import { TypeOrmModule } from "@nestjs/typeorm";
@@ -31,18 +32,8 @@ import { BudgetService } from "src/Modules/Budget/Services/budget.service";
 import { Budget } from "src/Modules/Budget/Entities/budget.entity";
 import { PdfHelper } from "src/Shared/Helpers/pdf-generator.helper";
 import { HashHelper } from "src/Shared/Helpers/hash.helper";
-import { NotificationsModule } from "src/Modules/Notifications/notifications.module";
+import { SmsModule } from "src/Modules/Sms/sms.module";
 import { SubdomainController } from "../Controllers/subdomain.controller";
-
-import {
-  OrganisationCoreController,
-  OrganisationCategoryController,
-  OrganisationMemberController,
-  OrganisationSupplierController,
-  OrganisationRequisitionController,
-  OrganisationOrderController,
-  OrganisationProductController,
-} from "../Controllers";
 
 @Module({
   imports: [
@@ -60,7 +51,7 @@ import {
     UserModule,
     TokenModule,
     MailModule,
-    NotificationsModule,
+    SmsModule,
     SuppliersModule,
     ProductModule,
     FileManagerModule,
@@ -69,15 +60,7 @@ import {
     OrganisationCategoryModule,
   ],
   controllers: [
-    // Separated organisation controllers
-    OrganisationCoreController,
-    OrganisationCategoryController,
-    OrganisationMemberController,
-    OrganisationSupplierController,
-    OrganisationRequisitionController,
-    OrganisationOrderController,
-    OrganisationProductController,
-    // Other existing controllers
+    OrganisationController,
     OrganisationDepartmentController,
     OrganisationBranchController,
     SubdomainController,

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { render } from "ejs";
-import { BrevoEmailService } from "../../../Infrastructure/Notification/brevo-mail";
+import { BrevoEmailService } from "../../../Infrastructure/Mail/brevoMail";
 import { AppLogger } from "src/Logger/logger.service";
 import { Injectable } from "@nestjs/common";
 import { emailInvitationData } from "src/Modules/Organisation/Types/organisation.types";

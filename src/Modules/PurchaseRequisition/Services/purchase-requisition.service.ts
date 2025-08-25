@@ -22,7 +22,6 @@ import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 import { BudgetService } from "src/Modules/Budget/Services/budget.service";
 import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
 import { PurchaseOrderStatus } from "src/Modules/PurchaseOrder/Enums/purchase-order.enum";
-import { UpdatePurchaseRequisitionDto } from "../Dtos/purchase-requisition.dto";
 
 @Injectable()
 export class PurchaseRequisitionService {
@@ -367,42 +366,6 @@ export class PurchaseRequisitionService {
     }
 
     return updatedRequisition.raw[0];
-  }
-
-  public async updatePurchaseRequisition(
-    organisationId: string,
-    requisitionId: string,
-    updateData: UpdatePurchaseRequisitionDto,
-  ): Promise<PurchaseRequisition> {
-    const requisition = await this.purchaseRequisitionRepository.findOne({
-      where: {
-        id: requisitionId,
-        organisation: { id: organisationId },
-      },
-    });
-
-    if (!requisition) {
-      throw new NotFoundException("Purchase Requisition not found");
-    }
-
-    // Check if requisition can be updated (not in final states)
-    if (
-      new Set([
-        PurchaseRequisitionStatus.APPROVED,
-        PurchaseRequisitionStatus.REJECTED,
-      ]).has(requisition.status)
-    ) {
-      throw new BadRequestException(
-        `Cannot update requisition that has been ${requisition.status.toLowerCase()}`,
-      );
-    }
-
-    // Update the requisition with new data and save to trigger @BeforeUpdate hook
-    Object.assign(requisition, updateData);
-    const updatedRequisition =
-      await this.purchaseRequisitionRepository.save(requisition);
-
-    return updatedRequisition;
   }
 
   /**

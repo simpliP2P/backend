@@ -14,5 +14,4 @@ export enum PaymentTerms {
 export enum NotificationChannels {
   SMS = "sms",
   Email = "email",
-  WhatsApp = "whatsapp",
 }
