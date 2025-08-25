@@ -31,7 +31,7 @@ import { PurchaseOrderStatus } from "../Enums/purchase-order.enum";
 import { ClientHelper } from "src/Shared/Helpers/client.helper";
 import { TokenService } from "src/Modules/Token/Services/token.service";
 import { TokenType } from "src/Modules/Token/Enums/token.enum";
-import { SmsService } from "src/Modules/Sms/Services/sms.service";
+import { NotificationOrchestratorService } from "src/Modules/Notifications/Services/notification-orchestrator.service";
 import { NotificationChannels } from "src/Modules/Supplier/Enums/supplier.enum";
 import { INotificationData } from "src/Modules/Supplier/Types/supplier.types";
 
@@ -52,7 +52,7 @@ export class PurchaseOrderService {
     private readonly emailService: EmailServices,
     private readonly clientHelper: ClientHelper,
     private readonly tokenService: TokenService,
-    private readonly smsService: SmsService,
+    private readonly notificationOrchestrator: NotificationOrchestratorService,
   ) {}
 
   public async create(
@@ -356,21 +356,34 @@ export class PurchaseOrderService {
           supplierName,
           signedUrl: poUrl,
         });
-
         break;
 
       case NotificationChannels.SMS:
-        this.smsService.sendPurchaseOrderSms(supplier.phone, {
-          organisationName,
-          supplierName,
-          poUrl,
-        });
+        await this.notificationOrchestrator.sendPurchaseOrderNotification(
+          NotificationChannels.SMS,
+          supplier.phone,
+          {
+            organisationName,
+            supplierName,
+            poUrl,
+          },
+        );
+        break;
 
+      case NotificationChannels.WhatsApp:
+        await this.notificationOrchestrator.sendPurchaseOrderNotification(
+          NotificationChannels.WhatsApp,
+          supplier.phone,
+          {
+            organisationName,
+            supplierName,
+            poUrl,
+          },
+        );
         break;
 
       default:
         throw new BadRequestException("Invalid notification channel");
-        break;
     }
   }
 }
