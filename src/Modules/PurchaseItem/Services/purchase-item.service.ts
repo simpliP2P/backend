@@ -97,7 +97,7 @@ export class PurchaseItemService {
     query: any,
     page: number,
     pageSize: number,
-  ): Promise<{ data: PurchaseItem[]; metadata: any }> {
+  ): Promise<{ items: PurchaseItem[]; metadata: any }> {
     let _page = page;
     let _pageSize = pageSize;
     if (isNaN(page) || page < 1) _page = 1;
@@ -105,7 +105,7 @@ export class PurchaseItemService {
 
     const skip = (_page - 1) * _pageSize; // Calculate the offset
 
-    const [data, total] = await this.purchaseItemRepo.findAndCount({
+    const [items, total] = await this.purchaseItemRepo.findAndCount({
       where: query,
       relations: ["purchase_requisition", "purchase_order", "product"],
       select: {
@@ -125,7 +125,7 @@ export class PurchaseItemService {
     });
 
     return {
-      data,
+      items,
       metadata: {
         total,
         page: _page,

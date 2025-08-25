@@ -20,6 +20,11 @@ export class AddPurchaseItemTriggersToUpdatePRTotals1747985608895
       $$ LANGUAGE plpgsql;
     `);
 
+    // Drop trigger if exists before creating
+    await queryRunner.query(`
+      DROP TRIGGER IF EXISTS trg_update_pr_after_insert ON purchase_items;
+    `);
+
     await queryRunner.query(`
       CREATE TRIGGER trg_update_pr_after_insert
       AFTER INSERT ON purchase_items
@@ -44,6 +49,11 @@ export class AddPurchaseItemTriggersToUpdatePRTotals1747985608895
         RETURN NEW;
       END;
       $$ LANGUAGE plpgsql;
+    `);
+
+    // Drop trigger if exists before creating
+    await queryRunner.query(`
+      DROP TRIGGER IF EXISTS trg_update_pr_after_update ON purchase_items;
     `);
 
     await queryRunner.query(`
@@ -71,6 +81,11 @@ export class AddPurchaseItemTriggersToUpdatePRTotals1747985608895
         RETURN OLD;
       END;
       $$ LANGUAGE plpgsql;
+    `);
+
+    // Drop trigger if exists before creating
+    await queryRunner.query(`
+      DROP TRIGGER IF EXISTS trg_update_pr_before_delete ON purchase_items;
     `);
 
     await queryRunner.query(`
