@@ -34,6 +34,29 @@ export const AppDataSource = new DataSource({
     idleTimeoutMillis: 30000,
     reapIntervalMillis: 1000,
     createRetryIntervalMillis: 200,
+    // PostgreSQL query caching and performance optimizations
+    statement_timeout: 30000, // 30 seconds
+    query_timeout: 30000,
+    // Enable query plan caching
+    plan_cache_mode: "auto",
+    // Connection-level settings for better caching
+    application_name: "simplip2p-backend",
+    // Enable prepared statement caching
+    prepare_cache_size: 100,
+    // Set work_mem for better query performance
+    work_mem: "4MB",
+    // Enable shared_preload_libraries for pg_stat_statements
+    shared_preload_libraries: "pg_stat_statements",
   },
   poolSize: 20,
+  // // Enable query result caching
+  // cache: {
+  //   duration: 300000, // 5 minutes
+  //   type: "redis",
+  //   options: {
+  //     host: process.env.REDIS_HOST,
+  //     port: parseInt(process.env.REDIS_PORT || "6379"),
+  //     password: process.env.REDIS_PASSWORD,
+  //   },
+  // },
 });
