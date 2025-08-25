@@ -107,11 +107,11 @@ export class PurchaseRequisitionService {
       .createQueryBuilder()
       .update(PurchaseRequisition)
       .set({
-      status: PurchaseRequisitionStatus.PENDING,
-      branch: { id: branch_id },
-      department: { id: department_id },
-      supplier: { id: supplier_id },
-      ...request,
+        status: PurchaseRequisitionStatus.PENDING,
+        branch: { id: branch_id },
+        department: { id: department_id },
+        supplier: { id: supplier_id },
+        ...request,
       })
       .where("id = :id", { id: requisition.id })
       .returning("*")

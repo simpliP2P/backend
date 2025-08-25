@@ -3,8 +3,10 @@ import {
   Controller,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   Query,
   Req,
   SetMetadata,
@@ -25,6 +27,7 @@ import { OrganisationBranch } from "../Entities/organisation-branch.entity";
 import {
   ApprovalDataDto,
   CreatePurchaseRequisitionDto,
+  UpdatePurchaseRequisitionDto,
 } from "src/Modules/PurchaseRequisition/Dtos/purchase-requisition.dto";
 
 @Controller("organisations")
@@ -181,6 +184,36 @@ export class OrganisationRequisitionController {
         status: "success",
         message: "Requisition fetched successfully.",
         data: { requisition },
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Put(":organisationId/requisitions/:requisitionId")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_PURCHASE_REQUISITIONS,
+    PermissionType.UPDATE_PURCHASE_REQUISITIONS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async updateRequisition(
+    @Param("organisationId", ParseUUIDPipe) organisationId: string,
+    @Param("requisitionId", ParseUUIDPipe) requisitionId: string,
+    @Body() updateData: UpdatePurchaseRequisitionDto,
+  ) {
+    try {
+      const updatedRequisition =
+        await this.purchaseRequisitionService.updatePurchaseRequisition(
+          organisationId,
+          requisitionId,
+          updateData,
+        );
+
+      return {
+        status: "success",
+        message: "Purchase requisition updated successfully",
+        data: { requisition: updatedRequisition },
       };
     } catch (error) {
       throw error;
