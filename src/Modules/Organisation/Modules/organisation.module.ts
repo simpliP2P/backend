@@ -1,6 +1,5 @@
 import { Module } from "@nestjs/common";
 import { OrganisationService } from "../Services/organisation.service";
-import { OrganisationController } from "../Controllers/organisation.controller";
 import { Organisation } from "../Entities/organisation.entity";
 import { UserOrganisation } from "../Entities/user-organisation.entity";
 import { TypeOrmModule } from "@nestjs/typeorm";
@@ -35,6 +34,16 @@ import { HashHelper } from "src/Shared/Helpers/hash.helper";
 import { SmsModule } from "src/Modules/Sms/sms.module";
 import { SubdomainController } from "../Controllers/subdomain.controller";
 
+import {
+  OrganisationCoreController,
+  OrganisationCategoryController,
+  OrganisationMemberController,
+  OrganisationSupplierController,
+  OrganisationRequisitionController,
+  OrganisationOrderController,
+  OrganisationProductController,
+} from "../Controllers";
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -60,7 +69,15 @@ import { SubdomainController } from "../Controllers/subdomain.controller";
     OrganisationCategoryModule,
   ],
   controllers: [
-    OrganisationController,
+    // Separated organisation controllers
+    OrganisationCoreController,
+    OrganisationCategoryController,
+    OrganisationMemberController,
+    OrganisationSupplierController,
+    OrganisationRequisitionController,
+    OrganisationOrderController,
+    OrganisationProductController,
+    // Other existing controllers
     OrganisationDepartmentController,
     OrganisationBranchController,
     SubdomainController,
