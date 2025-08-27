@@ -320,6 +320,7 @@ export class PurchaseRequisitionService {
       );
     }
 
+    /*
     const supplierId = approvalData?.supplier_id || requisition.supplier?.id;
 
     if (!supplierId) {
@@ -327,8 +328,12 @@ export class PurchaseRequisitionService {
         "No supplier is assigned to the requisition.",
       );
     }
+    */
 
-    if (approvalData.status === PurchaseRequisitionStatus.APPROVED) {
+    const isStatusApproveAndBudgetAttached =
+      approvalData.status === PurchaseRequisitionStatus.APPROVED &&
+      approvalData.budget_id;
+    if (isStatusApproveAndBudgetAttached) {
       // Update budget reserved
       await this.budgetService.reserveAmount(
         organisationId,
