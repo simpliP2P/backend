@@ -287,7 +287,7 @@ export class PurchaseRequisitionService {
       status: PurchaseRequisitionStatus;
       approved_by: any;
       approval_justification: string;
-      budget_id: string;
+      budget_id?: string;
       action_type: PRApprovalActionType;
       supplier_id?: string;
     },
@@ -337,7 +337,7 @@ export class PurchaseRequisitionService {
       // Update budget reserved
       await this.budgetService.reserveAmount(
         organisationId,
-        approvalData.budget_id,
+        approvalData.budget_id || "",
         requisition.estimated_cost,
       );
     }
