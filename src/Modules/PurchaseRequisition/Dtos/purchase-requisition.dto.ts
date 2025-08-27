@@ -86,7 +86,8 @@ export class ApprovalDataDto {
   approval_justification: string;
 
   @IsUUID()
-  budget_id: string;
+  @IsOptional()
+  budget_id?: string;
 
   @IsEnum(PRApprovalActionType)
   action_type: PRApprovalActionType;
