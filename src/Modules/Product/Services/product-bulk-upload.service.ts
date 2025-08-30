@@ -375,7 +375,7 @@ export class ProductBulkUploadService {
           throw new Error(`Row ${index + 1}: Product name is required`);
         if (!product.description)
           throw new Error(`Row ${index + 1}: Product description is required`);
-        if (isNaN(product.unitPrice) || product.unitPrice <= 0)
+        if (isNaN(product.unitPrice) || product.unitPrice < 0)
           throw new Error(`Row ${index + 1}: Valid product price is required`);
         if (isNaN(product.stockQty) || product.stockQty < 0)
           throw new Error(`Row ${index + 1}: Valid stock quantity is required`);
