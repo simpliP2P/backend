@@ -38,7 +38,7 @@ export class OrganisationPermissionsGuard implements CanActivate {
       request.headers.oid;
 
     if (!isUUID(organisationId)) {
-      throw new ForbiddenException("Organisation ID is required");
+      throw new ForbiddenException("Valid Organisation ID is required");
     }
 
     const userOrganisation =
