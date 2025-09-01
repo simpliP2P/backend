@@ -134,9 +134,85 @@ export class PurchaseOrderService {
   }
 
   /**
-   * Pending orders will be approved requisitions that have not been converted to purchase orders
+   * Creates a purchase order for a specific supplier with selected items
+   * Used in the new workflow where items are assigned to different suppliers
    */
-  public async getAllPendingOrders() {}
+  public async createMultipleSupplierPO(
+    organisationId: string,
+    data: Partial<IPurchaseOrder> & { items: string[] },
+  ): Promise<Partial<PurchaseOrder>> {
+    try {
+      const pr = await this.purchaseRequisitionService.getPurchaseRequisition({
+        where: { id: data.request_id },
+        relations: ["items", "organisation"],
+        select: {
+          organisation: {
+            id: true,
+            name: true,
+          },
+        },
+      });
+
+      if (pr?.status !== PurchaseRequisitionStatus.APPROVED) {
+        throw new ForbiddenException("Purchase Requisition not approved");
+      }
+
+      // get supplier details
+      const foundSupplier = await this.supplierService.findOne({
+        where: { id: data.supplier_id, organisation: { id: organisationId } },
+      });
+
+      // create purchase order
+      const po_number = await this.generatePoNumber(organisationId);
+
+      const { items, ...purchaseOrderData } = data;
+      const purchaseOrder = this.purchaseOrderRepository.create({
+        ...purchaseOrderData,
+        po_number,
+        purchase_requisition: { id: data.request_id } as PurchaseRequisition,
+        organisation: { id: organisationId } as Organisation,
+        supplier: foundSupplier,
+      });
+
+      const savedPurchaseOrder =
+        await this.purchaseOrderRepository.save(purchaseOrder);
+      const { supplier } = savedPurchaseOrder;
+
+      // Update only the specified purchase items with this purchase order id
+      await this.purchaseItemRepository
+        .createQueryBuilder()
+        .update(PurchaseItem)
+        .set({ purchase_order: { id: savedPurchaseOrder.id } })
+        .where("id IN (:...itemIds)", { itemIds: data.items })
+        .andWhere("purchase_order_id IS NULL")
+        .execute();
+
+      // Generate purchase order Url for supplier to view
+      const poUrl = await this.genPurchaseOrderUrl({
+        creatorId: savedPurchaseOrder.created_by.id,
+        organisationId,
+        poId: savedPurchaseOrder.id,
+      });
+
+      const notificationData = {
+        organisationName: pr.organisation.name,
+        supplier: {
+          name: foundSupplier.full_name,
+          email: foundSupplier.email,
+          phone: foundSupplier.phone,
+        },
+        poUrl,
+      };
+
+      this.notifySupplier(supplier.notification_channel, notificationData);
+
+      return savedPurchaseOrder;
+    } catch (error) {
+      throw new Error(
+        `Failed to create multiple supplier purchase order: ${error.message}`,
+      );
+    }
+  }
 
   public async getOrganisationOrders({
     organisationId,

@@ -6,6 +6,7 @@ import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/pu
 import { Column, Entity, JoinColumn, ManyToOne, Unique } from "typeorm";
 import { PurchaseItemStatus } from "../Enums/purchase-item.enum";
 import { Organisation } from "src/Modules/Organisation/Entities/organisation.entity";
+import { Supplier } from "src/Modules/Supplier/Entities/supplier.entity";
 
 @Entity("purchase_items")
 @Unique("unique_item_per_org_pr", [
@@ -53,4 +54,8 @@ export class PurchaseItem extends BaseEntity {
   @ManyToOne(() => Organisation, (org) => org.purchaseRequisitions)
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
+
+  @ManyToOne(() => Supplier, { nullable: true })
+  @JoinColumn({ name: "supplier_id" })
+  supplier: Supplier;
 }
