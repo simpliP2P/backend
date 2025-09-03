@@ -9,6 +9,7 @@ export enum PermissionType {
   DELETE_SUPPLIERS = "delete_suppliers",
   MANAGE_PURCHASE_REQUISITIONS = "manage_purchase_requisitions",
   CREATE_PURCHASE_REQUISITIONS = "create_purchase_requisitions",
+  EDIT_PURCHASE_REQUISITIONS = "edit_purchase_requisitions",
   GET_PURCHASE_REQUISITIONS = "get_purchase_requisitions",
   UPDATE_PURCHASE_REQUISITIONS = "update_purchase_requisitions",
   DELETE_PURCHASE_REQUISITIONS = "delete_purchase_requisitions",
