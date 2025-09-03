@@ -17,13 +17,9 @@ import { OrganisationPermissionsGuard } from "src/Guards/permissions.guard";
 import { PermissionType } from "../Enums/user-organisation.enum";
 import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchase-requisition.service";
 import { PurchaseRequisitionStatus } from "src/Modules/PurchaseRequisition/Enums/purchase-requisition.enum";
-import { User } from "src/Modules/User/Entities/user.entity";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 import { ApiResponse } from "src/Shared/Interfaces/api-response.interface";
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
-import { OrganisationDepartment } from "../Entities/organisation-department.entity";
-import { Supplier } from "src/Modules/Supplier/Entities/supplier.entity";
-import { OrganisationBranch } from "../Entities/organisation-branch.entity";
 import {
   ApprovalDataDto,
   CreatePurchaseRequisitionDto,
@@ -108,14 +104,8 @@ export class OrganisationRequisitionController {
       const purchaseRequisition =
         await this.purchaseRequisitionService.createPurchaseRequisition(
           organisationId,
-          {
-            ...data,
-            created_by: { id: userId } as User,
-            department: { id: data.department_id } as OrganisationDepartment,
-            supplier: { id: data.supplier_id } as Supplier,
-            branch: { id: data.branch_id } as OrganisationBranch,
-            status: PurchaseRequisitionStatus.SAVED_FOR_LATER,
-          },
+          userId,
+          data,
         );
 
       return {
