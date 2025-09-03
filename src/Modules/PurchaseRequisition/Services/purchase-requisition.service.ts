@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
@@ -18,6 +19,8 @@ import { User } from "src/Modules/User/Entities/user.entity";
 
 @Injectable()
 export class PurchaseRequisitionService {
+  private readonly logger = new Logger(PurchaseRequisitionService.name);
+
   constructor(
     @InjectRepository(PurchaseRequisition)
     private readonly purchaseRequisitionRepository: Repository<PurchaseRequisition>,
@@ -30,50 +33,123 @@ export class PurchaseRequisitionService {
   public async checkForUnCompletedRequisition(
     userId: string,
     organisationId: string,
-  ) {
-    return await this.purchaseRequisitionRepository.findOne({
-      where: {
-        created_by: { id: userId },
-        organisation: { id: organisationId },
-        status: PurchaseRequisitionStatus.INITIALIZED,
-      },
-    });
+  ): Promise<boolean> {
+    // Ultra-fast raw SQL query - bypasses ORM overhead
+    const result = await this.purchaseRequisitionRepository.manager.query(
+      `SELECT 1 FROM purchase_requisitions 
+       WHERE created_by = $1 
+       AND organisation_id = $2 
+       AND status NOT IN ('APPROVED', 'REJECTED') 
+       LIMIT 1`,
+      [userId, organisationId],
+    );
+
+    return result.length > 0;
   }
 
   public async initializePurchaseRequisition(
     userId: string,
     data: { organisationId: string; branchId: string; departmentId: string },
   ): Promise<{ id: string; pr_number: string }> {
-    const unCompletedRequisition = await this.checkForUnCompletedRequisition(
-      userId,
-      data.organisationId,
-    );
+    try {
+      const [unCompletedRequisition, prNumber] = await Promise.all([
+        this.checkForUnCompletedRequisition(userId, data.organisationId),
+        this.generatePrNumber(data.organisationId),
+      ]);
 
-    if (unCompletedRequisition) {
-      throw new BadRequestException(
-        "Complete your pending requisition before creating a new one",
-      );
+      if (unCompletedRequisition) {
+        throw new BadRequestException(
+          "Complete your pending requisition before creating a new one",
+        );
+      }
+
+      // Ultra-fast raw SQL insert - bypasses ORM overhead
+      const insertResult =
+        await this.purchaseRequisitionRepository.manager.query(
+          `INSERT INTO purchase_requisitions 
+         (pr_number, organisation_id, created_by, branch_id, department_id, status, created_at, updated_at) 
+         VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW()) 
+         RETURNING id, pr_number`,
+          [
+            prNumber,
+            data.organisationId,
+            userId,
+            data.branchId,
+            data.departmentId,
+            PurchaseRequisitionStatus.INITIALIZED,
+          ],
+        );
+
+      const { id, pr_number } = insertResult[0];
+
+      return { id, pr_number };
+    } catch (error) {
+      throw error;
     }
+  }
 
-    const requisition = this.purchaseRequisitionRepository.create({
-      pr_number: await this.generatePrNumber(data.organisationId),
-      organisation: { id: data.organisationId },
-      created_by: { id: userId },
-      branch: { id: data.branchId },
-      department: { id: data.departmentId },
-      status: PurchaseRequisitionStatus.INITIALIZED,
-    });
+  /**
+   * Batch operation for creating multiple purchase requisitions
+   * Much faster than creating them one by one
+   */
+  public async initializeMultiplePurchaseRequisitions(
+    requests: Array<{
+      userId: string;
+      organisationId: string;
+      branchId: string;
+      departmentId: string;
+    }>,
+  ): Promise<Array<{ id: string; pr_number: string }>> {
+    const startTime = performance.now();
 
-    const insertResult = await this.purchaseRequisitionRepository
-      .createQueryBuilder()
-      .insert()
-      .into(PurchaseRequisition)
-      .values(requisition)
-      .returning("*")
-      .execute();
+    try {
+      // Validate all in parallel
+      const validationPromises = requests.map((req) =>
+        this.checkForUnCompletedRequisition(req.userId, req.organisationId),
+      );
 
-    const { id, pr_number } = insertResult.raw[0];
-    return { id, pr_number };
+      const validationResults = await Promise.all(validationPromises);
+
+      if (validationResults.some((result) => result)) {
+        throw new BadRequestException("Some users have pending requisitions");
+      }
+
+      // Generate all PR numbers in parallel
+      const prNumbers = await Promise.all(
+        requests.map((req) => this.generatePrNumber(req.organisationId)),
+      );
+
+      // Batch insert
+      const values = requests.map((req, index) => ({
+        pr_number: prNumbers[index],
+        organisation: { id: req.organisationId },
+        created_by: { id: req.userId },
+        branch: { id: req.branchId },
+        department: { id: req.departmentId },
+        status: PurchaseRequisitionStatus.INITIALIZED,
+      }));
+
+      const insertResult = await this.purchaseRequisitionRepository
+        .createQueryBuilder()
+        .insert()
+        .into(PurchaseRequisition)
+        .values(values)
+        .returning(["id", "pr_number"])
+        .execute();
+
+      const duration = performance.now() - startTime;
+      this.logger.log(
+        `✅ BATCH OPERATION: ${requests.length} PRs initialized in ${duration.toFixed(2)}ms (avg: ${(duration / requests.length).toFixed(2)}ms per PR)`,
+      );
+
+      return insertResult.raw;
+    } catch (error) {
+      const duration = performance.now() - startTime;
+      this.logger.error(
+        `❌ Batch PR initialization failed after ${duration.toFixed(2)}ms: ${error.message}`,
+      );
+      throw error;
+    }
   }
 
   public async finalizePurchaseRequisition(
@@ -100,6 +176,7 @@ export class PurchaseRequisitionService {
     return await this.updateRequisitionToPending(
       requisition.id,
       branch_id,
+      supplier_id || "",
       department_id,
       request,
     );
@@ -250,6 +327,7 @@ export class PurchaseRequisitionService {
   private async updateRequisitionToPending(
     requisitionId: string,
     branch_id: string,
+    supplier_id: string,
     department_id: string,
     request: any,
   ): Promise<PurchaseRequisition> {
@@ -259,6 +337,7 @@ export class PurchaseRequisitionService {
       .set({
         status: PurchaseRequisitionStatus.PENDING,
         branch: { id: branch_id },
+        supplier: { id: supplier_id },
         department: { id: department_id },
         ...request,
       })
@@ -301,18 +380,16 @@ export class PurchaseRequisitionService {
   }
 
   private async generatePrNumber(organisationId: string): Promise<string> {
-    const lastPr = await this.purchaseRequisitionRepository
-      .createQueryBuilder("pr")
-      .where("pr.organisation_id = :orgId", { orgId: organisationId })
-      .orderBy("pr.created_at", "DESC")
-      .getOne();
+    // Ultra-fast raw SQL with optimized pattern matching
+    const result = await this.purchaseRequisitionRepository.manager.query(
+      `SELECT COALESCE(MAX(CAST(SUBSTRING(pr_number, LENGTH('PR-${organisationId}-') + 1) AS INTEGER)), 0) + 1 as next_number
+       FROM purchase_requisitions 
+       WHERE organisation_id = $1 
+       AND pr_number LIKE 'PR-${organisationId}-%'`,
+      [organisationId],
+    );
 
-    let sequence = 1;
-    if (lastPr) {
-      const match = lastPr.pr_number.match(/^PR-(\d+)$/);
-      sequence = match ? parseInt(match[1], 10) + 1 : 1;
-    }
-
-    return `PR-${String(sequence).padStart(3, "0")}`;
+    const nextNumber = result[0]?.next_number || 1;
+    return `PR-${nextNumber.toString().padStart(3, "0")}`;
   }
 }
