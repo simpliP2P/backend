@@ -1,7 +1,5 @@
 import {
   ForbiddenException,
-  Inject,
-  forwardRef,
   Injectable,
   NotFoundException,
   BadRequestException,
@@ -22,7 +20,6 @@ import {
 } from "../Types/purchase-order.types";
 import { SuppliersService } from "src/Modules/Supplier/Services/supplier.service";
 import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
-import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchase-requisition.service";
 import { PurchaseRequisitionStatus } from "src/Modules/PurchaseRequisition/Enums/purchase-requisition.enum";
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
 import { BudgetService } from "src/Modules/Budget/Services/budget.service";
@@ -40,12 +37,8 @@ export class PurchaseOrderService {
   constructor(
     @InjectRepository(PurchaseOrder)
     private readonly purchaseOrderRepository: Repository<PurchaseOrder>,
-
     @InjectRepository(PurchaseItem)
     private readonly purchaseItemRepository: Repository<PurchaseItem>,
-
-    @Inject(forwardRef(() => PurchaseRequisitionService))
-    private readonly purchaseRequisitionService: PurchaseRequisitionService,
 
     private readonly supplierService: SuppliersService,
     private readonly budgetService: BudgetService,
@@ -58,21 +51,19 @@ export class PurchaseOrderService {
   public async create(
     organisationId: string,
     data: Partial<IPurchaseOrder>,
+    purchaseRequisition?: {
+      id: string;
+      status: PurchaseRequisitionStatus;
+      organisation: { id: string; name: string };
+    },
   ): Promise<Partial<PurchaseOrder>> {
     // check if PR is approved
     try {
-      const pr = await this.purchaseRequisitionService.getPurchaseRequisition({
-        where: { id: data.request_id },
-        relations: ["items", "organisation"],
-        select: {
-          organisation: {
-            id: true,
-            name: true,
-          },
-        },
-      });
+      if (!purchaseRequisition) {
+        throw new BadRequestException("Purchase requisition data is required");
+      }
 
-      if (pr?.status !== PurchaseRequisitionStatus.APPROVED) {
+      if (purchaseRequisition.status !== PurchaseRequisitionStatus.APPROVED) {
         throw new ForbiddenException("Purchase Requisition not approved");
       }
 
@@ -95,7 +86,7 @@ export class PurchaseOrderService {
       const { supplier, ...savedPurchaseOrder } =
         await this.purchaseOrderRepository.save(purchaseOrder);
 
-      const purchaseRequisitionId = pr.id;
+      const purchaseRequisitionId = purchaseRequisition.id;
 
       // Update purchase items with purchase order id
       this.purchaseItemRepository
@@ -116,7 +107,7 @@ export class PurchaseOrderService {
       });
 
       const notificationData = {
-        organisationName: pr.organisation.name,
+        organisationName: purchaseRequisition.organisation.name,
         supplier: {
           name: foundSupplier.full_name,
           email: foundSupplier.email,
@@ -140,20 +131,18 @@ export class PurchaseOrderService {
   public async createMultipleSupplierPO(
     organisationId: string,
     data: Partial<IPurchaseOrder> & { items: string[] },
+    purchaseRequisition?: {
+      id: string;
+      status: PurchaseRequisitionStatus;
+      organisation: { id: string; name: string };
+    },
   ): Promise<Partial<PurchaseOrder>> {
     try {
-      const pr = await this.purchaseRequisitionService.getPurchaseRequisition({
-        where: { id: data.request_id },
-        relations: ["items", "organisation"],
-        select: {
-          organisation: {
-            id: true,
-            name: true,
-          },
-        },
-      });
+      if (!purchaseRequisition) {
+        throw new BadRequestException("Purchase requisition data is required");
+      }
 
-      if (pr?.status !== PurchaseRequisitionStatus.APPROVED) {
+      if (purchaseRequisition.status !== PurchaseRequisitionStatus.APPROVED) {
         throw new ForbiddenException("Purchase Requisition not approved");
       }
 
@@ -195,7 +184,7 @@ export class PurchaseOrderService {
       });
 
       const notificationData = {
-        organisationName: pr.organisation.name,
+        organisationName: purchaseRequisition.organisation.name,
         supplier: {
           name: foundSupplier.full_name,
           email: foundSupplier.email,
