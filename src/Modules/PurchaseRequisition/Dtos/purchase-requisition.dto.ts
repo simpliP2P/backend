@@ -105,8 +105,4 @@ export class ManagerReviewSubmissionDto {
   @ValidateNested({ each: true })
   @Type(() => ItemSupplierAssignmentDto)
   item_supplier_assignments: ItemSupplierAssignmentDto[];
-
-  @IsOptional()
-  @IsString()
-  notes?: string;
 }
