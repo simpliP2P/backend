@@ -73,16 +73,17 @@ export class OrganisationPermissionsGuard implements CanActivate {
      * At this point, we are sure that the user is part of the organisation.
      * Now, allow access if ORG_MEMBER permission is required.
      */
-    if (requiredPermissions.includes(PermissionType.ORG_MEMBER)) {
+    const isOrgMember = requiredPermissions.includes(PermissionType.ORG_MEMBER);
+    if (isOrgMember) {
       return true;
     }
 
     // Check if user has the required permissions
-    const hasPermission = requiredPermissions.some((permission) =>
+    const hasRequiredPermission = requiredPermissions.some((permission) =>
       userPermissions.includes(permission),
     );
 
     // Return true if the user has the required permissions, otherwise false
-    return hasPermission;
+    return hasRequiredPermission;
   }
 }
