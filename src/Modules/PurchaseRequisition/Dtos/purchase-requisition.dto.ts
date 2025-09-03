@@ -6,12 +6,16 @@ import {
   IsString,
   IsUUID,
   Min,
+  IsArray,
+  ValidateNested,
 } from "class-validator";
+import { Type } from "class-transformer";
 import { IsDateAtLeastToday } from "src/Modules/Organisation/Dtos/organisation.dto";
 import {
   PRApprovalActionType,
   PurchaseRequisitionStatus,
 } from "../Enums/purchase-requisition.enum";
+import { ItemSupplierAssignmentDto } from "./item-supplier-assignment.dto";
 
 export class InitializePurchaseRequisitionDto {
   @IsUUID()
@@ -92,7 +96,13 @@ export class ApprovalDataDto {
   @IsEnum(PRApprovalActionType)
   action_type: PRApprovalActionType;
 
-  @IsUUID()
-  @IsOptional()
-  supplier_id?: string;
+  // Note: supplier_id is no longer needed in the new workflow
+  // Suppliers are assigned per item during manager review
+}
+
+export class ManagerReviewSubmissionDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ItemSupplierAssignmentDto)
+  item_supplier_assignments: ItemSupplierAssignmentDto[];
 }

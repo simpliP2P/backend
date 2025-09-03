@@ -1,11 +1,12 @@
 import { Injectable, NestMiddleware } from "@nestjs/common";
 import { Request, Response, NextFunction } from "express";
 import { AppLogger } from "../Logger/logger.service";
-import { PerformanceHelper } from "../Shared/Helpers/performance.helper";
 
 @Injectable()
 export class RequestLoggerMiddleware implements NestMiddleware {
-  constructor(private logger: AppLogger) {}
+  constructor(
+    private logger: AppLogger,
+  ) {}
 
   use(req: Request, res: Response, next: NextFunction) {
     const startTime = Date.now();
@@ -37,11 +38,7 @@ export class RequestLoggerMiddleware implements NestMiddleware {
         8,
       )} ${coloredStatus.padEnd(5)} ${processingTime}ms`;
       this.logger.log(formattedLog);
-
-      // Log slow endpoints for performance monitoring
-      PerformanceHelper.logSlowEndpoint(method, originalUrl, processingTime);
     });
-
     next();
   }
 }

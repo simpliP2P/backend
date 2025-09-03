@@ -1,7 +1,5 @@
 import {
   ForbiddenException,
-  Inject,
-  forwardRef,
   Injectable,
   NotFoundException,
   BadRequestException,
@@ -22,7 +20,6 @@ import {
 } from "../Types/purchase-order.types";
 import { SuppliersService } from "src/Modules/Supplier/Services/supplier.service";
 import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
-import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchase-requisition.service";
 import { PurchaseRequisitionStatus } from "src/Modules/PurchaseRequisition/Enums/purchase-requisition.enum";
 import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
 import { BudgetService } from "src/Modules/Budget/Services/budget.service";
@@ -40,12 +37,8 @@ export class PurchaseOrderService {
   constructor(
     @InjectRepository(PurchaseOrder)
     private readonly purchaseOrderRepository: Repository<PurchaseOrder>,
-
     @InjectRepository(PurchaseItem)
     private readonly purchaseItemRepository: Repository<PurchaseItem>,
-
-    @Inject(forwardRef(() => PurchaseRequisitionService))
-    private readonly purchaseRequisitionService: PurchaseRequisitionService,
 
     private readonly supplierService: SuppliersService,
     private readonly budgetService: BudgetService,
@@ -58,21 +51,19 @@ export class PurchaseOrderService {
   public async create(
     organisationId: string,
     data: Partial<IPurchaseOrder>,
+    purchaseRequisition?: {
+      id: string;
+      status: PurchaseRequisitionStatus;
+      organisation: { id: string; name: string };
+    },
   ): Promise<Partial<PurchaseOrder>> {
     // check if PR is approved
     try {
-      const pr = await this.purchaseRequisitionService.getPurchaseRequisition({
-        where: { id: data.request_id },
-        relations: ["items", "organisation"],
-        select: {
-          organisation: {
-            id: true,
-            name: true,
-          },
-        },
-      });
+      if (!purchaseRequisition) {
+        throw new BadRequestException("Purchase requisition data is required");
+      }
 
-      if (pr?.status !== PurchaseRequisitionStatus.APPROVED) {
+      if (purchaseRequisition.status !== PurchaseRequisitionStatus.APPROVED) {
         throw new ForbiddenException("Purchase Requisition not approved");
       }
 
@@ -95,7 +86,7 @@ export class PurchaseOrderService {
       const { supplier, ...savedPurchaseOrder } =
         await this.purchaseOrderRepository.save(purchaseOrder);
 
-      const purchaseRequisitionId = pr.id;
+      const purchaseRequisitionId = purchaseRequisition.id;
 
       // Update purchase items with purchase order id
       this.purchaseItemRepository
@@ -116,7 +107,7 @@ export class PurchaseOrderService {
       });
 
       const notificationData = {
-        organisationName: pr.organisation.name,
+        organisationName: purchaseRequisition.organisation.name,
         supplier: {
           name: foundSupplier.full_name,
           email: foundSupplier.email,
@@ -134,9 +125,83 @@ export class PurchaseOrderService {
   }
 
   /**
-   * Pending orders will be approved requisitions that have not been converted to purchase orders
+   * Creates a purchase order for a specific supplier with selected items
+   * Used in the new workflow where items are assigned to different suppliers
    */
-  public async getAllPendingOrders() {}
+  public async createMultipleSupplierPO(
+    organisationId: string,
+    data: Partial<IPurchaseOrder> & { items: string[] },
+    purchaseRequisition?: {
+      id: string;
+      status: PurchaseRequisitionStatus;
+      organisation: { id: string; name: string };
+    },
+  ): Promise<Partial<PurchaseOrder>> {
+    try {
+      if (!purchaseRequisition) {
+        throw new BadRequestException("Purchase requisition data is required");
+      }
+
+      if (purchaseRequisition.status !== PurchaseRequisitionStatus.APPROVED) {
+        throw new ForbiddenException("Purchase Requisition not approved");
+      }
+
+      // get supplier details
+      const foundSupplier = await this.supplierService.findOne({
+        where: { id: data.supplier_id, organisation: { id: organisationId } },
+      });
+
+      // create purchase order
+      const po_number = await this.generatePoNumber(organisationId);
+
+      const { items, ...purchaseOrderData } = data;
+      const purchaseOrder = this.purchaseOrderRepository.create({
+        ...purchaseOrderData,
+        po_number,
+        purchase_requisition: { id: data.request_id } as PurchaseRequisition,
+        organisation: { id: organisationId } as Organisation,
+        supplier: foundSupplier,
+      });
+
+      const savedPurchaseOrder =
+        await this.purchaseOrderRepository.save(purchaseOrder);
+      const { supplier } = savedPurchaseOrder;
+
+      // Update only the specified purchase items with this purchase order id
+      await this.purchaseItemRepository
+        .createQueryBuilder()
+        .update(PurchaseItem)
+        .set({ purchase_order: { id: savedPurchaseOrder.id } })
+        .where("id IN (:...itemIds)", { itemIds: data.items })
+        .andWhere("purchase_order_id IS NULL")
+        .execute();
+
+      // Generate purchase order Url for supplier to view
+      const poUrl = await this.genPurchaseOrderUrl({
+        creatorId: savedPurchaseOrder.created_by.id,
+        organisationId,
+        poId: savedPurchaseOrder.id,
+      });
+
+      const notificationData = {
+        organisationName: purchaseRequisition.organisation.name,
+        supplier: {
+          name: foundSupplier.full_name,
+          email: foundSupplier.email,
+          phone: foundSupplier.phone,
+        },
+        poUrl,
+      };
+
+      this.notifySupplier(supplier.notification_channel, notificationData);
+
+      return savedPurchaseOrder;
+    } catch (error) {
+      throw new Error(
+        `Failed to create multiple supplier purchase order: ${error.message}`,
+      );
+    }
+  }
 
   public async getOrganisationOrders({
     organisationId,

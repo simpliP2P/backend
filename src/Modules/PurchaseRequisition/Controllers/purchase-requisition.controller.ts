@@ -6,16 +6,20 @@ import {
   SetMetadata,
   UseGuards,
   Put,
+  Param,
 } from "@nestjs/common";
 import { PurchaseRequisitionService } from "../Services/purchase-requisition.service";
 import { Request } from "express";
-import { InitializePurchaseRequisitionDto } from "../Dtos/purchase-requisition.dto";
+import {
+  InitializePurchaseRequisitionDto,
+  CreatePurchaseRequisitionDto,
+  ManagerReviewSubmissionDto,
+} from "../Dtos/purchase-requisition.dto";
 import { PermissionType } from "src/Modules/Organisation/Enums/user-organisation.enum";
 import { OrganisationPermissionsGuard } from "src/Guards/permissions.guard";
-import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
-import { CreatePurchaseRequisitionDto } from "../Dtos/purchase-requisition.dto";
 
 @Controller("purchase-requisitions")
+@UseGuards(OrganisationPermissionsGuard)
 export class PurchaseRequisitionController {
   constructor(
     private readonly purchaseRequisitionService: PurchaseRequisitionService,
@@ -26,26 +30,12 @@ export class PurchaseRequisitionController {
     PermissionType.OWNER,
     PermissionType.MANAGE_PURCHASE_REQUISITIONS,
   ])
-  @UseGuards(OrganisationPermissionsGuard)
   async initializePurchaseRequisition(
     @Req() req: Request,
     @Body() data: InitializePurchaseRequisitionDto,
   ) {
     try {
       const userId = req.user.sub;
-      const organisationId = data.organisationId;
-
-      const unCompletedRequisition =
-        await this.purchaseRequisitionService.checkForUnCompletedRequisition(
-          userId,
-          organisationId,
-        );
-
-      if (unCompletedRequisition) {
-        throw new BadRequestException(
-          "Complete your pending requisition before creating a new one",
-        );
-      }
 
       const prData =
         await this.purchaseRequisitionService.initializePurchaseRequisition(
@@ -68,7 +58,6 @@ export class PurchaseRequisitionController {
     PermissionType.OWNER,
     PermissionType.MANAGE_PURCHASE_REQUISITIONS,
   ])
-  @UseGuards(OrganisationPermissionsGuard)
   async finalizePurchaseRequisition(
     @Req() req: Request,
     @Body() data: CreatePurchaseRequisitionDto,
@@ -76,10 +65,6 @@ export class PurchaseRequisitionController {
     try {
       const userId = req.user.sub;
       const organisationId = req.headers.oid as string;
-
-      if (!organisationId) {
-        throw new BadRequestException("Organisation ID is required.");
-      }
 
       const requisition =
         await this.purchaseRequisitionService.finalizePurchaseRequisition(
@@ -92,6 +77,36 @@ export class PurchaseRequisitionController {
       return {
         status: "success",
         message: "Purchase requisition finalized",
+        data: { requisition },
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Put(":requisitionId/manager-review")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.EDIT_PURCHASE_REQUISITIONS,
+  ])
+  async submitForManagerReview(
+    @Req() req: Request,
+    @Body() data: ManagerReviewSubmissionDto,
+    @Param("requisitionId") requisitionId: string,
+  ) {
+    try {
+      const organisationId = req.headers.oid as string;
+
+      const requisition =
+        await this.purchaseRequisitionService.submitForManagerReview(
+          organisationId,
+          requisitionId,
+          data,
+        );
+
+      return {
+        status: "success",
+        message: "Purchase requisition submitted for manager review",
         data: { requisition },
       };
     } catch (error) {

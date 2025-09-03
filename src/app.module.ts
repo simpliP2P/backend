@@ -19,6 +19,7 @@ import { PurchaseItemModule } from "./Modules/PurchaseItem/Modules/purchase-item
 import { FileManagerModule } from "./Modules/FileManager/Modules/file-manager.module";
 import { ExportModule } from "./Modules/ExportData/Modules/export.module";
 import { PurchaseOrderModule } from "./Modules/PurchaseOrder/Modules/purchase-order.module";
+import { SharedModule } from "./Shared/shared.module";
 // import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 
 @Module({
@@ -37,6 +38,7 @@ import { PurchaseOrderModule } from "./Modules/PurchaseOrder/Modules/purchase-or
     //   ],
     // }),
     DatabaseModule,
+    SharedModule,
     AuthModule,
     OAuthModule,
     OrganisationModule,

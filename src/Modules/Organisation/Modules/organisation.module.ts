@@ -10,8 +10,6 @@ import { MailModule } from "src/Modules/Mail/mail.module";
 import { UserOrganisationRepository } from "../Repositories/user-organisation.repository";
 import { AppLogger } from "src/Logger/logger.service";
 import { SuppliersModule } from "src/Modules/Supplier/Modules/supplier.module";
-import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchase-requisition.service";
-import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
 import { ProductModule } from "src/Modules/Product/Modules/product.module";
 import { AuditLogsModule } from "src/Modules/AuditLogs/Modules/audit-logs.module";
 import { OrganisationDepartmentService } from "../Services/organisation-department.service";
@@ -20,9 +18,6 @@ import { OrganisationBranch } from "../Entities/organisation-branch.entity";
 import { OrganisationDepartment } from "../Entities/organisation-department.entity";
 import { User } from "src/Modules/User/Entities/user.entity";
 import { PurchaseItemModule } from "src/Modules/PurchaseItem/Modules/purchase-item.module";
-import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
-import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order.entity";
-import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 import { OrganisationCategoryModule } from "./organisation-category.module";
 import { FileManagerModule } from "src/Modules/FileManager/Modules/file-manager.module";
 import { OrganisationDepartmentController } from "../Controllers/organisation-department.controller";
@@ -43,6 +38,9 @@ import {
   OrganisationOrderController,
   OrganisationProductController,
 } from "../Controllers";
+import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order.entity";
+import { PurchaseRequisitionModule } from "src/Modules/PurchaseRequisition/Modules/purchase-requisition.module";
+import { PurchaseOrderModule } from "src/Modules/PurchaseOrder/Modules/purchase-order.module";
 
 @Module({
   imports: [
@@ -52,10 +50,8 @@ import {
       OrganisationDepartment,
       OrganisationBranch,
       UserOrganisation,
-      PurchaseRequisition,
-      PurchaseOrder,
-      PurchaseItem,
       Budget,
+      PurchaseOrder,
     ]),
     UserModule,
     TokenModule,
@@ -67,6 +63,8 @@ import {
     AuditLogsModule,
     PurchaseItemModule,
     OrganisationCategoryModule,
+    PurchaseRequisitionModule,
+    PurchaseOrderModule,
   ],
   controllers: [
     // Separated organisation controllers
@@ -89,8 +87,8 @@ import {
     ClientHelper,
     UserOrganisationRepository,
     AppLogger,
-    PurchaseOrderService,
-    PurchaseRequisitionService,
+    // PurchaseOrderService,
+    // PurchaseRequisitionService,
     BudgetService,
     PdfHelper,
     OrganisationDepartmentService,
@@ -101,8 +99,6 @@ import {
     OrganisationDepartmentService,
     OrganisationBranchService,
     UserOrganisationRepository,
-    PurchaseOrderService,
-    PurchaseRequisitionService,
     FileManagerModule,
     PdfHelper,
     ClientHelper,
