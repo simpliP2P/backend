@@ -399,7 +399,7 @@ export class PurchaseOrderService {
       sequence = match ? parseInt(match[1], 10) + 1 : 1;
     }
 
-    return `PO-${String(sequence).padStart(3, "0")}`;
+    return `PO-${sequence}`;
   }
 
   /**
