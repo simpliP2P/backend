@@ -63,7 +63,7 @@ export class PurchaseRequisitionService {
         `SELECT 1 FROM purchase_requisitions 
          WHERE created_by = $1 
          AND organisation_id = $2 
-         AND status NOT IN ('APPROVED', 'REJECTED') 
+         AND status = 'INITIALIZED'
          LIMIT 1`,
         [userId, organisationId],
       );
@@ -81,108 +81,72 @@ export class PurchaseRequisitionService {
     userId: string,
     data: { organisationId: string; branchId: string; departmentId: string },
   ): Promise<{ id: string; pr_number: string }> {
-    try {
-      const [unCompletedRequisition, prNumber] = await Promise.all([
-        this.checkForUnCompletedRequisition(userId, data.organisationId),
-        this.generatePrNumber(data.organisationId),
-      ]);
+    const startTime = performance.now();
 
-      if (unCompletedRequisition) {
+    try {
+      // OPTIMIZATION: Single atomic query that checks AND generates PR number only when inserting
+      // This eliminates 2 separate database round trips and prevents sequence gaps
+      const result = await this.purchaseRequisitionRepository.manager.query(
+        `WITH check_existing AS (
+           SELECT 1 as has_existing 
+           FROM purchase_requisitions 
+           WHERE created_by = $1 
+           AND organisation_id = $2 
+           AND status = 'INITIALIZED'
+           LIMIT 1
+         ),
+         ensure_seq AS (
+           INSERT INTO pr_sequences (organisation_id, sequence_name)
+           SELECT $2, 'pr_seq_' || replace($2::text, '-', '_')
+           WHERE NOT EXISTS (SELECT 1 FROM pr_sequences WHERE organisation_id = $2)
+         ),
+         next_pr AS (
+           SELECT nextval('pr_seq_' || replace($2::text, '-', '_')) as next_number
+           WHERE NOT EXISTS (SELECT 1 FROM check_existing)
+         ),
+         insert_result AS (
+           INSERT INTO purchase_requisitions 
+           (pr_number, organisation_id, created_by, branch_id, department_id, status, created_at, updated_at) 
+           SELECT 
+             'PR-' || next_number::text,
+             $2, $1, $3, $4, $5, NOW(), NOW()
+           FROM next_pr
+           RETURNING id, pr_number
+         )
+         SELECT 
+           CASE 
+             WHEN EXISTS (SELECT 1 FROM check_existing) THEN 'EXISTS'
+             ELSE 'SUCCESS'
+           END as status,
+           (SELECT id FROM insert_result LIMIT 1) as id,
+           (SELECT pr_number FROM insert_result LIMIT 1) as pr_number`,
+        [
+          userId,
+          data.organisationId,
+          data.branchId,
+          data.departmentId,
+          PurchaseRequisitionStatus.INITIALIZED,
+        ],
+      );
+
+      const { status, id, pr_number } = result[0];
+
+      if (status === "EXISTS") {
         throw new BadRequestException(
           "Complete your pending requisition before creating a new one",
         );
       }
 
-      // Ultra-fast raw SQL insert - bypasses ORM overhead
-      const insertResult =
-        await this.purchaseRequisitionRepository.manager.query(
-          `INSERT INTO purchase_requisitions 
-         (pr_number, organisation_id, created_by, branch_id, department_id, status, created_at, updated_at) 
-         VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW()) 
-         RETURNING id, pr_number`,
-          [
-            prNumber,
-            data.organisationId,
-            userId,
-            data.branchId,
-            data.departmentId,
-            PurchaseRequisitionStatus.INITIALIZED,
-          ],
-        );
-
-      const { id, pr_number } = insertResult[0];
-
+      const duration = performance.now() - startTime;
       this.logger.log(
-        `Successfully initialized PR ${pr_number} for user ${userId}`,
+        `⚡ ULTRA-FAST PR INIT: ${pr_number} for user ${userId} in ${duration.toFixed(2)}ms`,
       );
+
       return { id, pr_number };
     } catch (error) {
-      this.logger.error(
-        `Error initializing purchase requisition: ${error.message}`,
-      );
-      throw error;
-    }
-  }
-
-  /**
-   * Batch operation for creating multiple purchase requisitions
-   * Much faster than creating them one by one
-   */
-  public async initializeMultiplePurchaseRequisitions(
-    requests: Array<{
-      userId: string;
-      organisationId: string;
-      branchId: string;
-      departmentId: string;
-    }>,
-  ): Promise<Array<{ id: string; pr_number: string }>> {
-    const startTime = performance.now();
-
-    try {
-      // Validate all in parallel
-      const validationPromises = requests.map((req) =>
-        this.checkForUnCompletedRequisition(req.userId, req.organisationId),
-      );
-
-      const validationResults = await Promise.all(validationPromises);
-
-      if (validationResults.some((result) => result)) {
-        throw new BadRequestException("Some users have pending requisitions");
-      }
-
-      // Generate all PR numbers in parallel
-      const prNumbers = await Promise.all(
-        requests.map((req) => this.generatePrNumber(req.organisationId)),
-      );
-
-      // Batch insert
-      const values = requests.map((req, index) => ({
-        pr_number: prNumbers[index],
-        organisation: { id: req.organisationId },
-        created_by: { id: req.userId },
-        branch: { id: req.branchId },
-        department: { id: req.departmentId },
-        status: PurchaseRequisitionStatus.INITIALIZED,
-      }));
-
-      const insertResult = await this.purchaseRequisitionRepository
-        .createQueryBuilder()
-        .insert()
-        .into(PurchaseRequisition)
-        .values(values)
-        .returning(["id", "pr_number"])
-        .execute();
-
-      const duration = performance.now() - startTime;
-      this.logger.log(
-        `✅ BATCH OPERATION: ${requests.length} PRs initialized in ${duration.toFixed(2)}ms (avg: ${(duration / requests.length).toFixed(2)}ms per PR)`,
-      );
-
-      return insertResult.raw;
-    } catch (error) {
       const duration = performance.now() - startTime;
       this.logger.error(
-        `❌ Batch PR initialization failed after ${duration.toFixed(2)}ms: ${error.message}`,
+        `❌ PR init failed after ${duration.toFixed(2)}ms: ${error.message}`,
       );
       throw error;
     }
@@ -420,21 +384,69 @@ export class PurchaseRequisitionService {
       // Use transaction to prevent race conditions
       return await this.purchaseRequisitionRepository.manager.transaction(
         async (manager) => {
+          // Ensure sequence exists for this organization
+          this.ensureSequenceExists(manager, organisationId);
+
+          // Get sequence name
+          const sequenceName = `pr_seq_${organisationId.replace(/-/g, "_")}`;
+
+          // Get next number from sequence (O(1) performance)
           const result = await manager.query(
-            `SELECT COALESCE(MAX(CAST(SUBSTRING(pr_number, LENGTH('PR-') + 1) AS INTEGER)), 0) + 1 as next_number
-             FROM purchase_requisitions 
-             WHERE organisation_id = $1 
-             AND pr_number LIKE 'PR-%'`,
-            [organisationId],
+            `SELECT nextval($1) as next_number`,
+            [sequenceName],
           );
 
           const nextNumber = result[0]?.next_number || 1;
-          return `PR-${nextNumber.toString().padStart(3, "0")}`;
+          return `PR-${nextNumber}`;
         },
       );
     } catch (error) {
       this.logger.error(`Error generating PR number: ${error.message}`);
       throw new BadRequestException("Failed to generate PR number");
+    }
+  }
+
+  private async ensureSequenceExists(
+    manager: any,
+    organisationId: string,
+  ): Promise<void> {
+    try {
+      const sequenceName = `pr_seq_${organisationId.replace(/-/g, "_")}`;
+
+      // Check if sequence exists
+      const sequenceExists = await manager.query(
+        `SELECT 1 FROM pr_sequences WHERE organisation_id = $1`,
+        [organisationId],
+      );
+
+      if (sequenceExists.length === 0) {
+        // Create sequence for new organization
+        await manager.query(`
+          CREATE SEQUENCE IF NOT EXISTS ${sequenceName}
+          START WITH 1
+          INCREMENT BY 1
+          NO MINVALUE
+          NO MAXVALUE
+          CACHE 1
+        `);
+
+        // Record in tracking table
+        await manager.query(
+          `
+          INSERT INTO pr_sequences (organisation_id, sequence_name)
+          VALUES ($1, $2)
+          ON CONFLICT (organisation_id) DO NOTHING
+        `,
+          [organisationId, sequenceName],
+        );
+
+        this.logger.log(
+          `Created PR sequence for organization ${organisationId}`,
+        );
+      }
+    } catch (error) {
+      this.logger.error(`Error ensuring sequence exists: ${error.message}`);
+      throw error;
     }
   }
 }
