@@ -107,7 +107,12 @@ export class PurchaseItemService {
 
     const [items, total] = await this.purchaseItemRepo.findAndCount({
       where: query,
-      relations: ["purchase_requisition", "purchase_order", "product", "supplier"],
+      relations: [
+        "purchase_requisition",
+        "purchase_order",
+        "product",
+        "supplier",
+      ],
       select: {
         purchase_requisition: {
           id: true,

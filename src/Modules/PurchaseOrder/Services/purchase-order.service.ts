@@ -149,18 +149,31 @@ export class PurchaseOrderService {
       // get supplier details
       const foundSupplier = await this.supplierService.findOne({
         where: { id: data.supplier_id, organisation: { id: organisationId } },
+        select: {
+          id: true,
+          full_name: true,
+          email: true,
+          phone: true,
+          notification_channel: true,
+        },
       });
+
+      if (!data.created_by?.id) {
+        throw new BadRequestException("Created by user ID is required");
+      }
 
       // create purchase order
       const po_number = await this.generatePoNumber(organisationId);
 
       const { items, ...purchaseOrderData } = data;
+
       const purchaseOrder = this.purchaseOrderRepository.create({
         ...purchaseOrderData,
         po_number,
         purchase_requisition: { id: data.request_id } as PurchaseRequisition,
         organisation: { id: organisationId } as Organisation,
         supplier: foundSupplier,
+        created_by: data.created_by,
       });
 
       const savedPurchaseOrder =
@@ -177,6 +190,12 @@ export class PurchaseOrderService {
         .execute();
 
       // Generate purchase order Url for supplier to view
+      if (!savedPurchaseOrder.created_by?.id) {
+        throw new Error(
+          "Created by user ID is missing after saving purchase order",
+        );
+      }
+
       const poUrl = await this.genPurchaseOrderUrl({
         creatorId: savedPurchaseOrder.created_by.id,
         organisationId,
