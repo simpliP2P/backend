@@ -256,6 +256,6 @@ export class ProductService {
       sequence = match ? parseInt(match[1], 10) + 1 : 1;
     }
 
-    return `INV-${String(sequence).padStart(3, "0")}`;
+    return `INV-${sequence}`;
   }
 }

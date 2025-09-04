@@ -30,21 +30,51 @@ export class PurchaseRequisitionService {
   ) {}
 
   // Core CRUD Operations
+  public async checkForInitializedRequisition(
+    userId: string,
+    organisationId: string,
+  ): Promise<boolean> {
+    try {
+      const result = await this.purchaseRequisitionRepository.manager.query(
+        `SELECT 1 FROM purchase_requisitions 
+         WHERE created_by = $1 
+         AND organisation_id = $2 
+         AND status = 'INITIALIZED'
+         LIMIT 1`,
+        [userId, organisationId],
+      );
+
+      return result.length > 0;
+    } catch (error) {
+      this.logger.error(
+        `Error checking initialized requisition: ${error.message}`,
+      );
+      throw new BadRequestException("Failed to check requisition status");
+    }
+  }
+
   public async checkForUnCompletedRequisition(
     userId: string,
     organisationId: string,
   ): Promise<boolean> {
-    // Ultra-fast raw SQL query - bypasses ORM overhead
-    const result = await this.purchaseRequisitionRepository.manager.query(
-      `SELECT 1 FROM purchase_requisitions 
-       WHERE created_by = $1 
-       AND organisation_id = $2 
-       AND status NOT IN ('APPROVED', 'REJECTED') 
-       LIMIT 1`,
-      [userId, organisationId],
-    );
+    try {
+      // Ultra-fast raw SQL query - bypasses ORM overhead
+      const result = await this.purchaseRequisitionRepository.manager.query(
+        `SELECT 1 FROM purchase_requisitions 
+         WHERE created_by = $1 
+         AND organisation_id = $2 
+         AND status NOT IN ('APPROVED', 'REJECTED') 
+         LIMIT 1`,
+        [userId, organisationId],
+      );
 
-    return result.length > 0;
+      return result.length > 0;
+    } catch (error) {
+      this.logger.error(
+        `Error checking uncompleted requisition: ${error.message}`,
+      );
+      throw new BadRequestException("Failed to check requisition status");
+    }
   }
 
   public async initializePurchaseRequisition(
@@ -82,8 +112,14 @@ export class PurchaseRequisitionService {
 
       const { id, pr_number } = insertResult[0];
 
+      this.logger.log(
+        `Successfully initialized PR ${pr_number} for user ${userId}`,
+      );
       return { id, pr_number };
     } catch (error) {
+      this.logger.error(
+        `Error initializing purchase requisition: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -380,16 +416,25 @@ export class PurchaseRequisitionService {
   }
 
   private async generatePrNumber(organisationId: string): Promise<string> {
-    // Ultra-fast raw SQL with optimized pattern matching
-    const result = await this.purchaseRequisitionRepository.manager.query(
-      `SELECT COALESCE(MAX(CAST(SUBSTRING(pr_number, LENGTH('PR-') + 1) AS INTEGER)), 0) + 1 as next_number
-       FROM purchase_requisitions 
-       WHERE organisation_id = $1 
-       AND pr_number LIKE 'PR-%'`,
-      [organisationId],
-    );
+    try {
+      // Use transaction to prevent race conditions
+      return await this.purchaseRequisitionRepository.manager.transaction(
+        async (manager) => {
+          const result = await manager.query(
+            `SELECT COALESCE(MAX(CAST(SUBSTRING(pr_number, LENGTH('PR-') + 1) AS INTEGER)), 0) + 1 as next_number
+             FROM purchase_requisitions 
+             WHERE organisation_id = $1 
+             AND pr_number LIKE 'PR-%'`,
+            [organisationId],
+          );
 
-    const nextNumber = result[0]?.next_number || 1;
-    return `PR-${nextNumber.toString().padStart(3, "0")}`;
+          const nextNumber = result[0]?.next_number || 1;
+          return `PR-${nextNumber.toString().padStart(3, "0")}`;
+        },
+      );
+    } catch (error) {
+      this.logger.error(`Error generating PR number: ${error.message}`);
+      throw new BadRequestException("Failed to generate PR number");
+    }
   }
 }
