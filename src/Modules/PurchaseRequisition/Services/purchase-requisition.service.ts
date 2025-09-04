@@ -385,7 +385,8 @@ export class PurchaseRequisitionService {
       `SELECT COALESCE(MAX(CAST(SUBSTRING(pr_number, LENGTH('PR-') + 1) AS INTEGER)), 0) + 1 as next_number
        FROM purchase_requisitions 
        WHERE organisation_id = $1 
-       AND pr_number LIKE 'PR-%'`,
+       AND pr_number LIKE 'PR-%' 
+       FOR UPDATE`, // This locks the rows`,
       [organisationId],
     );
 
