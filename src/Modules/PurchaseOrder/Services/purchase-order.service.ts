@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import {
@@ -34,6 +35,8 @@ import { INotificationData } from "src/Modules/Supplier/Types/supplier.types";
 
 @Injectable()
 export class PurchaseOrderService {
+  private readonly logger = new Logger(PurchaseOrderService.name);
+
   constructor(
     @InjectRepository(PurchaseOrder)
     private readonly purchaseOrderRepository: Repository<PurchaseOrder>,
@@ -385,21 +388,75 @@ export class PurchaseOrderService {
     });
   }
 
-  private async generatePoNumber(organisationId: string) {
-    const lastPo = await this.purchaseOrderRepository
-      .createQueryBuilder("po")
-      .where("po.organisation_id = :orgId", { orgId: organisationId })
-      .orderBy("po.created_at", "DESC")
-      .limit(1)
-      .getOne();
+  private async generatePoNumber(organisationId: string): Promise<string> {
+    try {
+      // Use transaction to prevent race conditions
+      return await this.purchaseOrderRepository.manager.transaction(
+        async (manager) => {
+          // Ensure sequence exists for this organization
+          this.ensurePoSequenceExists(manager, organisationId);
 
-    let sequence = 1;
-    if (lastPo) {
-      const match = lastPo.po_number.match(/^PO-(\d+)$/);
-      sequence = match ? parseInt(match[1], 10) + 1 : 1;
+          // Get sequence name
+          const sequenceName = `po_seq_${organisationId.replace(/-/g, "_")}`;
+
+          // Get next number from sequence (O(1) performance)
+          const result = await manager.query(
+            `SELECT nextval($1) as next_number`,
+            [sequenceName],
+          );
+
+          const nextNumber = result[0]?.next_number || 1;
+          return `PO-${nextNumber}`;
+        },
+      );
+    } catch (error) {
+      this.logger.error(`Error generating PO number: ${error.message}`);
+      throw new BadRequestException("Failed to generate PO number");
     }
+  }
 
-    return `PO-${sequence}`;
+  private async ensurePoSequenceExists(
+    manager: any,
+    organisationId: string,
+  ): Promise<void> {
+    try {
+      const sequenceName = `po_seq_${organisationId.replace(/-/g, "_")}`;
+
+      // Check if sequence exists
+      const sequenceExists = await manager.query(
+        `SELECT 1 FROM po_sequences WHERE organisation_id = $1`,
+        [organisationId],
+      );
+
+      if (sequenceExists.length === 0) {
+        // Create sequence for new organization
+        await manager.query(`
+          CREATE SEQUENCE IF NOT EXISTS ${sequenceName}
+          START WITH 1
+          INCREMENT BY 1
+          NO MINVALUE
+          NO MAXVALUE
+          CACHE 1
+        `);
+
+        // Record in tracking table
+        await manager.query(
+          `
+          INSERT INTO po_sequences (organisation_id, sequence_name)
+          VALUES ($1, $2)
+          ON CONFLICT (organisation_id) DO NOTHING
+        `,
+          [organisationId, sequenceName],
+        );
+
+        this.logger.log(
+          `Created PO sequence for organization ${organisationId}`,
+        );
+      }
+    } catch (error) {
+      this.logger.error(`Error ensuring PO sequence exists: ${error.message}`);
+      throw error;
+    }
   }
 
   /**
