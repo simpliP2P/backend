@@ -382,10 +382,10 @@ export class PurchaseRequisitionService {
   private async generatePrNumber(organisationId: string): Promise<string> {
     // Ultra-fast raw SQL with optimized pattern matching
     const result = await this.purchaseRequisitionRepository.manager.query(
-      `SELECT COALESCE(MAX(CAST(SUBSTRING(pr_number, LENGTH('PR-${organisationId}-') + 1) AS INTEGER)), 0) + 1 as next_number
+      `SELECT COALESCE(MAX(CAST(SUBSTRING(pr_number, LENGTH('PR-') + 1) AS INTEGER)), 0) + 1 as next_number
        FROM purchase_requisitions 
        WHERE organisation_id = $1 
-       AND pr_number LIKE 'PR-${organisationId}-%'`,
+       AND pr_number LIKE 'PR-%'`,
       [organisationId],
     );
 
