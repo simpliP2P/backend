@@ -12,6 +12,7 @@ import {
 } from "../Enums/purchase-requisition.enum";
 import { BudgetService } from "src/Modules/Budget/Services/budget.service";
 import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
+import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 
 interface IApprovalData {
   status: PurchaseRequisitionStatus;
@@ -57,10 +58,13 @@ export class PurchaseRequisitionApprovalService {
     );
 
     // create PO
-    if (
-      approvalData.action_type === PRApprovalActionType.APPROVE_AND_CREATE_PO
-    ) {
-      this.createPurchaseOrdersFromRequisition(organisationId, requisitionId);
+    const isActionApproveAndCreatePO =
+      approvalData.action_type === PRApprovalActionType.APPROVE_AND_CREATE_PO;
+    if (isActionApproveAndCreatePO) {
+      this.createPurchaseOrdersFromRequisition(
+        organisationId,
+        requisitionId,
+      );
     }
 
     return updatedRequisition;
@@ -80,6 +84,7 @@ export class PurchaseRequisitionApprovalService {
           "organisation",
           "branch",
           "department",
+          "created_by",
         ],
       });
 
@@ -97,7 +102,8 @@ export class PurchaseRequisitionApprovalService {
           {
             request_id: requisitionId,
             total_amount: items.reduce(
-              (sum, item) => sum + item.unit_price * item.quantity,
+              (sum: number, item: PurchaseItem) =>
+                sum + item.unit_price * (item.po_quantity || item.pr_quantity),
               0,
             ),
             supplier_id: supplierId,
@@ -115,7 +121,7 @@ export class PurchaseRequisitionApprovalService {
         );
       }
     } catch (error) {
-      throw new Error(`Failed to create purchase orders: ${error.message}`);
+      throw error;
     }
   }
 
