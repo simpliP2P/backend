@@ -13,10 +13,8 @@ import { UserService } from "src/Modules/User/Services/user.service";
 import { PermissionType } from "../Enums/user-organisation.enum";
 import { User } from "src/Modules/User/Entities/user.entity";
 import {
-  // BadRequestException,
   EmailExistsException,
   OrganisationExists,
-  // UserHasOrganisation,
   UserNotFoundException,
 } from "src/Shared/Exceptions/app.exceptions";
 import { EmailServices } from "src/Modules/Mail/Services/mail.service";
