@@ -46,6 +46,12 @@ export class OrganisationPermissionsGuard implements CanActivate {
         userId,
         organisationId,
       );
+
+    // User is not part of the organisation
+    if (!userOrganisation) {
+      return false;
+    }
+
     const userPermissions = userOrganisation?.permissions;
     if (!userPermissions) {
       throw new ForbiddenException("User does not have any permissions");
@@ -58,11 +64,6 @@ export class OrganisationPermissionsGuard implements CanActivate {
       throw new ForbiddenException(
         "Account has been deactivated. Contact your organisation admin if you think this is an error.",
       );
-    }
-
-    // User is not part of the organisation
-    if (!userOrganisation) {
-      return false;
     }
 
     if (!userOrganisation.is_creator && !userOrganisation.accepted_invitation) {
