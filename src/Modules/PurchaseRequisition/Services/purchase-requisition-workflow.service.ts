@@ -105,7 +105,7 @@ export class PurchaseRequisitionWorkflowService {
       .createQueryBuilder()
       .update(PurchaseRequisition)
       .set({
-        status: PurchaseRequisitionStatus.MANAGER_REVIEW,
+        status: PurchaseRequisitionStatus.REVIEW,
       })
       .where("id = :id", { id: requisitionId })
       .returning("*")
