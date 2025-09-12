@@ -115,9 +115,9 @@ export class AuditLogsService {
           endDate,
         },
       )
+      .orderBy("log.created_at", "DESC")
       .take(exportAll ? undefined : _pageSize)
       .skip(exportAll ? undefined : (_page - 1) * _pageSize)
-      .orderBy("log.created_at", "DESC")
       .getManyAndCount();
 
     return {
@@ -162,6 +162,9 @@ export class AuditLogsService {
           },
         },
       },
+      order: {
+        created_at: "DESC",
+      },
     });
 
     return {
@@ -191,6 +194,7 @@ export class AuditLogsService {
       .addSelect(["user.first_name", "user.last_name", "uo.role"])
       .where("log.organisation_id = :orgId", { orgId: organisationId })
       .andWhere("log.id IN (:...ids)", { ids })
+      .orderBy("log.created_at", "DESC")
       .getMany();
 
     return this.flattenLogs(logs);
