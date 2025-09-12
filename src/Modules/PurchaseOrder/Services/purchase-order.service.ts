@@ -181,7 +181,6 @@ export class PurchaseOrderService {
 
       const savedPurchaseOrder =
         await this.purchaseOrderRepository.save(purchaseOrder);
-      const { supplier } = savedPurchaseOrder;
 
       // Update only the specified purchase items with this purchase order id
       await this.purchaseItemRepository
@@ -198,24 +197,6 @@ export class PurchaseOrderService {
           "Created by user ID is missing after saving purchase order",
         );
       }
-
-      const poUrl = await this.genPurchaseOrderUrl({
-        creatorId: savedPurchaseOrder.created_by.id,
-        organisationId,
-        poId: savedPurchaseOrder.id,
-      });
-
-      const notificationData = {
-        organisationName: purchaseRequisition.organisation.name,
-        supplier: {
-          name: foundSupplier.full_name,
-          email: foundSupplier.email,
-          phone: foundSupplier.phone,
-        },
-        poUrl,
-      };
-
-      this.notifySupplier(supplier.notification_channel, notificationData);
 
       return savedPurchaseOrder;
     } catch (error) {
@@ -273,7 +254,6 @@ export class PurchaseOrderService {
         supplier: {
           id: true,
           full_name: true,
-          category: true,
         },
       },
       order: {
@@ -335,7 +315,28 @@ export class PurchaseOrderService {
   ) {
     const order = await this.purchaseOrderRepository.findOne({
       where: { organisation: { id: organisationId }, id: orderId },
-      relations: ["purchase_requisition.budget"],
+      relations: [
+        "purchase_requisition.budget",
+        "supplier",
+        "organisation",
+        "created_by",
+      ],
+      select: {
+        supplier: {
+          id: true,
+          full_name: true,
+          email: true,
+          phone: true,
+          notification_channel: true,
+        },
+        organisation: {
+          id: true,
+          name: true,
+        },
+        created_by: {
+          id: true,
+        },
+      },
     });
 
     if (!order) {
@@ -344,12 +345,7 @@ export class PurchaseOrderService {
 
     // update the product stock quantity
     if (status === PurchaseOrderStatus.APPROVED) {
-      const budgetId = order.purchase_requisition.budget.id;
-      await this.budgetService.consumeReservedAmount(
-        organisationId,
-        budgetId,
-        order.total_amount,
-      );
+      this.approvePurchaseOrder({ order });
     }
 
     order.status = status;
@@ -386,6 +382,51 @@ export class PurchaseOrderService {
         created_at: "DESC",
       },
     });
+  }
+
+  private async approvePurchaseOrder(args: { order: PurchaseOrder }) {
+    const { order } = args;
+    const {
+      id: poId,
+      purchase_requisition,
+      total_amount,
+      supplier,
+      organisation,
+      created_by: { id: creatorId },
+    } = order;
+
+
+    const budgetId = purchase_requisition.budget?.id;
+    const organisationId = organisation.id;
+
+    if (!budgetId) {
+      throw new BadRequestException("Budget not attached to purchase requisition");
+    }
+
+    this.budgetService.consumeReservedAmount(
+      organisationId,
+      budgetId,
+      total_amount,
+    );
+
+    const poUrl = await this.genPurchaseOrderUrl({
+      creatorId,
+      organisationId,
+      poId,
+    });
+
+    const notificationData: INotificationData = {
+      organisationName: organisation.name,
+      supplier: {
+        name: supplier.full_name,
+        email: supplier.email,
+        phone: supplier.phone,
+      },
+      poUrl,
+    };
+
+    // notify supplier
+    this.notifySupplier(supplier.notification_channel, notificationData);
   }
 
   private async generatePoNumber(organisationId: string): Promise<string> {
