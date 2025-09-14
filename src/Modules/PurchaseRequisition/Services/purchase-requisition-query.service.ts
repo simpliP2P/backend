@@ -175,7 +175,10 @@ export class PurchaseRequisitionQueryService {
 
     if (status) {
       whereConditions.status = status;
-    } else if (status === PurchaseRequisitionStatus.SAVED_FOR_LATER) {
+    } else if (
+      status === PurchaseRequisitionStatus.SAVED_FOR_LATER ||
+      status === PurchaseRequisitionStatus.INITIALIZED
+    ) {
       whereConditions.created_by = { id: userId };
     } else {
       whereConditions.status = Not(PurchaseRequisitionStatus.INITIALIZED);

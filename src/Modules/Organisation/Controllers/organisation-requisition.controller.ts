@@ -56,10 +56,8 @@ export class OrganisationRequisitionController {
         Object.values(PurchaseRequisitionStatus).includes(
           status as PurchaseRequisitionStatus,
         );
-      const isRestrictedStatus =
-        status === PurchaseRequisitionStatus.INITIALIZED;
-
-      if (isValidStatus && isRestrictedStatus) {
+        
+      if (!isValidStatus) {
         throw new BadRequestException("Invalid status");
       }
 
