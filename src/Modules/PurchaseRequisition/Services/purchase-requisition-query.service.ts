@@ -65,16 +65,28 @@ export class PurchaseRequisitionQueryService {
   public async getPurchaseRequisitionById(
     organisationId: string,
     requisitionId: string,
+    userId: string,
   ): Promise<PurchaseRequisition | null> {
-    return await this.purchaseRequisitionRepository.findOne({
+    const pr = await this.purchaseRequisitionRepository.findOne({
       where: {
         organisation: { id: organisationId },
         id: requisitionId,
-        status: Not(PurchaseRequisitionStatus.SAVED_FOR_LATER),
       },
       relations: ["created_by", "supplier", "items", "department", "branch"],
       select: this.getDetailedSelectFields(),
     });
+
+    if (!pr) throw new NotFoundException("Purchase Requisition not found");
+
+    const isSavedForLaterByUser =
+      pr.created_by.id === userId &&
+      pr.status === PurchaseRequisitionStatus.SAVED_FOR_LATER;
+
+    if (isSavedForLaterByUser) {
+      throw new NotFoundException("Purchase Requisition not found");
+    }
+
+    return pr;
   }
 
   public async getSavedPurchaseRequisitions(
@@ -90,10 +102,7 @@ export class PurchaseRequisitionQueryService {
       where: {
         created_by: { id: userId },
         organisation: { id: organisationId },
-        status: In([
-          PurchaseRequisitionStatus.SAVED_FOR_LATER,
-          PurchaseRequisitionStatus.INITIALIZED,
-        ]),
+        status: PurchaseRequisitionStatus.SAVED_FOR_LATER,
       },
       relations: ["created_by", "supplier", "department", "branch"],
       select: this.getBasicSelectFields(),
