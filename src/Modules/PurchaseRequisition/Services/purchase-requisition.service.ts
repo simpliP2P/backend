@@ -263,20 +263,6 @@ export class PurchaseRequisitionService {
     );
   }
 
-  public async getSavedPurchaseRequisitions(
-    page: number,
-    pageSize: number,
-    userId: string,
-    organisationId: string,
-  ) {
-    return await this.queryService.getSavedPurchaseRequisitions(
-      page,
-      pageSize,
-      userId,
-      organisationId,
-    );
-  }
-
   public async findOrgPurchaseRequisitionsByIds(params: {
     organisationId: string;
     ids: string[];

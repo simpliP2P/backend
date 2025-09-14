@@ -91,28 +91,6 @@ export class PurchaseRequisitionQueryService {
     return pr;
   }
 
-  public async getSavedPurchaseRequisitions(
-    page: number = 1,
-    pageSize: number = 10,
-    userId: string,
-    organisationId: string,
-  ) {
-    const { _page, _pageSize } = this.normalizePagination(page, pageSize);
-    const skip = (_page - 1) * _pageSize;
-
-    return await this.purchaseRequisitionRepository.find({
-      where: {
-        created_by: { id: userId },
-        organisation: { id: organisationId },
-        status: PurchaseRequisitionStatus.SAVED_FOR_LATER,
-      },
-      relations: ["created_by", "supplier", "department", "branch"],
-      select: this.getBasicSelectFields(),
-      take: _pageSize,
-      skip,
-    });
-  }
-
   public async findOrgPurchaseRequisitionsByIds({
     organisationId,
     ids,
@@ -231,6 +209,7 @@ export class PurchaseRequisitionQueryService {
     };
   }
 
+  // @ts-ignore
   private getBasicSelectFields() {
     return {
       created_by: { first_name: true },
