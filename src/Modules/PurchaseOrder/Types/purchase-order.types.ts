@@ -15,6 +15,6 @@ export interface IPurchaseOrder {
 }
 
 export interface IGetAllPurchaseOrdersInput
-  extends Omit<IGetAllPurchaseRequisitionInput, "status"> {
+  extends Omit<IGetAllPurchaseRequisitionInput, "status" | "userId"> {
   status?: PurchaseOrderStatus;
 }
