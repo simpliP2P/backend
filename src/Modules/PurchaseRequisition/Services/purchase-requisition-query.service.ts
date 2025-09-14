@@ -173,15 +173,22 @@ export class PurchaseRequisitionQueryService {
       whereConditions.created_at = LessThanOrEqual(new Date(endDate));
     }
 
-    if (status) {
-      whereConditions.status = status;
-    } else if (
-      status === PurchaseRequisitionStatus.SAVED_FOR_LATER ||
-      status === PurchaseRequisitionStatus.INITIALIZED
+    if (
+      status === PurchaseRequisitionStatus.INITIALIZED ||
+      status === PurchaseRequisitionStatus.SAVED_FOR_LATER
     ) {
-      whereConditions.created_by = { id: userId };
+      whereConditions.status = status;
+      whereConditions.created_by = { id: userId }; // restrict to current user
+    } else if (status) {
+      whereConditions.status = status; // any other status, no user restriction
     } else {
-      whereConditions.status = Not(PurchaseRequisitionStatus.INITIALIZED);
+      // Default: exclude all draft statuses (INITIALIZED + SAVED_FOR_LATER)
+      whereConditions.status = Not(
+        In([
+          PurchaseRequisitionStatus.INITIALIZED,
+          PurchaseRequisitionStatus.SAVED_FOR_LATER,
+        ]),
+      );
     }
 
     return whereConditions;
