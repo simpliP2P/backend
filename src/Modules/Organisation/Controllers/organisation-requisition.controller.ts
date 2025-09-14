@@ -172,7 +172,7 @@ export class OrganisationRequisitionController {
         await this.purchaseRequisitionService.getPurchaseRequisitionById(
           organisationId,
           requisitionId,
-          userId
+          userId,
         );
 
       return {
