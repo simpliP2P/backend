@@ -33,6 +33,7 @@ export interface ICreatePurchaseRequisition {
 }
 
 export interface IGetAllPurchaseRequisitionInput {
+  userId: string;
   organisationId: string;
   status?: PurchaseRequisitionStatus;
   page?: number;

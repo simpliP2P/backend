@@ -395,12 +395,13 @@ export class PurchaseOrderService {
       created_by: { id: creatorId },
     } = order;
 
-
     const budgetId = purchase_requisition.budget?.id;
     const organisationId = organisation.id;
 
     if (!budgetId) {
-      throw new BadRequestException("Budget not attached to purchase requisition");
+      throw new BadRequestException(
+        "Budget not attached to purchase requisition",
+      );
     }
 
     this.budgetService.consumeReservedAmount(

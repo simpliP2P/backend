@@ -20,6 +20,7 @@ export class PurchaseRequisitionQueryService {
   ) {}
 
   public async getAllPurchaseRequisitions({
+    userId,
     organisationId,
     status,
     page,
@@ -41,6 +42,7 @@ export class PurchaseRequisitionQueryService {
       pageSize || 20,
     );
     const whereConditions = this.buildWhereConditions(
+      userId,
       organisationId,
       startDate,
       endDate,
@@ -79,7 +81,7 @@ export class PurchaseRequisitionQueryService {
     if (!pr) throw new NotFoundException("Purchase Requisition not found");
 
     const isSavedForLaterByUser =
-      pr.created_by.id === userId &&
+      pr.created_by?.id === userId &&
       pr.status === PurchaseRequisitionStatus.SAVED_FOR_LATER;
 
     if (isSavedForLaterByUser) {
@@ -152,6 +154,7 @@ export class PurchaseRequisitionQueryService {
   }
 
   private buildWhereConditions(
+    userId: string,
     organisationId: string,
     startDate?: string,
     endDate?: string,
@@ -172,13 +175,10 @@ export class PurchaseRequisitionQueryService {
 
     if (status) {
       whereConditions.status = status;
+    } else if (status === PurchaseRequisitionStatus.SAVED_FOR_LATER) {
+      whereConditions.created_by = { id: userId };
     } else {
-      whereConditions.status = Not(
-        In([
-          PurchaseRequisitionStatus.SAVED_FOR_LATER,
-          PurchaseRequisitionStatus.INITIALIZED,
-        ]),
-      );
+      whereConditions.status = Not(PurchaseRequisitionStatus.INITIALIZED);
     }
 
     return whereConditions;
