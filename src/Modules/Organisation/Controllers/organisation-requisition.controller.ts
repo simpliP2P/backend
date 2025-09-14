@@ -57,7 +57,6 @@ export class OrganisationRequisitionController {
           status as PurchaseRequisitionStatus,
         );
       const isRestrictedStatus =
-        status === PurchaseRequisitionStatus.SAVED_FOR_LATER ||
         status === PurchaseRequisitionStatus.INITIALIZED;
 
       if (isValidStatus && isRestrictedStatus) {
