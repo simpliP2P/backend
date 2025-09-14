@@ -18,8 +18,6 @@ import { PermissionType } from "../Enums/user-organisation.enum";
 import { PurchaseRequisitionService } from "src/Modules/PurchaseRequisition/Services/purchase-requisition.service";
 import { PurchaseRequisitionStatus } from "src/Modules/PurchaseRequisition/Enums/purchase-requisition.enum";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
-import { ApiResponse } from "src/Shared/Interfaces/api-response.interface";
-import { PurchaseRequisition } from "src/Modules/PurchaseRequisition/Entities/purchase-requisition.entity";
 import {
   ApprovalDataDto,
   CreatePurchaseRequisitionDto,
@@ -56,7 +54,7 @@ export class OrganisationRequisitionController {
         Object.values(PurchaseRequisitionStatus).includes(
           status as PurchaseRequisitionStatus,
         );
-        
+
       if (!isValidStatus) {
         throw new BadRequestException("Invalid status");
       }
@@ -109,40 +107,6 @@ export class OrganisationRequisitionController {
         status: "success",
         message: "Purchase requisition saved successfully",
         data: { purchase_requisition: purchaseRequisition },
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  @Get(":organisationId/requisitions/saved")
-  @SetMetadata("permissions", [
-    PermissionType.OWNER,
-    PermissionType.MANAGE_PURCHASE_REQUISITIONS,
-    PermissionType.GET_PURCHASE_REQUISITIONS,
-  ])
-  @UseGuards(OrganisationPermissionsGuard)
-  async getRequisitionsSavedForLater(
-    @Param("organisationId") organisationId: string,
-    @Query("page") page: number,
-    @Query("pageSize") pageSize: number,
-    @Req() req: Request,
-  ): Promise<ApiResponse<{ requisitions: PurchaseRequisition[] }>> {
-    try {
-      const userId = req.user.sub;
-
-      const savedRequisitions =
-        await this.purchaseRequisitionService.getSavedPurchaseRequisitions(
-          page,
-          pageSize,
-          userId,
-          organisationId,
-        );
-
-      return {
-        status: "success",
-        message: "Saved requisitions fetched successfully.",
-        data: { requisitions: savedRequisitions },
       };
     } catch (error) {
       throw error;
