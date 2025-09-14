@@ -49,13 +49,11 @@ export class OrganisationRequisitionController {
     @Query("endDate") endDate: string,
   ) {
     try {
-      const isValidStatus =
-        status &&
-        Object.values(PurchaseRequisitionStatus).includes(
+      if (
+        !Object.values(PurchaseRequisitionStatus).includes(
           status as PurchaseRequisitionStatus,
-        );
-
-      if (!isValidStatus) {
+        )
+      ) {
         throw new BadRequestException("Invalid status");
       }
 
