@@ -23,7 +23,6 @@ import {
   CreatePurchaseRequisitionDto,
   UpdatePurchaseRequisitionDto,
 } from "src/Modules/PurchaseRequisition/Dtos/purchase-requisition.dto";
-import { stat } from "fs";
 
 @Controller("organisations")
 export class OrganisationRequisitionController {
