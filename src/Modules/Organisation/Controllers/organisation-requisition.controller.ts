@@ -23,6 +23,7 @@ import {
   CreatePurchaseRequisitionDto,
   UpdatePurchaseRequisitionDto,
 } from "src/Modules/PurchaseRequisition/Dtos/purchase-requisition.dto";
+import { stat } from "fs";
 
 @Controller("organisations")
 export class OrganisationRequisitionController {
@@ -49,8 +50,7 @@ export class OrganisationRequisitionController {
     @Query("endDate") endDate: string,
   ) {
     try {
-      if (
-        !Object.values(PurchaseRequisitionStatus).includes(
+      if (status && !Object.values(PurchaseRequisitionStatus).includes(
           status as PurchaseRequisitionStatus,
         )
       ) {
