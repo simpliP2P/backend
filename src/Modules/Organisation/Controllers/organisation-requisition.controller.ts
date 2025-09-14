@@ -160,14 +160,19 @@ export class OrganisationRequisitionController {
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async getRequisitionById(
+    @Req() req: Request,
     @Param("organisationId") organisationId: string,
     @Param("requisitionId") requisitionId: string,
   ) {
     try {
+      const userId = req.user.sub;
+      if (!userId) return;
+
       const requisition =
         await this.purchaseRequisitionService.getPurchaseRequisitionById(
           organisationId,
           requisitionId,
+          userId
         );
 
       return {

@@ -254,10 +254,12 @@ export class PurchaseRequisitionService {
   public async getPurchaseRequisitionById(
     organisationId: string,
     requisitionId: string,
+    userId: string,
   ) {
     return await this.queryService.getPurchaseRequisitionById(
       organisationId,
       requisitionId,
+      userId,
     );
   }
 
