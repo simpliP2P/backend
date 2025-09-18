@@ -10,17 +10,17 @@ export class CreatePurchaseOrderDto {
   @IsNotEmpty()
   @IsNumber()
   total_amount: number;
-
+  
   @IsString()
   @IsOptional()
   currency?: string;
-
-  @IsUUID()
+  
+  @IsString({ allowEmptyString: true })
   supplier_id: string;
-
+  
   @IsUUID()
   request_id: string;
-
+  
   @IsString()
   attachment: string;
 }
