@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Matches,
 } from "class-validator";
 
 export class CreatePurchaseOrderDto {
@@ -15,7 +16,9 @@ export class CreatePurchaseOrderDto {
   @IsOptional()
   currency?: string;
   
-  @IsString({ allowEmptyString: true })
+  @IsOptional()
+  @IsString()
+  @Matches(/^$|.+/)
   supplier_id: string;
   
   @IsUUID()
