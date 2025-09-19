@@ -181,7 +181,10 @@ export class PurchaseItemService {
     const { supplier_id, ...rest } = data;
     const item = await this.getPurchaseItemById(organisationId, itemId);
 
-    Object.assign(item, { supplier: { id: supplier_id }, ...rest });
+    Object.assign(item, {
+      supplier: supplier_id ? { id: supplier_id } : undefined,
+      ...rest,
+    });
 
     // The subscriber will handle updating the PR totals
     return await this.purchaseItemRepo.save(item);
