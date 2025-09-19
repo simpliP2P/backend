@@ -157,7 +157,7 @@ export class SuppliersService {
       organisationId,
     );
 
-    await this.supplierRepository.remove(supplier);
+    await this.supplierRepository.softRemove(supplier);
   }
 
   public async count(query: any) {
