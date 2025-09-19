@@ -319,21 +319,21 @@ export class PurchaseRequisitionService {
     department_id: string,
     request: any,
   ): Promise<PurchaseRequisition> {
-    const updatedRequisition = await this.purchaseRequisitionRepository
-      .createQueryBuilder()
-      .update(PurchaseRequisition)
-      .set({
-        status: PurchaseRequisitionStatus.PENDING,
-        branch: { id: branch_id },
-        supplier: { id: supplier_id },
-        department: { id: department_id },
-        ...request,
-      })
-      .where("id = :id", { id: requisitionId })
-      .returning("*")
-      .execute();
-
-    return updatedRequisition.raw[0];
+      const updatedRequisition = await this.purchaseRequisitionRepository
+        .createQueryBuilder()
+        .update(PurchaseRequisition)
+        .set({
+          status: PurchaseRequisitionStatus.PENDING,
+          branch: branch_id ? { id: branch_id } : undefined,
+          supplier: supplier_id ? { id: supplier_id } : undefined,
+          department: department_id ? { id: department_id } : undefined,
+          ...request,
+        })
+        .where("id = :id", { id: requisitionId })
+        .returning("*")
+        .execute();
+  
+      return updatedRequisition.raw[0];
   }
 
   private async findRequisitionForUpdate(
