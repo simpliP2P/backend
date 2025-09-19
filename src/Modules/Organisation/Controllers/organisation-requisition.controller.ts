@@ -49,7 +49,9 @@ export class OrganisationRequisitionController {
     @Query("endDate") endDate: string,
   ) {
     try {
-      if (status && !Object.values(PurchaseRequisitionStatus).includes(
+      if (
+        status &&
+        !Object.values(PurchaseRequisitionStatus).includes(
           status as PurchaseRequisitionStatus,
         )
       ) {
