@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Min,
   ValidateIf,
 } from "class-validator";
 import { PurchaseItemStatus } from "../Enums/purchase-item.enum";
@@ -25,6 +26,7 @@ export class PurchaseItemDto {
   item_name: string;
 
   @IsInt()
+  @Min(1)
   pr_quantity: number;
 
   @IsNumber()
@@ -36,6 +38,7 @@ export class PurchaseItemDto {
 
   @IsOptional()
   @IsInt()
+  @Min(1)
   po_quantity?: number;
 
   @IsOptional()
