@@ -10,7 +10,6 @@ import { PurchaseRequisition } from "../Entities/purchase-requisition.entity";
 import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
 import { ICreatePurchaseRequisition } from "../Types/purchase-requisition.types";
 import { PurchaseRequisitionApprovalService } from "./purchase-requisition-approval.service";
-import { PurchaseRequisitionWorkflowService } from "./purchase-requisition-workflow.service";
 import { PurchaseRequisitionQueryService } from "./purchase-requisition-query.service";
 import { OrganisationBranch } from "src/Modules/Organisation/Entities/organisation-branch.entity";
 import { Supplier } from "src/Modules/Supplier/Entities/supplier.entity";
@@ -25,7 +24,6 @@ export class PurchaseRequisitionService {
     @InjectRepository(PurchaseRequisition)
     private readonly purchaseRequisitionRepository: Repository<PurchaseRequisition>,
     private readonly approvalService: PurchaseRequisitionApprovalService,
-    private readonly workflowService: PurchaseRequisitionWorkflowService,
     private readonly queryService: PurchaseRequisitionQueryService,
   ) {}
 
@@ -231,18 +229,6 @@ export class PurchaseRequisitionService {
       requisitionId,
       organisationId,
       approvalData,
-    );
-  }
-
-  public async submitForManagerReview(
-    organisationId: string,
-    requisitionId: string,
-    managerReviewData: any,
-  ) {
-    return await this.workflowService.submitForManagerReview(
-      organisationId,
-      requisitionId,
-      managerReviewData,
     );
   }
 

@@ -6,14 +6,12 @@ import {
   SetMetadata,
   UseGuards,
   Put,
-  Param,
 } from "@nestjs/common";
 import { PurchaseRequisitionService } from "../Services/purchase-requisition.service";
 import { Request } from "express";
 import {
   InitializePurchaseRequisitionDto,
   CreatePurchaseRequisitionDto,
-  ManagerReviewSubmissionDto,
 } from "../Dtos/purchase-requisition.dto";
 import { PermissionType } from "src/Modules/Organisation/Enums/user-organisation.enum";
 import { OrganisationPermissionsGuard } from "src/Guards/permissions.guard";
@@ -77,36 +75,6 @@ export class PurchaseRequisitionController {
       return {
         status: "success",
         message: "Purchase requisition finalized",
-        data: { requisition },
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  @Put(":requisitionId/manager-review")
-  @SetMetadata("permissions", [
-    PermissionType.OWNER,
-    PermissionType.EDIT_PURCHASE_REQUISITIONS,
-  ])
-  async submitForManagerReview(
-    @Req() req: Request,
-    @Body() data: ManagerReviewSubmissionDto,
-    @Param("requisitionId") requisitionId: string,
-  ) {
-    try {
-      const organisationId = req.headers.oid as string;
-
-      const requisition =
-        await this.purchaseRequisitionService.submitForManagerReview(
-          organisationId,
-          requisitionId,
-          data,
-        );
-
-      return {
-        status: "success",
-        message: "Purchase requisition submitted for manager review",
         data: { requisition },
       };
     } catch (error) {
