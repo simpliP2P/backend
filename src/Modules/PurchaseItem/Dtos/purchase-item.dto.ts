@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  ValidateIf,
 } from "class-validator";
 import { PurchaseItemStatus } from "../Enums/purchase-item.enum";
 
@@ -68,4 +69,10 @@ export class UpdatePurchaseItemDto {
   @IsOptional()
   @IsEnum(PurchaseItemStatus)
   status?: PurchaseItemStatus;
+
+  @IsOptional()
+  @IsString()
+  @IsUUID()
+  @ValidateIf((_, value) => value !== "" && value != null)
+  supplier_id?: string;
 }

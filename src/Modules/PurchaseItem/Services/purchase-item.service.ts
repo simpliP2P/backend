@@ -178,8 +178,10 @@ export class PurchaseItemService {
     itemId: string,
     data: UpdatePurchaseItemDto,
   ): Promise<PurchaseItem> {
+    const { supplier_id, ...rest } = data;
     const item = await this.getPurchaseItemById(organisationId, itemId);
-    Object.assign(item, data);
+
+    Object.assign(item, { supplier: { id: supplier_id }, ...rest });
 
     // The subscriber will handle updating the PR totals
     return await this.purchaseItemRepo.save(item);

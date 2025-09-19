@@ -22,6 +22,7 @@ import { PermissionType } from "src/Modules/Organisation/Enums/user-organisation
 import { Request } from "express";
 
 @Controller("purchase-items")
+@UseGuards(OrganisationPermissionsGuard)
 export class PurchaseItemController {
   constructor(private readonly purchaseItemService: PurchaseItemService) {}
 
@@ -31,7 +32,6 @@ export class PurchaseItemController {
     PermissionType.MANAGE_PURCHASE_REQUISITIONS,
     PermissionType.MANAGE_PURCHASE_ORDERS,
   ])
-  @UseGuards(OrganisationPermissionsGuard)
   async addItem(@Req() req: Request, @Body() data: PurchaseItemDto) {
     try {
       const organisationId = req.headers["oid"] as string;
@@ -57,7 +57,6 @@ export class PurchaseItemController {
     PermissionType.MANAGE_PURCHASE_REQUISITIONS,
     PermissionType.MANAGE_PURCHASE_ORDERS,
   ])
-  @UseGuards(OrganisationPermissionsGuard)
   async getAllPurchaseItems(
     @Req() req: Request,
     @Query("pr_number") pr_number: string,
@@ -92,7 +91,6 @@ export class PurchaseItemController {
     PermissionType.MANAGE_PURCHASE_REQUISITIONS,
     PermissionType.MANAGE_PURCHASE_ORDERS,
   ])
-  @UseGuards(OrganisationPermissionsGuard)
   async getPurchaseItemById(
     @Req() req: Request,
     @Param("id", new ParseUUIDPipe()) itemId: string,
@@ -121,7 +119,6 @@ export class PurchaseItemController {
     PermissionType.MANAGE_PURCHASE_REQUISITIONS,
     PermissionType.MANAGE_PURCHASE_ORDERS,
   ])
-  @UseGuards(OrganisationPermissionsGuard)
   async updateItem(
     @Param("id", new ParseUUIDPipe()) id: string,
     @Req() req: Request,
@@ -152,7 +149,6 @@ export class PurchaseItemController {
     PermissionType.MANAGE_PURCHASE_REQUISITIONS,
     PermissionType.MANAGE_PURCHASE_ORDERS,
   ])
-  @UseGuards(OrganisationPermissionsGuard)
   async deleteItem(
     @Param("id", new ParseUUIDPipe()) id: string,
     @Req() req: Request,
