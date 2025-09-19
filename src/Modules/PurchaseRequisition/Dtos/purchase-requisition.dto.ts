@@ -8,6 +8,7 @@ import {
   Min,
   IsArray,
   ValidateNested,
+  ValidateIf,
 } from "class-validator";
 import { Type } from "class-transformer";
 import { IsDateAtLeastToday } from "src/Modules/Organisation/Dtos/organisation.dto";
@@ -42,9 +43,11 @@ export class CreatePurchaseRequisitionDto {
   @IsOptional()
   branch_id: string;
 
-  @IsUUID()
   @IsOptional()
-  supplier_id: string;
+  @IsString()
+  @IsUUID()
+  @ValidateIf((_, value) => value !== "" && value != null)
+  supplier_id?: string;
 
   @IsString()
   requestor_phone: string;
