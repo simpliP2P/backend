@@ -10,7 +10,10 @@ import {
 import { Supplier } from "../Entities/supplier.entity";
 import { CreateSupplierDto, UpdateSupplierDto } from "../Dtos/supplier.dto";
 import { SupplierExists } from "src/Shared/Exceptions/app.exceptions";
-import { IGetAllSuppliersByOrg } from "../Types/supplier.types";
+import {
+  IGetAllSuppliersByOrg,
+  ISearchSuppliersInput,
+} from "../Types/supplier.types";
 
 @Injectable()
 export class SuppliersService {
@@ -187,6 +190,83 @@ export class SuppliersService {
         created_at: "DESC",
       },
     });
+  }
+
+  public async searchSuppliers({
+    organisationId,
+    query,
+    page,
+    pageSize,
+  }: ISearchSuppliersInput): Promise<{
+    data: Supplier[];
+    metadata: {
+      total: number;
+      page: number;
+      pageSize: number;
+      totalPages: number;
+    };
+  }> {
+    let _page = page && page > 0 ? page : 1;
+    let _pageSize = pageSize && pageSize > 0 ? pageSize : 10;
+
+    const qb = this.supplierRepository
+      .createQueryBuilder("supplier")
+      .leftJoinAndSelect("supplier.category", "category")
+      .where("supplier.organisation_id = :organisationId", { organisationId });
+
+    // Handle edge case: if query is just "SUP" or "sup", return empty results
+    if (/^SUP-?$/i.test(query.trim())) {
+      return {
+        data: [],
+        metadata: {
+          total: 0,
+          page: _page,
+          pageSize: _pageSize,
+          totalPages: 0,
+        },
+      };
+    }
+
+    // if query contains only numbers (with optional SUP- prefix), treat as number search
+    // Otherwise, treat as name search
+    const isNumberSearch = /^(SUP-?)?\d+$/i.test(query.trim());
+
+    if (isNumberSearch) {
+      // Handle number search: SUP-001, 1, 001 formats
+      const normalizedNumber = query.replace(/^SUP-?/i, "");
+      const patterns = [
+        `%SUP-${normalizedNumber}%`,
+        `%SUP-${normalizedNumber.padStart(2, "0")}%`,
+        `%SUP-${normalizedNumber.padStart(3, "0")}%`,
+      ];
+      qb.andWhere(
+        "(supplier.supplier_no ILIKE :pattern1 OR supplier.supplier_no ILIKE :pattern2 OR supplier.supplier_no ILIKE :pattern3)",
+        {
+          pattern1: patterns[0],
+          pattern2: patterns[1],
+          pattern3: patterns[2],
+        },
+      );
+    } else {
+      // Handle name search
+      qb.andWhere("supplier.full_name ILIKE :name", { name: `%${query}%` });
+    }
+
+    qb.orderBy("supplier.created_at", "DESC")
+      .take(_pageSize)
+      .skip((_page - 1) * _pageSize);
+
+    const [data, total] = await qb.getManyAndCount();
+
+    return {
+      data,
+      metadata: {
+        total,
+        page: _page,
+        pageSize: _pageSize,
+        totalPages: Math.ceil(total / _pageSize),
+      },
+    };
   }
 
   private async generateSupplierNumber(

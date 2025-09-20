@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -77,6 +78,42 @@ export class OrganisationSupplierController {
       return {
         status: "success",
         message: "Suppliers fetched successfully",
+        data,
+        metadata,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get(":organisationId/suppliers/search")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.ORG_MEMBER,
+    PermissionType.MANAGE_SUPPLIERS,
+    PermissionType.GET_SUPPLIERS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async searchSuppliers(
+    @Param("organisationId") organisationId: string,
+    @Query("q") query: string,
+    @Query("page") page?: number,
+    @Query("pageSize") pageSize?: number,
+  ) {
+    try {
+      if (!query)
+        throw new BadRequestException("Search query parameter is required");
+
+      const { data, metadata } = await this.supplierService.searchSuppliers({
+        organisationId,
+        query,
+        page,
+        pageSize,
+      });
+
+      return {
+        status: "success",
+        message: "Suppliers searched successfully",
         data,
         metadata,
       };

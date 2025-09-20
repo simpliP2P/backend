@@ -31,3 +31,10 @@ export interface IGetAllSuppliersByOrg {
   endDate?: string;
   exportAll?: boolean;
 }
+
+export interface ISearchSuppliersInput {
+  organisationId: string;
+  query: string;
+  page?: number;
+  pageSize?: number;
+}
