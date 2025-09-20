@@ -167,6 +167,7 @@ export class PurchaseRequisitionService {
     }
 
     return await this.updateRequisitionToPending(
+      organisationId,
       requisition.id,
       branch_id,
       supplier_id || "",
@@ -295,6 +296,7 @@ export class PurchaseRequisitionService {
   }
 
   private async updateRequisitionToPending(
+    organisationId: string,
     requisitionId: string,
     branch_id: string,
     supplier_id: string,
@@ -312,8 +314,22 @@ export class PurchaseRequisitionService {
         ...request,
       })
       .where("id = :id", { id: requisitionId })
+      .andWhere("organisation_id = :orgId", { orgId: organisationId })
       .returning("*")
       .execute();
+
+    // if supplier is sent, assign all items without supplier to this supplier
+    if (supplier_id) {
+      this.purchaseRequisitionRepository.manager.query(
+        `
+        UPDATE purchase_items
+        SET supplier_id = $1
+        WHERE purchase_requisition_id = $2
+        AND (supplier_id IS NULL OR supplier_id = '')
+      `,
+        [supplier_id, requisitionId],
+      );
+    }
 
     return updatedRequisition.raw[0];
   }
