@@ -70,19 +70,20 @@ export class PurchaseRequisitionQueryService {
     userId: string,
   ): Promise<PurchaseRequisition | null> {
     // Check if the requisitionId matches PR number pattern (more reliable than UUID regex)
-    const isPRNumber = /^PR-?\d+$/i.test(requisitionId) || /^\d+$/.test(requisitionId);
-    
+    const isPRNumber =
+      /^PR-?\d+$/i.test(requisitionId) || /^\d+$/.test(requisitionId);
+
     let pr: PurchaseRequisition | null;
 
     if (isPRNumber) {
       // Handle PR number search - normalize the input
-      const normalizedNumber = requisitionId.replace(/^PR-?/i, '');
+      const normalizedNumber = requisitionId.replace(/^PR-?/i, "");
       const patterns = [
         `PR-${normalizedNumber}`,
-        `PR-${normalizedNumber.padStart(2, '0')}`,
-        `PR-${normalizedNumber.padStart(3, '0')}`,
+        `PR-${normalizedNumber.padStart(2, "0")}`,
+        `PR-${normalizedNumber.padStart(3, "0")}`,
       ];
-      
+
       // Use query builder for flexible PR number matching
       pr = await this.purchaseRequisitionRepository
         .createQueryBuilder("pr")
@@ -97,7 +98,7 @@ export class PurchaseRequisitionQueryService {
           "supplier.id",
           "supplier.full_name",
           "items.item_name",
-          "items.unit_price", 
+          "items.unit_price",
           "items.currency",
           "items.pr_quantity",
           "items.po_quantity",
@@ -105,14 +106,17 @@ export class PurchaseRequisitionQueryService {
           "department.name",
           "branch.id",
           "branch.name",
-          "branch.address"
+          "branch.address",
         ])
         .where("pr.organisation_id = :organisationId", { organisationId })
-        .andWhere("(pr.pr_number ILIKE :pattern1 OR pr.pr_number ILIKE :pattern2 OR pr.pr_number ILIKE :pattern3)", {
-          pattern1: patterns[0],
-          pattern2: patterns[1],
-          pattern3: patterns[2],
-        })
+        .andWhere(
+          "(pr.pr_number ILIKE :pattern1 OR pr.pr_number ILIKE :pattern2 OR pr.pr_number ILIKE :pattern3)",
+          {
+            pattern1: patterns[0],
+            pattern2: patterns[1],
+            pattern3: patterns[2],
+          },
+        )
         .getOne();
     } else {
       // Handle UUID search (fallback for anything that doesn't match PR pattern)
