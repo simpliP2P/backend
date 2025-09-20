@@ -327,12 +327,12 @@ export class PurchaseRequisitionService {
 
     // if supplier is sent, assign all items without supplier to this supplier
     if (supplier_id) {
-      this.purchaseRequisitionRepository.manager.query(
+      await this.purchaseRequisitionRepository.manager.query(
         `
         UPDATE purchase_items
         SET supplier_id = $1
         WHERE purchase_requisition_id = $2
-        AND (supplier_id IS NULL OR supplier_id = '')
+        AND supplier_id IS NULL
       `,
         [supplier_id, requisitionId],
       );
