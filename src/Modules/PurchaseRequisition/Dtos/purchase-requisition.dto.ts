@@ -6,17 +6,14 @@ import {
   IsString,
   IsUUID,
   Min,
-  IsArray,
-  ValidateNested,
   ValidateIf,
 } from "class-validator";
-import { Type } from "class-transformer";
 import { IsDateAtLeastToday } from "src/Modules/Organisation/Dtos/organisation.dto";
 import {
   PRApprovalActionType,
   PurchaseRequisitionStatus,
 } from "../Enums/purchase-requisition.enum";
-import { ItemSupplierAssignmentDto } from "./item-supplier-assignment.dto";
+import { AtLeastOneField } from "src/Shared/Decorators/custom.decorator";
 
 export class InitializePurchaseRequisitionDto {
   @IsUUID()
@@ -68,10 +65,6 @@ export class CreatePurchaseRequisitionDto {
   @IsString()
   justification: string;
 
-  // @IsString()
-  // @IsOptional()
-  // shipping_address: string;
-
   @IsDateAtLeastToday({
     message: "Needed by date must be today or in the future",
   })
@@ -81,6 +74,63 @@ export class CreatePurchaseRequisitionDto {
   @IsNumber()
   @Min(0)
   delivery_fee: number;
+}
+
+export class SavedPurchaseRequisitionDto {
+  @IsString()
+  pr_number: string;
+
+  @IsUUID()
+  @IsOptional()
+  department_id?: string;
+
+  @IsUUID()
+  @IsOptional()
+  branch_id?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsUUID()
+  @ValidateIf((_, value) => value !== "" && value != null)
+  supplier_id?: string;
+
+  @IsString()
+  @IsOptional()
+  @AtLeastOneField(["pr_number"], {
+    message: "At least one field besides pr_number must be provided",
+  })
+  requestor_phone?: string;
+
+  @IsString()
+  @IsOptional()
+  requestor_name?: string;
+
+  @IsEmail()
+  @IsOptional()
+  requestor_email?: string;
+
+  @IsString()
+  @IsOptional()
+  request_description?: string;
+
+  @IsString()
+  @IsOptional()
+  currency?: string;
+
+  @IsString()
+  @IsOptional()
+  justification?: string;
+
+  @IsDateAtLeastToday({
+    message: "Needed by date must be today or in the future",
+  })
+  @IsOptional()
+  needed_by_date?: Date;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  delivery_fee?: number;
 }
 
 export class UpdatePurchaseRequisitionDto extends CreatePurchaseRequisitionDto {}
@@ -98,14 +148,4 @@ export class ApprovalDataDto {
 
   @IsEnum(PRApprovalActionType)
   action_type: PRApprovalActionType;
-
-  // Note: supplier_id is no longer needed in the new workflow
-  // Suppliers are assigned per item during manager review
-}
-
-export class ManagerReviewSubmissionDto {
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => ItemSupplierAssignmentDto)
-  item_supplier_assignments: ItemSupplierAssignmentDto[];
 }

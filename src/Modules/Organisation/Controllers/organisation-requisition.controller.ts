@@ -20,7 +20,7 @@ import { PurchaseRequisitionStatus } from "src/Modules/PurchaseRequisition/Enums
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 import {
   ApprovalDataDto,
-  CreatePurchaseRequisitionDto,
+  SavedPurchaseRequisitionDto,
   UpdatePurchaseRequisitionDto,
 } from "src/Modules/PurchaseRequisition/Dtos/purchase-requisition.dto";
 
@@ -87,7 +87,7 @@ export class OrganisationRequisitionController {
   @UseGuards(OrganisationPermissionsGuard)
   async saveForLater(
     @Param("organisationId") organisationId: string,
-    @Body() data: CreatePurchaseRequisitionDto,
+    @Body() data: SavedPurchaseRequisitionDto,
     @Req() req: Request,
   ) {
     try {

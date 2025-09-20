@@ -12,6 +12,7 @@ import { ICreatePurchaseRequisition } from "../Types/purchase-requisition.types"
 import { PurchaseRequisitionApprovalService } from "./purchase-requisition-approval.service";
 import { PurchaseRequisitionQueryService } from "./purchase-requisition-query.service";
 import { User } from "src/Modules/User/Entities/user.entity";
+import { CreatePurchaseRequisitionDto } from "../Dtos/purchase-requisition.dto";
 
 @Injectable()
 export class PurchaseRequisitionService {
@@ -148,7 +149,7 @@ export class PurchaseRequisitionService {
     organisationId: string,
     userId: string,
     pr_number: string,
-    data: ICreatePurchaseRequisition,
+    data: CreatePurchaseRequisitionDto,
   ) {
     const { branch_id, department_id, supplier_id, ...request } = data;
     const requisition = await this.findRequisitionForFinalization(
