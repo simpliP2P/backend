@@ -86,4 +86,8 @@ export class UpdateProductDto {
   @IsString()
   @IsOptional()
   unitOfMeasure: string;
+
+  @IsString()
+  @IsOptional()
+  image_url: string;
 }
