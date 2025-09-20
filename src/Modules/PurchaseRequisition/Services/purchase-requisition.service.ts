@@ -85,11 +85,13 @@ export class PurchaseRequisitionService {
         async (manager) => {
           // Check for existing initialized requisition
           const existing = await manager.query(
-            `SELECT 1 FROM purchase_requisitions 
+            `SELECT * FROM purchase_requisitions 
              WHERE created_by = $1 AND organisation_id = $2 AND status = 'INITIALIZED'
              LIMIT 1`,
             [userId, data.organisationId],
           );
+
+          console.log("Existing initialized requisition check:", existing); // Debug log
 
           if (existing.length > 0) {
             throw new BadRequestException(
@@ -235,6 +237,7 @@ export class PurchaseRequisitionService {
 
   // Query Operations Delegated
   public async getAllPurchaseRequisitions(params: any) {
+    console.log("Params in service:", params);
     return await this.queryService.getAllPurchaseRequisitions(params);
   }
 

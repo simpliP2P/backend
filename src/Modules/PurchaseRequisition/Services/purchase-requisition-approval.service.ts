@@ -54,7 +54,7 @@ export class PurchaseRequisitionApprovalService {
 
     // create PO
     const isActionApproveAndCreatePO =
-    approvalData.action_type === PRApprovalActionType.APPROVE_AND_CREATE_PO;
+      approvalData.action_type === PRApprovalActionType.APPROVE_AND_CREATE_PO;
     if (isActionApproveAndCreatePO) {
       console.log(`Creating POs for requisition ${requisitionId}`);
       await this.createPurchaseOrdersFromRequisition(
@@ -67,7 +67,7 @@ export class PurchaseRequisitionApprovalService {
       requisitionId,
       approvalData,
     );
-    
+
     return updatedRequisition;
   }
 

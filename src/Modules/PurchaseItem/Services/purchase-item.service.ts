@@ -191,16 +191,25 @@ export class PurchaseItemService {
     itemId: string,
     data: UpdatePurchaseItemDto,
   ): Promise<PurchaseItem> {
-    const { supplier_id, ...rest } = data;
-    const item = await this.getPurchaseItemById(organisationId, itemId);
+    try {
+      const { supplier_id, ...rest } = data;
+      const item = await this.getPurchaseItemById(organisationId, itemId);
 
-    Object.assign(item, {
-      supplier: supplier_id ? { id: supplier_id } : undefined,
-      ...rest,
-    });
+      Object.assign(item, {
+        supplier: supplier_id ? { id: supplier_id } : undefined,
+        ...rest,
+      });
 
-    // The subscriber will handle updating the PR totals
-    return await this.purchaseItemRepo.save(item);
+      // The subscriber will handle updating the PR totals
+      return await this.purchaseItemRepo.save(item);
+    } catch (error) {
+      // FK violation, then throw invalid supplier
+      if (error.code === "23503") {
+        throw new BadRequestException("Invalid supplier");
+      }
+
+      throw error;
+    }
   }
 
   async deletePurchaseItem(

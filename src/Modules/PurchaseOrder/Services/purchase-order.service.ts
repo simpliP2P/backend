@@ -476,22 +476,34 @@ export class PurchaseOrderService {
 
   private async generatePoNumber(organisationId: string): Promise<string> {
     try {
-      // Use transaction to prevent race conditions
+      const sequenceName = `po_seq_${organisationId.replace(/-/g, "_")}`;
+
+      // Simple approach: create sequence if not exists, then get next value
       return await this.purchaseOrderRepository.manager.transaction(
         async (manager) => {
-          // Ensure sequence exists for this organization
-          this.ensurePoSequenceExists(manager, organisationId);
+          // Create sequence and tracking record in one go
+          await manager.query(`
+            CREATE SEQUENCE IF NOT EXISTS ${sequenceName}
+            START WITH 1
+            INCREMENT BY 1
+          `);
 
-          // Get sequence name
-          const sequenceName = `po_seq_${organisationId.replace(/-/g, "_")}`;
+          await manager.query(
+            `
+            INSERT INTO po_sequences (organisation_id, sequence_name)
+            VALUES ($1, $2)
+            ON CONFLICT (organisation_id) DO NOTHING
+          `,
+            [organisationId, sequenceName],
+          );
 
-          // Get next number from sequence (O(1) performance)
+          // Get next number
           const result = await manager.query(
             `SELECT nextval($1) as next_number`,
             [sequenceName],
           );
-
           const nextNumber = result[0]?.next_number || 1;
+
           return `PO-${nextNumber}`;
         },
       );
@@ -499,53 +511,7 @@ export class PurchaseOrderService {
       this.logger.error(`Error generating PO number: ${error.message}`);
       throw new BadRequestException("Failed to generate PO number");
     }
-  }
-
-  private async ensurePoSequenceExists(
-    manager: any,
-    organisationId: string,
-  ): Promise<void> {
-    try {
-      const sequenceName = `po_seq_${organisationId.replace(/-/g, "_")}`;
-
-      // Check if sequence exists
-      const sequenceExists = await manager.query(
-        `SELECT 1 FROM po_sequences WHERE organisation_id = $1`,
-        [organisationId],
-      );
-
-      if (sequenceExists.length === 0) {
-        // Create sequence for new organization
-        await manager.query(`
-          CREATE SEQUENCE IF NOT EXISTS ${sequenceName}
-          START WITH 1
-          INCREMENT BY 1
-          NO MINVALUE
-          NO MAXVALUE
-          CACHE 1
-        `);
-
-        // Record in tracking table
-        await manager.query(
-          `
-          INSERT INTO po_sequences (organisation_id, sequence_name)
-          VALUES ($1, $2)
-          ON CONFLICT (organisation_id) DO NOTHING
-        `,
-          [organisationId, sequenceName],
-        );
-
-        this.logger.log(
-          `Created PO sequence for organization ${organisationId}`,
-        );
-      }
-    } catch (error) {
-      this.logger.error(`Error ensuring PO sequence exists: ${error.message}`);
-      throw error;
-    }
-  }
-
-  /**
+  } /**
    * Generates a link for the supplier to view the purchase order
    * @param data
    */
