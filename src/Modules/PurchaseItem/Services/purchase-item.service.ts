@@ -117,6 +117,9 @@ export class PurchaseItemService {
         purchase_requisition: {
           id: true,
           pr_number: true,
+          estimated_cost: true,
+          quantity: true,
+          currency: true,
         },
         purchase_order: {
           id: true,
