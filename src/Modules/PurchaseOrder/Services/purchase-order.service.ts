@@ -355,8 +355,14 @@ export class PurchaseOrderService {
   public async updateOrderStatus(
     organisationId: string,
     orderId: string,
-    status: string,
+    data: {
+      status: PurchaseOrderStatus;
+      delivery_fee: number;
+      vat_percent: number;
+    },
   ) {
+    const { status, delivery_fee, vat_percent } = data;
+
     const order = await this.purchaseOrderRepository.findOne({
       where: { organisation: { id: organisationId }, id: orderId },
       relations: [
@@ -393,6 +399,10 @@ export class PurchaseOrderService {
     }
 
     order.status = status;
+    order.vat = order.total_amount * (vat_percent / 100) || 0;
+    order.delivery_fee = delivery_fee || 0;
+
+    // Save updated order and exclude purchase_requisition from returned object
     const { purchase_requisition, ...updatedOrder } =
       await this.purchaseOrderRepository.save(order);
 

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   Param,
   Patch,
@@ -125,17 +126,36 @@ export class OrganisationOrderController {
     PermissionType.OWNER,
     PermissionType.MANAGE_PURCHASE_ORDERS,
     PermissionType.UPDATE_PURCHASE_ORDERS,
+    PermissionType.APPROVE_PURCHASE_ORDERS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
   async updateOrderStatus(
+    @Req() req: Request,
     @Param("organisationId") organisationId: string,
     @Param("orderId") orderId: string,
-    @Body() data: { status: PurchaseOrderStatus },
+    @Body()
+    data: {
+      status: PurchaseOrderStatus;
+      delivery_fee: number;
+      vat_percent: number;
+    },
   ) {
     try {
+      const { status } = data;
+      const permissions = req.user.permissions as string[];
+
       if (
-        !Object.values(PurchaseOrderStatus).includes(data.status) ||
-        data.status === PurchaseOrderStatus.PENDING
+        status &&
+        !permissions.includes(PermissionType.APPROVE_PURCHASE_ORDERS)
+      ) {
+        throw new ForbiddenException(
+          "You do not have permission to update this order status",
+        );
+      }
+
+      if (
+        !Object.values(PurchaseOrderStatus).includes(status) ||
+        status === PurchaseOrderStatus.PENDING
       ) {
         throw new BadRequestException("Invalid status");
       }
@@ -143,7 +163,7 @@ export class OrganisationOrderController {
       const order = await this.purchaseOrderService.updateOrderStatus(
         organisationId,
         orderId,
-        data.status,
+        data,
       );
 
       return {

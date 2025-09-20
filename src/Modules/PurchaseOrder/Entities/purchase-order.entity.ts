@@ -27,6 +27,24 @@ export class PurchaseOrder extends BaseEntity {
   @Column({ nullable: true })
   attachment: string;
 
+  @Column({
+    type: "decimal",
+    precision: 10,
+    scale: 2,
+    nullable: true,
+    default: 0,
+  })
+  delivery_fee: number;
+
+  @Column({
+    type: "decimal",
+    precision: 10,
+    scale: 2,
+    nullable: true,
+    default: 0,
+  })
+  vat: number;
+
   @ManyToOne(() => Organisation, (org) => org.purchaseOrders)
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
