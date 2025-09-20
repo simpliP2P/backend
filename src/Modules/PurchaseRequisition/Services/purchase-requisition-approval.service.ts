@@ -169,13 +169,13 @@ export class PurchaseRequisitionApprovalService {
     }
 
     if (
-      this.isPendingRequisitionBeingApproved(
+      !this.isPendingRequisitionBeingApproved(
         requisition.status,
         approvalData.status,
       )
     ) {
       throw new BadRequestException(
-        "Purchase Requisition must be reviewed by manager before approval. Current status: PENDING",
+        "Only requisitions with 'PENDING' status can be approved.",
       );
     }
 
