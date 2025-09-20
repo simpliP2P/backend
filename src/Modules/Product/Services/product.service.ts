@@ -10,7 +10,10 @@ import {
 import { Product } from "../Entities/product.entity";
 import { CreateProductDto, UpdateProductDto } from "../Dtos/product.dto";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
-import { IGetAllProductsInput, ISearchProductsInput } from "../Types/product.types";
+import {
+  IGetAllProductsInput,
+  ISearchProductsInput,
+} from "../Types/product.types";
 import { OrganisationCategory } from "src/Modules/Organisation/Entities/organisation-category.entity";
 
 @Injectable()

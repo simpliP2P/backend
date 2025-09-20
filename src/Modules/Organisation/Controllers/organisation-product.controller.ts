@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -69,6 +70,8 @@ export class OrganisationProductController {
     @Query("pageSize") pageSize: number,
   ) {
     try {
+      if (!name) throw new BadRequestException("Search query is required");
+
       const { data, metadata } = await this.productService.searchProductsByName(
         {
           organisationId,
