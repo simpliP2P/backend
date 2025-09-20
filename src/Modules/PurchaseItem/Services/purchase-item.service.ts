@@ -124,6 +124,7 @@ export class PurchaseItemService {
         product: {
           id: true,
           description: true,
+          unitOfMeasure: true,
         },
         supplier: {
           id: true,
@@ -172,6 +173,7 @@ export class PurchaseItemService {
         product: {
           id: true,
           description: true,
+          unitOfMeasure: true,
         },
         supplier: {
           id: true,
