@@ -59,6 +59,36 @@ export class OrganisationProductController {
     }
   }
 
+  @Get(":organisationId/products/search")
+  @SetMetadata("permissions", [PermissionType.ORG_MEMBER])
+  @UseGuards(OrganisationPermissionsGuard)
+  async searchProducts(
+    @Param("organisationId") organisationId: string,
+    @Query("q") name: string,
+    @Query("page") page: number,
+    @Query("pageSize") pageSize: number,
+  ) {
+    try {
+      const { data, metadata } = await this.productService.searchProductsByName(
+        {
+          organisationId,
+          name,
+          page,
+          pageSize,
+        },
+      );
+
+      return {
+        status: "success",
+        message: "Products searched successfully",
+        data,
+        metadata,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Get(":organisationId/products")
   @SetMetadata("permissions", [PermissionType.ORG_MEMBER])
   @UseGuards(OrganisationPermissionsGuard)

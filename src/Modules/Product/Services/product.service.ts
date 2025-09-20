@@ -10,7 +10,7 @@ import {
 import { Product } from "../Entities/product.entity";
 import { CreateProductDto, UpdateProductDto } from "../Dtos/product.dto";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
-import { IGetAllProductsInput } from "../Types/product.types";
+import { IGetAllProductsInput, ISearchProductsInput } from "../Types/product.types";
 import { OrganisationCategory } from "src/Modules/Organisation/Entities/organisation-category.entity";
 
 @Injectable()
@@ -137,6 +137,52 @@ export class ProductService {
 
     // const [data, total] =
     //   await this.productRepository.findAndCount(queryOptions);
+
+    return {
+      data,
+      metadata: {
+        total,
+        page: _page,
+        pageSize: _pageSize,
+        totalPages: Math.ceil(total / _pageSize),
+      },
+    };
+  }
+
+  public async searchProductsByName({
+    organisationId,
+    name,
+    page,
+    pageSize,
+  }: ISearchProductsInput): Promise<{
+    data: Product[];
+    metadata: {
+      total: number;
+      page: number;
+      pageSize: number;
+      totalPages: number;
+    };
+  }> {
+    let _page = page && page > 0 ? page : 1;
+    let _pageSize = pageSize && pageSize > 0 ? pageSize : 10;
+
+    const qb = this.productRepository
+      .createQueryBuilder("product")
+      .leftJoinAndMapOne(
+        "product.category",
+        OrganisationCategory,
+        "category",
+        "category.id = product.category_id",
+      )
+      .addSelect(["category.id", "category.name", "category.deleted_at"])
+      .withDeleted()
+      .where("product.organisation_id = :organisationId", { organisationId })
+      .andWhere("product.name ILIKE :name", { name: `%${name}%` })
+      .orderBy("product.created_at", "DESC")
+      .take(_pageSize)
+      .skip((_page - 1) * _pageSize);
+
+    const [data, total] = await qb.getManyAndCount();
 
     return {
       data,

@@ -393,6 +393,8 @@ export class PurchaseRequisitionService {
         [organisationId],
       );
 
+      console.log("Sequence exists check:", sequenceExists);
+
       if (sequenceExists.length === 0) {
         // Create sequence for new organization
         await manager.query(`

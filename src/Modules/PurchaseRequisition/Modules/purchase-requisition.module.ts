@@ -8,7 +8,6 @@ import { BudgetModule } from "src/Modules/Budget/Modules/budget.module";
 import { HashHelper } from "src/Shared/Helpers/hash.helper";
 import { PurchaseRequisitionQueryService } from "../Services/purchase-requisition-query.service";
 import { PurchaseRequisitionApprovalService } from "../Services/purchase-requisition-approval.service";
-import { PurchaseRequisitionWorkflowService } from "../Services/purchase-requisition-workflow.service";
 import { UserOrganisationRepository } from "src/Modules/Organisation/Repositories/user-organisation.repository";
 import { OrganisationAccessModule } from "src/Modules/Organisation/Modules/organisation-access.module";
 import { PurchaseOrderModule } from "src/Modules/PurchaseOrder/Modules/purchase-order.module";
@@ -25,7 +24,6 @@ import { PurchaseOrderModule } from "src/Modules/PurchaseOrder/Modules/purchase-
   providers: [
     UserOrganisationRepository,
     PurchaseRequisitionApprovalService,
-    PurchaseRequisitionWorkflowService,
     PurchaseRequisitionQueryService,
     PurchaseRequisitionService,
     HashHelper,
