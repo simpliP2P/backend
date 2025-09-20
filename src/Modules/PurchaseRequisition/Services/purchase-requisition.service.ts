@@ -82,65 +82,62 @@ export class PurchaseRequisitionService {
     const startTime = performance.now();
 
     try {
-      // OPTIMIZATION: Single atomic query that checks AND generates PR number only when inserting
-      // This eliminates 2 separate database round trips and prevents sequence gaps
-      const result = await this.purchaseRequisitionRepository.manager.query(
-        `WITH check_existing AS (
-           SELECT 1 as has_existing 
-           FROM purchase_requisitions 
-           WHERE created_by = $1 
-           AND organisation_id = $2 
-           AND status = 'INITIALIZED'
-           LIMIT 1
-         ),
-         ensure_seq AS (
-           INSERT INTO pr_sequences (organisation_id, sequence_name)
-           SELECT $2, 'pr_seq_' || replace($2::text, '-', '_')
-           WHERE NOT EXISTS (SELECT 1 FROM pr_sequences WHERE organisation_id = $2)
-         ),
-         next_pr AS (
-           SELECT nextval('pr_seq_' || replace($2::text, '-', '_')) as next_number
-           WHERE NOT EXISTS (SELECT 1 FROM check_existing)
-         ),
-         insert_result AS (
-           INSERT INTO purchase_requisitions 
-           (pr_number, organisation_id, created_by, branch_id, department_id, status, created_at, updated_at) 
-           SELECT 
-             'PR-' || next_number::text,
-             $2, $1, $3, $4, $5, NOW(), NOW()
-           FROM next_pr
-           RETURNING id, pr_number
-         )
-         SELECT 
-           CASE 
-             WHEN EXISTS (SELECT 1 FROM check_existing) THEN 'EXISTS'
-             ELSE 'SUCCESS'
-           END as status,
-           (SELECT id FROM insert_result LIMIT 1) as id,
-           (SELECT pr_number FROM insert_result LIMIT 1) as pr_number`,
-        [
-          userId,
-          data.organisationId,
-          data.branchId,
-          data.departmentId,
-          PurchaseRequisitionStatus.INITIALIZED,
-        ],
+      // Use a transaction to ensure atomicity
+      return await this.purchaseRequisitionRepository.manager.transaction(
+        async (manager) => {
+          // Check for existing initialized requisition
+          const existing = await manager.query(
+            `SELECT 1 FROM purchase_requisitions 
+             WHERE created_by = $1 AND organisation_id = $2 AND status = 'INITIALIZED'
+             LIMIT 1`,
+            [userId, data.organisationId],
+          );
+
+          if (existing.length > 0) {
+            throw new BadRequestException(
+              "Complete your pending requisition before creating a new one",
+            );
+          }
+
+          // Ensure sequence exists for this organization
+          await this.ensureSequenceExists(manager, data.organisationId);
+
+          // Get next PR number
+          const sequenceName = `pr_seq_${data.organisationId.replace(/-/g, "_")}`;
+          const nextNumberResult = await manager.query(
+            `SELECT nextval($1) as next_number`,
+            [sequenceName],
+          );
+          const nextNumber = nextNumberResult[0].next_number;
+          const prNumber = `PR-${nextNumber}`;
+
+          // Insert the new requisition
+          const insertResult = await manager.query(
+            `INSERT INTO purchase_requisitions 
+             (pr_number, organisation_id, created_by, branch_id, department_id, status, created_at, updated_at)
+             VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+             RETURNING id, pr_number`,
+            [
+              prNumber,
+              data.organisationId,
+              userId,
+              data.branchId,
+              data.departmentId,
+              PurchaseRequisitionStatus.INITIALIZED,
+            ],
+          );
+
+          const duration = performance.now() - startTime;
+          this.logger.log(
+            `⚡ ULTRA-FAST PR INIT: ${prNumber} for user ${userId} in ${duration.toFixed(2)}ms`,
+          );
+
+          return {
+            id: insertResult[0].id,
+            pr_number: insertResult[0].pr_number,
+          };
+        },
       );
-
-      const { status, id, pr_number } = result[0];
-
-      if (status === "EXISTS") {
-        throw new BadRequestException(
-          "Complete your pending requisition before creating a new one",
-        );
-      }
-
-      const duration = performance.now() - startTime;
-      this.logger.log(
-        `⚡ ULTRA-FAST PR INIT: ${pr_number} for user ${userId} in ${duration.toFixed(2)}ms`,
-      );
-
-      return { id, pr_number };
     } catch (error) {
       const duration = performance.now() - startTime;
       this.logger.error(
