@@ -285,22 +285,63 @@ export class PurchaseOrderService {
     organisationId: string,
     orderId: string,
   ): Promise<PurchaseOrder> {
-    const order = await this.purchaseOrderRepository.findOne({
-      where: { organisation: { id: organisationId }, id: orderId },
-      relations: [
-        "supplier",
-        "purchase_requisition",
-        "purchase_requisition.branch",
-        "items",
-        "organisation",
-      ],
-      select: {
-        organisation: {
-          name: true,
-          logo: true,
+    // Check if the orderId matches PO number pattern (more reliable than UUID regex)
+    const isPONumber = /^PO-?\d+$/i.test(orderId) || /^\d+$/.test(orderId);
+    
+    let order: PurchaseOrder | null;
+
+    if (isPONumber) {
+      // Handle PO number search - normalize the input
+      const normalizedNumber = orderId.replace(/^PO-?/i, '');
+      const patterns = [
+        `PO-${normalizedNumber}`,
+        `PO-${normalizedNumber.padStart(2, '0')}`,
+        `PO-${normalizedNumber.padStart(3, '0')}`,
+      ];
+      
+      // Use query builder for flexible PO number matching
+      order = await this.purchaseOrderRepository
+        .createQueryBuilder("po")
+        .leftJoinAndSelect("po.supplier", "supplier")
+        .leftJoinAndSelect("po.purchase_requisition", "purchase_requisition")
+        .leftJoinAndSelect("purchase_requisition.branch", "branch")
+        .leftJoinAndSelect("po.items", "items")
+        .leftJoinAndSelect("po.organisation", "organisation")
+        .select([
+          "po",
+          "supplier",
+          "purchase_requisition",
+          "branch",
+          "items",
+          "organisation.name",
+          "organisation.logo"
+        ])
+        .where("po.organisation_id = :organisationId", { organisationId })
+        .andWhere("(po.po_number ILIKE :pattern1 OR po.po_number ILIKE :pattern2 OR po.po_number ILIKE :pattern3)", {
+          pattern1: patterns[0],
+          pattern2: patterns[1],
+          pattern3: patterns[2],
+        })
+        .getOne();
+    } else {
+      // Handle UUID search (fallback for anything that doesn't match PO pattern)
+      order = await this.purchaseOrderRepository.findOne({
+        where: { organisation: { id: organisationId }, id: orderId },
+        relations: [
+          "supplier",
+          "purchase_requisition",
+          "purchase_requisition.branch",
+          "items",
+          "organisation",
+        ],
+        select: {
+          organisation: {
+            name: true,
+            logo: true,
+          },
         },
-      },
-    });
+      });
+    }
 
     if (!order) {
       throw new NotFoundException("Purchase order not found");

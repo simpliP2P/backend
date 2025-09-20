@@ -18,3 +18,8 @@ export interface IGetAllPurchaseOrdersInput
   extends Omit<IGetAllPurchaseRequisitionInput, "status" | "userId"> {
   status?: PurchaseOrderStatus;
 }
+
+export interface ISearchPurchaseOrdersInput {
+  organisationId: string;
+  number: string;
+}
