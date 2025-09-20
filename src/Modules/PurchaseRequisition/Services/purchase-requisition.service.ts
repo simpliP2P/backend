@@ -191,11 +191,15 @@ export class PurchaseRequisitionService {
           supplier: supplier_id ? { id: supplier_id } : undefined,
           branch: branch_id ? { id: branch_id } : undefined,
           status: PurchaseRequisitionStatus.SAVED_FOR_LATER,
-          pr_number: await this.generatePrNumber(organisationId),
+          // pr_number: await this.generatePrNumber(organisationId),
           organisation: { id: organisationId },
         });
 
-        await transactionalEntityManager.save(requisition);
+        await transactionalEntityManager.update(
+          PurchaseRequisition,
+          { pr_number: data.pr_number },
+          requisition,
+        );
         return requisition;
       },
     );
@@ -362,33 +366,6 @@ export class PurchaseRequisitionService {
       throw new BadRequestException(
         `Cannot update requisition that has been ${requisition.status.toLowerCase()}`,
       );
-    }
-  }
-
-  private async generatePrNumber(organisationId: string): Promise<string> {
-    try {
-      // Use transaction to prevent race conditions
-      return await this.purchaseRequisitionRepository.manager.transaction(
-        async (manager) => {
-          // Ensure sequence exists for this organization
-          this.ensureSequenceExists(manager, organisationId);
-
-          // Get sequence name
-          const sequenceName = `pr_seq_${organisationId.replace(/-/g, "_")}`;
-
-          // Get next number from sequence (O(1) performance)
-          const result = await manager.query(
-            `SELECT nextval($1) as next_number`,
-            [sequenceName],
-          );
-
-          const nextNumber = result[0]?.next_number || 1;
-          return `PR-${nextNumber}`;
-        },
-      );
-    } catch (error) {
-      this.logger.error(`Error generating PR number: ${error.message}`);
-      throw new BadRequestException("Failed to generate PR number");
     }
   }
 

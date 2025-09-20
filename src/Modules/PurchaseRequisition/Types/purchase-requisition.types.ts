@@ -21,6 +21,7 @@ export interface IPurchaseRequisition {
   status: PurchaseRequisitionStatus;
 }
 export interface ICreatePurchaseRequisition {
+  pr_number: string;
   department_id?: string;
   branch_id?: string;
   supplier_id?: string;
