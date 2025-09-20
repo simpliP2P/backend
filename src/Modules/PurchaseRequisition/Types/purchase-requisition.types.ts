@@ -42,3 +42,8 @@ export interface IGetAllPurchaseRequisitionInput {
   endDate?: string;
   exportAll?: boolean;
 }
+
+export interface ISearchPurchaseRequisitionsInput {
+  organisationId: string;
+  number: string;
+}
