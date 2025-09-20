@@ -11,9 +11,6 @@ import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
 import { ICreatePurchaseRequisition } from "../Types/purchase-requisition.types";
 import { PurchaseRequisitionApprovalService } from "./purchase-requisition-approval.service";
 import { PurchaseRequisitionQueryService } from "./purchase-requisition-query.service";
-import { OrganisationBranch } from "src/Modules/Organisation/Entities/organisation-branch.entity";
-import { Supplier } from "src/Modules/Supplier/Entities/supplier.entity";
-import { OrganisationDepartment } from "src/Modules/Organisation/Entities/organisation-department.entity";
 import { User } from "src/Modules/User/Entities/user.entity";
 
 @Injectable()
@@ -184,12 +181,13 @@ export class PurchaseRequisitionService {
   ): Promise<PurchaseRequisition> {
     return await this.purchaseRequisitionRepository.manager.transaction(
       async (transactionalEntityManager) => {
+        const { supplier_id, department_id, branch_id, ...rest } = data;
         const requisition = this.purchaseRequisitionRepository.create({
-          ...data,
+          ...rest,
           created_by: { id: userId } as User,
-          department: { id: data.department_id } as OrganisationDepartment,
-          supplier: { id: data.supplier_id } as Supplier,
-          branch: { id: data.branch_id } as OrganisationBranch,
+          department: department_id ? { id: department_id } : undefined,
+          supplier: supplier_id ? { id: supplier_id } : undefined,
+          branch: branch_id ? { id: branch_id } : undefined,
           status: PurchaseRequisitionStatus.SAVED_FOR_LATER,
           pr_number: await this.generatePrNumber(organisationId),
           organisation: { id: organisationId },
@@ -389,8 +387,6 @@ export class PurchaseRequisitionService {
         `SELECT 1 FROM pr_sequences WHERE organisation_id = $1`,
         [organisationId],
       );
-
-      console.log("Sequence exists check:", sequenceExists);
 
       if (sequenceExists.length === 0) {
         // Create sequence for new organization
