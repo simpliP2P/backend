@@ -192,16 +192,17 @@ export class OrganisationRequisitionController {
     try {
       const userId = req.user.sub;
 
-      await this.purchaseRequisitionService.updateApprovalDetails(
-        requisitionId,
-        organisationId,
-        { ...approvalData, approved_by: userId },
-      );
+      const requisition =
+        await this.purchaseRequisitionService.updateApprovalDetails(
+          requisitionId,
+          organisationId,
+          { ...approvalData, approved_by: userId },
+        );
 
       return {
         status: "success",
         message: "Purchase requisition updated successfully",
-        data: {},
+        data: { requisition },
       };
     } catch (error) {
       throw error;

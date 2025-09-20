@@ -131,7 +131,7 @@ export class PurchaseOrderService {
    * Creates a purchase order for a specific supplier with selected items
    * Used in the new workflow where items are assigned to different suppliers
    */
-  public async createMultipleSupplierPO(
+  public async createPOforSupplier(
     organisationId: string,
     data: Partial<IPurchaseOrder> & { items: string[] },
     purchaseRequisition?: {
@@ -287,18 +287,18 @@ export class PurchaseOrderService {
   ): Promise<PurchaseOrder> {
     // Check if the orderId matches PO number pattern (more reliable than UUID regex)
     const isPONumber = /^PO-?\d+$/i.test(orderId) || /^\d+$/.test(orderId);
-    
+
     let order: PurchaseOrder | null;
 
     if (isPONumber) {
       // Handle PO number search - normalize the input
-      const normalizedNumber = orderId.replace(/^PO-?/i, '');
+      const normalizedNumber = orderId.replace(/^PO-?/i, "");
       const patterns = [
         `PO-${normalizedNumber}`,
-        `PO-${normalizedNumber.padStart(2, '0')}`,
-        `PO-${normalizedNumber.padStart(3, '0')}`,
+        `PO-${normalizedNumber.padStart(2, "0")}`,
+        `PO-${normalizedNumber.padStart(3, "0")}`,
       ];
-      
+
       // Use query builder for flexible PO number matching
       order = await this.purchaseOrderRepository
         .createQueryBuilder("po")
@@ -314,14 +314,17 @@ export class PurchaseOrderService {
           "branch",
           "items",
           "organisation.name",
-          "organisation.logo"
+          "organisation.logo",
         ])
         .where("po.organisation_id = :organisationId", { organisationId })
-        .andWhere("(po.po_number ILIKE :pattern1 OR po.po_number ILIKE :pattern2 OR po.po_number ILIKE :pattern3)", {
-          pattern1: patterns[0],
-          pattern2: patterns[1],
-          pattern3: patterns[2],
-        })
+        .andWhere(
+          "(po.po_number ILIKE :pattern1 OR po.po_number ILIKE :pattern2 OR po.po_number ILIKE :pattern3)",
+          {
+            pattern1: patterns[0],
+            pattern2: patterns[1],
+            pattern3: patterns[2],
+          },
+        )
         .getOne();
     } else {
       // Handle UUID search (fallback for anything that doesn't match PO pattern)
