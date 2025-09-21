@@ -394,7 +394,7 @@ export class PurchaseOrderService {
 
     // update the product stock quantity
     if (status === PurchaseOrderStatus.APPROVED) {
-      this.approvePurchaseOrder({ order });
+      await this.consumeBudgetAndNotifySupplier({ order });
     }
 
     order.status = status;
@@ -437,7 +437,7 @@ export class PurchaseOrderService {
     });
   }
 
-  private async approvePurchaseOrder(args: { order: PurchaseOrder }) {
+  private async consumeBudgetAndNotifySupplier(args: { order: PurchaseOrder }) {
     const { order } = args;
     const {
       id: poId,
