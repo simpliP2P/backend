@@ -146,6 +146,7 @@ export class OrganisationOrderController {
 
       if (
         status &&
+        !permissions.includes(PermissionType.OWNER) &&
         !permissions.includes(PermissionType.APPROVE_PURCHASE_ORDERS)
       ) {
         throw new ForbiddenException(
