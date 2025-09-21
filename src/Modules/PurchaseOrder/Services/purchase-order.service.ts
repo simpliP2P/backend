@@ -191,7 +191,6 @@ export class PurchaseOrderService {
         .andWhere("purchase_order_id IS NULL")
         .execute();
 
-      // Generate purchase order Url for supplier to view
       if (!savedPurchaseOrder.created_by?.id) {
         throw new Error(
           "Created by user ID is missing after saving purchase order",
