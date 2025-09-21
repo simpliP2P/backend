@@ -11,6 +11,7 @@ import {
   Req,
   Get,
   Query,
+  BadRequestException,
 } from "@nestjs/common";
 import { PurchaseItemService } from "../Services/purchase-item.service";
 import {
@@ -60,16 +61,26 @@ export class PurchaseItemController {
   async getAllPurchaseItems(
     @Req() req: Request,
     @Query("pr_number") pr_number: string,
+    @Query("po_number") po_number: string,
     @Query("page") page: number,
     @Query("pageSize") pageSize: number,
   ) {
     try {
       const organisationId = req.headers["oid"] as string;
 
+      if (!pr_number && !po_number) {
+        throw new BadRequestException(
+          "Either pr_number or po_number must be provided",
+        );
+      }
+
       const data = await this.purchaseItemService.getAllPurchaseItems(
         {
           organisation: { id: organisationId },
-          purchase_requisition: { pr_number: pr_number },
+          purchase_requisition: pr_number
+            ? { pr_number: pr_number }
+            : undefined,
+          purchase_order: po_number ? { po_number: po_number } : undefined,
         },
         page,
         pageSize,
