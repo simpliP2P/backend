@@ -31,6 +31,16 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       logger.error("🔥 Uncaught Exception:", error.message);
       process.exit(1);
     });
+
+    process.on("SIGTERM", () => {
+      logger.log("SIGTERM received, shutting down gracefully");
+      process.exit(0);
+    });
+
+    process.on("SIGINT", () => {
+      logger.log("SIGINT received, shutting down gracefully");
+      process.exit(0);
+    });
   }
 
   catch(exception: unknown, host: ArgumentsHost) {
