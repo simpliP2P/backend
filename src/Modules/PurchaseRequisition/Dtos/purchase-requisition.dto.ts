@@ -3,7 +3,6 @@ import {
   IsEnum,
   IsNumber,
   IsOptional,
-  IsPhoneNumber,
   IsString,
   IsUUID,
   Min,
