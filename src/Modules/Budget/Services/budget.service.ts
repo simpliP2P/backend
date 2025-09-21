@@ -17,7 +17,6 @@ export class BudgetService {
     private readonly departmentService: OrganisationDepartmentService,
   ) {}
 
-  // Create a new budget
   async create(createBudgetDto: CreateBudgetDto): Promise<Budget> {
     const { branchId, departmentId, ...budgetData } = createBudgetDto;
 
@@ -32,7 +31,6 @@ export class BudgetService {
     return await this.budgetRepository.save(budget);
   }
 
-  // Find all budgets
   async findAll(organisationId: string): Promise<Budget[]> {
     return this.budgetRepository.find({
       where: { organisation: { id: organisationId } },
@@ -50,7 +48,6 @@ export class BudgetService {
     });
   }
 
-  // Find a budget by ID
   async findOne(organisationId: string, id: string): Promise<Budget> {
     const budget = await this.budgetRepository.findOne({
       where: { id, organisation: { id: organisationId } },
@@ -74,7 +71,6 @@ export class BudgetService {
     return budget;
   }
 
-  // Update a budget
   async update(id: string, updateBudgetDto: UpdateBudgetDto): Promise<Budget> {
     const { branchId, departmentId, organisationId, ...budgetData } =
       updateBudgetDto;
@@ -109,7 +105,6 @@ export class BudgetService {
     return this.budgetRepository.save(budget);
   }
 
-  // Delete a budget
   async remove(organisationId: string, id: string): Promise<void> {
     const budget = await this.budgetRepository.findOne({
       where: { id, organisation: { id: organisationId } },
@@ -139,7 +134,6 @@ export class BudgetService {
     return this.budgetRepository.save(budget);
   }
 
-  // Reserve an amount from the budget
   async reserveAmount(
     organisationId: string,
     id: string,
@@ -159,7 +153,6 @@ export class BudgetService {
     return this.budgetRepository.save(budget);
   }
 
-  // Release a reserved amount back to the budget
   async releaseReservedAmount(
     organisationId: string,
     id: string,
@@ -179,7 +172,6 @@ export class BudgetService {
     return this.budgetRepository.save(budget);
   }
 
-  // Calculate the available amount in the budget
   async calculateAvailableAmount(
     organisationId: string,
     id: string,
