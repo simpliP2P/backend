@@ -351,17 +351,11 @@ export class PurchaseOrderService {
     return order;
   }
 
-  public async updateOrderStatus(
+  public async approveOrRejectOrder(
     organisationId: string,
     orderId: string,
-    data: {
-      status: PurchaseOrderStatus;
-      delivery_fee: number;
-      vat_percent: number;
-    },
+    status: string,
   ) {
-    const { status, delivery_fee, vat_percent } = data;
-
     const order = await this.purchaseOrderRepository.findOne({
       where: { organisation: { id: organisationId }, id: orderId },
       relations: [
@@ -398,6 +392,32 @@ export class PurchaseOrderService {
     }
 
     order.status = status;
+
+    // Save updated order and exclude purchase_requisition from returned object
+    const { purchase_requisition, ...updatedOrder } =
+      await this.purchaseOrderRepository.save(order);
+
+    return updatedOrder;
+  }
+
+  public async updateOrder(
+    organisationId: string,
+    orderId: string,
+    data: {
+      delivery_fee: number;
+      vat_percent: number;
+    },
+  ) {
+    const { delivery_fee, vat_percent } = data;
+
+    const order = await this.purchaseOrderRepository.findOne({
+      where: { organisation: { id: organisationId }, id: orderId },
+    });
+
+    if (!order) {
+      throw new NotFoundException("Purchase order not found");
+    }
+
     order.vat = order.total_amount * (vat_percent / 100) || 0;
     order.delivery_fee = delivery_fee || 0;
 
