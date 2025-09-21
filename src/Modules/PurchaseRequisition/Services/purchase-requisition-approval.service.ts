@@ -114,6 +114,7 @@ export class PurchaseRequisitionApprovalService {
                 sum + item.unit_price * (item.po_quantity || item.pr_quantity),
               0,
             ),
+            total_items: items.length,
             supplier_id: supplierId,
             created_by: { id: requisition.created_by?.id },
             items: items.map((item) => item.id),

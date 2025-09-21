@@ -8,6 +8,7 @@ export interface IPurchaseOrder {
   request_id: string;
   supplier_id: string;
   total_amount: number;
+  total_items: number;
   created_by: Partial<User>;
   status: string;
   created_at: Date;

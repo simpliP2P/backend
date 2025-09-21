@@ -14,6 +14,9 @@ export class PurchaseOrder extends BaseEntity {
   @Column()
   po_number: string;
 
+  @Column({ type: "int", default: 0 })
+  total_items: number;
+
   @Column("decimal", { precision: 10, scale: 2 })
   total_amount: number;
 
