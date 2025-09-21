@@ -1,11 +1,11 @@
 import {
   Body,
   Controller,
-  ForbiddenException,
   Get,
   Param,
   Patch,
   Post,
+  Put,
   Query,
   Req,
   SetMetadata,
@@ -121,47 +121,24 @@ export class OrganisationOrderController {
     }
   }
 
-  @Patch(":organisationId/orders/:orderId/status")
+  @Put(":organisationId/orders/:orderId")
   @SetMetadata("permissions", [
     PermissionType.OWNER,
     PermissionType.MANAGE_PURCHASE_ORDERS,
     PermissionType.UPDATE_PURCHASE_ORDERS,
-    PermissionType.APPROVE_PURCHASE_ORDERS,
   ])
   @UseGuards(OrganisationPermissionsGuard)
-  async updateOrderStatus(
-    @Req() req: Request,
+  async updateOrder(
     @Param("organisationId") organisationId: string,
     @Param("orderId") orderId: string,
     @Body()
     data: {
-      status: PurchaseOrderStatus;
       delivery_fee: number;
       vat_percent: number;
     },
   ) {
     try {
-      const { status } = data;
-      const permissions = req.user.permissions as string[];
-
-      if (
-        status &&
-        !permissions.includes(PermissionType.OWNER) &&
-        !permissions.includes(PermissionType.APPROVE_PURCHASE_ORDERS)
-      ) {
-        throw new ForbiddenException(
-          "You do not have permission to update this order status",
-        );
-      }
-
-      if (
-        !Object.values(PurchaseOrderStatus).includes(status) ||
-        status === PurchaseOrderStatus.PENDING
-      ) {
-        throw new BadRequestException("Invalid status");
-      }
-
-      const order = await this.purchaseOrderService.updateOrderStatus(
+      const order = await this.purchaseOrderService.updateOrder(
         organisationId,
         orderId,
         data,
@@ -169,7 +146,47 @@ export class OrganisationOrderController {
 
       return {
         status: "success",
-        message: "Order status updated successfully",
+        message: "Order updated successfully",
+        data: order,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Patch(":organisationId/orders/:orderId/status")
+  @SetMetadata("permissions", [
+    PermissionType.OWNER,
+    PermissionType.MANAGE_PURCHASE_ORDERS,
+    PermissionType.APPROVE_PURCHASE_ORDERS,
+  ])
+  @UseGuards(OrganisationPermissionsGuard)
+  async updateOrderStatus(
+    @Param("organisationId") organisationId: string,
+    @Param("orderId") orderId: string,
+    @Body()
+    data: {
+      status: PurchaseOrderStatus;
+    },
+  ) {
+    try {
+      const { status } = data;
+      if (
+        !Object.values(PurchaseOrderStatus).includes(status) ||
+        status === PurchaseOrderStatus.PENDING
+      ) {
+        throw new BadRequestException("Invalid status");
+      }
+
+      const order = await this.purchaseOrderService.approveOrRejectOrder(
+        organisationId,
+        orderId,
+        status,
+      );
+
+      return {
+        status: "success",
+        message: `Order ${status.toLowerCase()} successfully`,
         data: order,
       };
     } catch (error) {
