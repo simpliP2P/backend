@@ -57,10 +57,7 @@ export class PurchaseRequisitionApprovalService {
       approvalData.action_type === PRApprovalActionType.APPROVE_AND_CREATE_PO;
     if (isActionApproveAndCreatePO) {
       console.log(`Creating POs for requisition ${requisitionId}`);
-      await this.createPurchaseOrdersFromRequisition(
-        organisationId,
-        requisitionId,
-      );
+      this.createPurchaseOrdersFromRequisition(organisationId, requisitionId);
     }
 
     const updatedRequisition = await this.updateRequisitionStatus(
@@ -184,16 +181,16 @@ export class PurchaseRequisitionApprovalService {
       );
     }
 
-    // if (
-    //   !this.isPendingRequisitionBeingApproved(
-    //     requisition.status,
-    //     approvalData.status,
-    //   )
-    // ) {
-    //   throw new BadRequestException(
-    //     "Only requisitions with 'PENDING' status can be approved.",
-    //   );
-    // }
+    if (
+      !this.isPendingRequisitionBeingApproved(
+        requisition.status,
+        approvalData.status,
+      )
+    ) {
+      throw new BadRequestException(
+        "Only requisitions with 'PENDING' status can be approved.",
+      );
+    }
 
     if (this.isApprovalAction(approvalData.action_type)) {
       await this.validateSupplierAssignments(requisition.id);
@@ -209,7 +206,6 @@ export class PurchaseRequisitionApprovalService {
     ].includes(status);
   }
 
-  // @ts-ignore
   private isPendingRequisitionBeingApproved(
     currentStatus: PurchaseRequisitionStatus,
     requestedStatus: PurchaseRequisitionStatus,
