@@ -421,6 +421,9 @@ export class PurchaseOrderService {
     order.vat = order.total_amount * (vat_percent / 100) || 0;
     order.delivery_fee = delivery_fee || 0;
 
+    order.total_amount =
+      (order.total_amount || 0) + (order.vat || 0) + (order.delivery_fee || 0);
+
     // Save updated order and exclude purchase_requisition from returned object
     const { purchase_requisition, ...updatedOrder } =
       await this.purchaseOrderRepository.save(order);
