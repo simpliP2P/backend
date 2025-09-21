@@ -48,7 +48,6 @@ export class CreatePurchaseRequisitionDto {
   supplier_id?: string;
 
   @IsString()
-  @IsPhoneNumber()
   requestor_phone: string;
 
   @IsString()
@@ -98,7 +97,6 @@ export class SavedPurchaseRequisitionDto {
 
   @IsString()
   @IsOptional()
-  @IsPhoneNumber()
   @AtLeastOneField(["pr_number"], {
     message: "At least one field besides pr_number must be provided",
   })
