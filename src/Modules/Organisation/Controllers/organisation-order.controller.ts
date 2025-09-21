@@ -138,6 +138,14 @@ export class OrganisationOrderController {
     },
   ) {
     try {
+      if (data.vat_percent < 0 || data.vat_percent > 100) {
+        throw new BadRequestException("VAT percent must be between 0 and 100");
+      }
+
+      if (data.delivery_fee < 0) {
+        throw new BadRequestException("Delivery fee cannot be negative");
+      }
+      
       const order = await this.purchaseOrderService.updateOrder(
         organisationId,
         orderId,
