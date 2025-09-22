@@ -201,7 +201,7 @@ export class OrganisationRequisitionController {
 
       return {
         status: "success",
-        message: "Purchase requisition updated successfully",
+        message: `requisition ${approvalData.action_type.replace(/_/g, " ")} successfully`,
         data: { requisition },
       };
     } catch (error) {

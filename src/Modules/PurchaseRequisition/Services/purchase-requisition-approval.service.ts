@@ -191,17 +191,20 @@ export class PurchaseRequisitionApprovalService {
       );
     }
 
-    if (requisition.status === PurchaseRequisitionStatus.PENDING) {
+    const allowedStatusesForAction = [
+      PurchaseRequisitionStatus.PENDING,
+    ];
+    if (!allowedStatusesForAction.includes(requisition.status)) {
       throw new BadRequestException(
-        `${approvalData.action_type.replace(/_/g, " ").toLowerCase()} only pending requisitions`,
+        `Action disallowed when requisition is in ${requisition.status} state`,
       );
     }
 
-    const isApprovalAction = this.isApprovalAction(approvalData.action_type);
-    if (isApprovalAction) {
+    if (this.isApprovalAction(approvalData.action_type)) {
       await this.validateSupplierAssignments(requisition.id);
     }
   }
+
 
   private isRequisitionInFinalState(
     status: PurchaseRequisitionStatus,
