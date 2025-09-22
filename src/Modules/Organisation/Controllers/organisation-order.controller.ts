@@ -15,7 +15,10 @@ import { Request } from "express";
 import { OrganisationPermissionsGuard } from "src/Guards/permissions.guard";
 import { PermissionType } from "../Enums/user-organisation.enum";
 import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
-import { CreatePurchaseOrderDto } from "src/Modules/PurchaseOrder/Dtos/purchase-order.dto";
+import {
+  CreatePurchaseOrderDto,
+  UpdatePurchaseOrderDto,
+} from "src/Modules/PurchaseOrder/Dtos/purchase-order.dto";
 import { User } from "src/Modules/User/Entities/user.entity";
 import { BadRequestException } from "src/Shared/Exceptions/app.exceptions";
 import { PurchaseOrderStatus } from "src/Modules/PurchaseOrder/Enums/purchase-order.enum";
@@ -132,10 +135,7 @@ export class OrganisationOrderController {
     @Param("organisationId") organisationId: string,
     @Param("orderId") orderId: string,
     @Body()
-    data: {
-      delivery_fee: number;
-      vat_percent: number;
-    },
+    data: UpdatePurchaseOrderDto,
   ) {
     try {
       if (data.vat_percent < 0 || data.vat_percent > 100) {
