@@ -237,7 +237,6 @@ export class PurchaseRequisitionService {
 
   // Query Operations Delegated
   public async getAllPurchaseRequisitions(params: any) {
-    console.log("Params in service:", params);
     return await this.queryService.getAllPurchaseRequisitions(params);
   }
 
