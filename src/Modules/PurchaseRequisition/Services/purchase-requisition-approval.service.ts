@@ -182,7 +182,6 @@ export class PurchaseRequisitionApprovalService {
   private async validateApprovalRequest(
     requisition: PurchaseRequisition,
     approvalData: {
-      // status: PurchaseRequisitionStatus;
       action_type: PRApprovalActionType;
     },
   ): Promise<void> {
@@ -192,19 +191,13 @@ export class PurchaseRequisitionApprovalService {
       );
     }
 
-    // if (requisition.status === PurchaseRequisitionStatus.PENDING) {
-    //   throw new BadRequestException(
-    //     `Only pending requisitions can be ${approvalData.status.toLowerCase()}`,
-    //   );
-    // }
-
-    const isApprovalAction = this.isApprovalAction(approvalData.action_type);
-    if (!isApprovalAction) {
+    if (requisition.status === PurchaseRequisitionStatus.PENDING) {
       throw new BadRequestException(
-        "Only pending requisitions  status can be approved.",
+        `${approvalData.action_type.replace(/_/g, " ").toLowerCase()} only pending requisitions`,
       );
     }
 
+    const isApprovalAction = this.isApprovalAction(approvalData.action_type);
     if (isApprovalAction) {
       await this.validateSupplierAssignments(requisition.id);
     }
