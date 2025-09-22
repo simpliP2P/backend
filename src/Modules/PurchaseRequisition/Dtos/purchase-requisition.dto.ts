@@ -136,9 +136,6 @@ export class SavedPurchaseRequisitionDto {
 export class UpdatePurchaseRequisitionDto extends CreatePurchaseRequisitionDto {}
 
 export class ApprovalDataDto {
-  @IsEnum(PurchaseRequisitionStatus)
-  status: PurchaseRequisitionStatus;
-
   @IsString()
   approval_justification: string;
 
