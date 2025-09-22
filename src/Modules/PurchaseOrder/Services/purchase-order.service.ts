@@ -386,6 +386,10 @@ export class PurchaseOrderService {
       throw new NotFoundException("Purchase order not found");
     }
 
+    if (!order.supplier) {
+      throw new BadRequestException("Supplier details not found");
+    }
+
     // update the product stock quantity
     if (status === PurchaseOrderStatus.APPROVED) {
       await this.consumeBudgetAndNotifySupplier({ order });
