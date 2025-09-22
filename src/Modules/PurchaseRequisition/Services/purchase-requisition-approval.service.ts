@@ -191,9 +191,7 @@ export class PurchaseRequisitionApprovalService {
       );
     }
 
-    const allowedStatusesForAction = [
-      PurchaseRequisitionStatus.PENDING,
-    ];
+    const allowedStatusesForAction = [PurchaseRequisitionStatus.PENDING];
     if (!allowedStatusesForAction.includes(requisition.status)) {
       throw new BadRequestException(
         `Action disallowed when requisition is in ${requisition.status} state`,
@@ -204,7 +202,6 @@ export class PurchaseRequisitionApprovalService {
       await this.validateSupplierAssignments(requisition.id);
     }
   }
-
 
   private isRequisitionInFinalState(
     status: PurchaseRequisitionStatus,

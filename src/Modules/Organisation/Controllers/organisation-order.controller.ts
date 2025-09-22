@@ -145,7 +145,7 @@ export class OrganisationOrderController {
       if (data.delivery_fee < 0) {
         throw new BadRequestException("Delivery fee cannot be negative");
       }
-      
+
       const order = await this.purchaseOrderService.updateOrder(
         organisationId,
         orderId,

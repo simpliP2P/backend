@@ -8,10 +8,11 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { PurchaseRequisition } from "../Entities/purchase-requisition.entity";
 import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
-import { ICreatePurchaseRequisition } from "../Types/purchase-requisition.types";
-import { IApprovalData, PurchaseRequisitionApprovalService } from "./purchase-requisition-approval.service";
+import {
+  IApprovalData,
+  PurchaseRequisitionApprovalService,
+} from "./purchase-requisition-approval.service";
 import { PurchaseRequisitionQueryService } from "./purchase-requisition-query.service";
-import { User } from "src/Modules/User/Entities/user.entity";
 import { CreatePurchaseRequisitionDto } from "../Dtos/purchase-requisition.dto";
 
 @Injectable()
@@ -175,35 +176,6 @@ export class PurchaseRequisitionService {
       supplier_id || "",
       department_id,
       request,
-    );
-  }
-
-  public async createPurchaseRequisition(
-    organisationId: string,
-    userId: string,
-    data: Partial<ICreatePurchaseRequisition>,
-  ): Promise<PurchaseRequisition> {
-    return await this.purchaseRequisitionRepository.manager.transaction(
-      async (transactionalEntityManager) => {
-        const { supplier_id, department_id, branch_id, ...rest } = data;
-        const requisition = this.purchaseRequisitionRepository.create({
-          ...rest,
-          created_by: { id: userId } as User,
-          department: department_id ? { id: department_id } : undefined,
-          supplier: supplier_id ? { id: supplier_id } : undefined,
-          branch: branch_id ? { id: branch_id } : undefined,
-          status: PurchaseRequisitionStatus.SAVED_FOR_LATER,
-          // pr_number: await this.generatePrNumber(organisationId),
-          organisation: { id: organisationId },
-        });
-
-        await transactionalEntityManager.update(
-          PurchaseRequisition,
-          { pr_number: data.pr_number },
-          requisition,
-        );
-        return requisition;
-      },
     );
   }
 
