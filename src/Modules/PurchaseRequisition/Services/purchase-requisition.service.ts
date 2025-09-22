@@ -9,7 +9,7 @@ import { Repository } from "typeorm";
 import { PurchaseRequisition } from "../Entities/purchase-requisition.entity";
 import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
 import { ICreatePurchaseRequisition } from "../Types/purchase-requisition.types";
-import { PurchaseRequisitionApprovalService } from "./purchase-requisition-approval.service";
+import { IApprovalData, PurchaseRequisitionApprovalService } from "./purchase-requisition-approval.service";
 import { PurchaseRequisitionQueryService } from "./purchase-requisition-query.service";
 import { User } from "src/Modules/User/Entities/user.entity";
 import { CreatePurchaseRequisitionDto } from "../Dtos/purchase-requisition.dto";
@@ -226,7 +226,7 @@ export class PurchaseRequisitionService {
   public async updateApprovalDetails(
     requisitionId: string,
     organisationId: string,
-    approvalData: any,
+    approvalData: IApprovalData,
   ) {
     return await this.approvalService.updateApprovalDetails(
       requisitionId,

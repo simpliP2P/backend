@@ -14,3 +14,10 @@ export enum PRApprovalActionType {
   REJECT = "reject",
   SUBMIT_FOR_APPROVAL = "submit_for_approval",
 }
+
+export const ActionToStatusMap = {
+  [PRApprovalActionType.APPROVE]: PurchaseRequisitionStatus.APPROVED,
+  [PRApprovalActionType.APPROVE_AND_CREATE_PO]: PurchaseRequisitionStatus.APPROVED,
+  [PRApprovalActionType.REJECT]: PurchaseRequisitionStatus.REJECTED,
+  [PRApprovalActionType.SUBMIT_FOR_APPROVAL]: PurchaseRequisitionStatus.PENDING,
+};

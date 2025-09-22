@@ -7,6 +7,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { PurchaseRequisition } from "../Entities/purchase-requisition.entity";
 import {
+  ActionToStatusMap,
   PRApprovalActionType,
   PurchaseRequisitionStatus,
 } from "../Enums/purchase-requisition.enum";
@@ -14,8 +15,7 @@ import { BudgetService } from "src/Modules/Budget/Services/budget.service";
 import { PurchaseOrderService } from "src/Modules/PurchaseOrder/Services/purchase-order.service";
 import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 
-interface IApprovalData {
-  status: PurchaseRequisitionStatus;
+export interface IApprovalData {
   approved_by: any;
   approval_justification: string;
   budget_id?: string;
@@ -37,6 +37,11 @@ export class PurchaseRequisitionApprovalService {
     organisationId: string,
     approvalData: IApprovalData,
   ): Promise<PurchaseRequisition> {
+    const status = ActionToStatusMap[approvalData.action_type];
+    if (!status) {
+      throw new BadRequestException("Invalid action type provided");
+    }
+
     const requisition = await this.findRequisitionForApproval(
       requisitionId,
       organisationId,
@@ -44,7 +49,12 @@ export class PurchaseRequisitionApprovalService {
 
     await this.validateApprovalRequest(requisition, approvalData);
 
-    if (this.shouldReserveBudget(approvalData)) {
+    if (
+      this.shouldReserveBudget({
+        budget_id: approvalData.budget_id,
+        status,
+      })
+    ) {
       await this.reserveBudgetForApproval(
         organisationId,
         approvalData.budget_id!,
@@ -62,7 +72,7 @@ export class PurchaseRequisitionApprovalService {
 
     const updatedRequisition = await this.updateRequisitionStatus(
       requisitionId,
-      approvalData,
+      { status, ...approvalData },
     );
 
     return updatedRequisition;
@@ -172,7 +182,7 @@ export class PurchaseRequisitionApprovalService {
   private async validateApprovalRequest(
     requisition: PurchaseRequisition,
     approvalData: {
-      status: PurchaseRequisitionStatus;
+      // status: PurchaseRequisitionStatus;
       action_type: PRApprovalActionType;
     },
   ): Promise<void> {
@@ -182,18 +192,20 @@ export class PurchaseRequisitionApprovalService {
       );
     }
 
-    if (
-      !this.isPendingRequisitionBeingApproved(
-        requisition.status,
-        approvalData.status,
-      )
-    ) {
+    // if (requisition.status === PurchaseRequisitionStatus.PENDING) {
+    //   throw new BadRequestException(
+    //     `Only pending requisitions can be ${approvalData.status.toLowerCase()}`,
+    //   );
+    // }
+
+    const isApprovalAction = this.isApprovalAction(approvalData.action_type);
+    if (!isApprovalAction) {
       throw new BadRequestException(
-        "Only requisitions with 'PENDING' status can be approved.",
+        "Only pending requisitions  status can be approved.",
       );
     }
 
-    if (this.isApprovalAction(approvalData.action_type)) {
+    if (isApprovalAction) {
       await this.validateSupplierAssignments(requisition.id);
     }
   }
@@ -205,16 +217,6 @@ export class PurchaseRequisitionApprovalService {
       PurchaseRequisitionStatus.APPROVED,
       PurchaseRequisitionStatus.REJECTED,
     ].includes(status);
-  }
-
-  private isPendingRequisitionBeingApproved(
-    currentStatus: PurchaseRequisitionStatus,
-    requestedStatus: PurchaseRequisitionStatus,
-  ): boolean {
-    return (
-      currentStatus === PurchaseRequisitionStatus.PENDING &&
-      requestedStatus === PurchaseRequisitionStatus.APPROVED
-    );
   }
 
   private isApprovalAction(actionType: PRApprovalActionType): boolean {
