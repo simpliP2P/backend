@@ -13,7 +13,10 @@ import {
   PurchaseRequisitionApprovalService,
 } from "./purchase-requisition-approval.service";
 import { PurchaseRequisitionQueryService } from "./purchase-requisition-query.service";
-import { CreatePurchaseRequisitionDto } from "../Dtos/purchase-requisition.dto";
+import {
+  CreatePurchaseRequisitionDto,
+  SavedPurchaseRequisitionDto,
+} from "../Dtos/purchase-requisition.dto";
 
 @Injectable()
 export class PurchaseRequisitionService {
@@ -177,6 +180,27 @@ export class PurchaseRequisitionService {
       department_id,
       request,
     );
+  }
+
+  public async saveForLaterPurchaseRequisition(
+    organisationId: string,
+    userId: string,
+    data: SavedPurchaseRequisitionDto,
+  ) {
+    const requisition = await this.purchaseRequisitionRepository.findOne({
+      where: {
+        created_by: { id: userId },
+        organisation: { id: organisationId },
+        pr_number: data.pr_number,
+      },
+    });
+
+    if (!requisition) {
+      throw new NotFoundException("Purchase Requisition not found");
+    }
+
+    Object.assign(requisition, data);
+    return await this.purchaseRequisitionRepository.save(requisition);
   }
 
   public async updatePurchaseRequisition(

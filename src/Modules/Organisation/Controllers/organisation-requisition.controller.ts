@@ -96,7 +96,7 @@ export class OrganisationRequisitionController {
       if (!userId) return;
 
       const purchaseRequisition =
-        await this.purchaseRequisitionService.updatePurchaseRequisition(
+        await this.purchaseRequisitionService.saveForLaterPurchaseRequisition(
           organisationId,
           userId,
           data,
