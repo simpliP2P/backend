@@ -418,11 +418,12 @@ export class PurchaseOrderService {
       throw new NotFoundException("Purchase order not found");
     }
 
-    order.vat = order.total_amount * (vat_percent / 100) || 0;
+    const totalAmount = Number(order.total_amount);
+    order.vat = totalAmount * (vat_percent / 100) || 0;
     order.delivery_fee = delivery_fee || 0;
 
     order.total_amount =
-      (order.total_amount || 0) + (order.vat || 0) + (order.delivery_fee || 0);
+      (totalAmount || 0) + (order.vat || 0) + (order.delivery_fee || 0);
 
     // Save updated order and exclude purchase_requisition from returned object
     const { purchase_requisition, ...updatedOrder } =

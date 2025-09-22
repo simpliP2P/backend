@@ -55,7 +55,6 @@ export class PurchaseRequisitionQueryService {
       exportAll,
     );
 
-    console.log("Query Options:", queryOptions); // Debug log
     const [requisitions, total] =
       await this.purchaseRequisitionRepository.findAndCount(queryOptions);
 
