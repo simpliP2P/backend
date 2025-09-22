@@ -197,7 +197,10 @@ export class PurchaseRequisitionService {
       throw new NotFoundException("Purchase Requisition not found");
     }
 
-    Object.assign(requisition, data);
+    Object.assign(requisition, {
+      status: PurchaseRequisitionStatus.SAVED_FOR_LATER,
+      ...data,
+    });
     return await this.purchaseRequisitionRepository.save(requisition);
   }
 
