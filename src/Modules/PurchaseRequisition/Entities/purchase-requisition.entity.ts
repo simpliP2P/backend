@@ -2,15 +2,7 @@ import { BaseEntity } from "src/Common/entities/base.entity";
 import { Organisation } from "src/Modules/Organisation/Entities/organisation.entity";
 import { PurchaseOrder } from "src/Modules/PurchaseOrder/Entities/purchase-order.entity";
 import { User } from "src/Modules/User/Entities/user.entity";
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  JoinColumn,
-  BeforeInsert,
-  BeforeUpdate,
-} from "typeorm";
+import { Column, Entity, ManyToOne, OneToMany, JoinColumn } from "typeorm";
 import { PurchaseRequisitionStatus } from "../Enums/purchase-requisition.enum";
 import { PurchaseItem } from "src/Modules/PurchaseItem/Entities/purchase-item.entity";
 import { OrganisationBranch } from "src/Modules/Organisation/Entities/organisation-branch.entity";
@@ -50,15 +42,6 @@ export class PurchaseRequisition extends BaseEntity {
 
   @Column({ default: "N/A" })
   justification: string;
-
-  @Column({
-    type: "decimal",
-    precision: 10,
-    scale: 2,
-    nullable: true,
-    default: 0,
-  })
-  delivery_fee: number;
 
   @Column({
     type: "enum",
@@ -105,46 +88,4 @@ export class PurchaseRequisition extends BaseEntity {
 
   @OneToMany(() => PurchaseOrder, (po) => po.purchase_requisition)
   purchaseOrders: PurchaseOrder[];
-
-  /**
-   * Calculate total before inserting
-   */
-  @BeforeInsert()
-  calculateTotalOnInsert() {
-    this.calculateTotal();
-  }
-
-  /**
-   * Recalculate total before updating
-   */
-  @BeforeUpdate()
-  calculateTotalOnUpdate() {
-    this.calculateTotal();
-  }
-
-  /**
-   * Calculate total by adding delivery_fee to estimated_cost
-   * estimated_cost becomes the total including delivery fee
-   */
-  private calculateTotal() {
-    const baseCost = this.estimated_cost || 0;
-    const deliveryFee = this.delivery_fee || 0;
-    this.estimated_cost = baseCost + deliveryFee;
-  }
-
-  /**
-   * Update delivery fee and recalculate total
-   */
-  updateDeliveryFee(deliveryFee: number) {
-    this.delivery_fee = deliveryFee;
-    this.calculateTotal();
-  }
-
-  /**
-   * Update base cost (before delivery fee) and recalculate total
-   */
-  updateBaseCost(baseCost: number) {
-    const deliveryFee = this.delivery_fee || 0;
-    this.estimated_cost = baseCost + deliveryFee;
-  }
 }
