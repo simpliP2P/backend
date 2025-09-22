@@ -29,27 +29,9 @@ export class CreatePurchaseOrderDto {
 }
 
 export class UpdatePurchaseOrderDto {
-  @IsOptional()
-  @IsString()
-  po_number?: string;
-
-  @IsOptional()
   @IsNumber()
-  total_amount?: number;
+  delivery_fee: number;
 
-  @IsOptional()
-  @IsString()
-  status?: string;
-
-  @IsOptional()
-  @IsString()
-  organisation_id?: string;
-
-  @IsOptional()
-  @IsString()
-  supplier_id?: string;
-
-  @IsOptional()
-  @IsString()
-  pr_id?: string;
+  @IsNumber()
+  vat_percent: number;
 }
