@@ -548,10 +548,8 @@ export class PurchaseOrderService {
       this.logger.error(`Error generating PO number: ${error.message}`);
       throw new BadRequestException("Failed to generate PO number");
     }
-  } /**
-   * Generates a link for the supplier to view the purchase order
-   * @param data
-   */
+  }
+
   private async genPurchaseOrderUrl(data: {
     creatorId: string;
     organisationId: string;
@@ -568,6 +566,8 @@ export class PurchaseOrderService {
       validFor,
       { organisationId: data.organisationId, poId: data.poId },
     );
+
+    this.logger.log(`Generated purchase order URL: ${currentClientHost}/purchase-orders/${data.poId}?x-resource-token=${token}`);
 
     return `${currentClientHost}/purchase-orders/${data.poId}?x-resource-token=${token}`;
   }
