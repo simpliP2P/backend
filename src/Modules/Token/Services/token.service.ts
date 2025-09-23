@@ -8,14 +8,12 @@ import {
   TokenExpiredException,
 } from "src/Shared/Exceptions/app.exceptions";
 import * as crypto from "crypto";
-import { AppLogger } from "src/Logger/logger.service";
 
 @Injectable()
 export class TokenService {
   constructor(
     @InjectRepository(Token)
     private tokenRepository: Repository<Token>,
-    private readonly logger: AppLogger,
   ) {}
 
   async createToken(
