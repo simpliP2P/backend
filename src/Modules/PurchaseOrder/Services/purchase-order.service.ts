@@ -567,8 +567,6 @@ export class PurchaseOrderService {
       { organisationId: data.organisationId, poId: data.poId },
     );
 
-    this.logger.log(`Generated purchase order URL: ${currentClientHost}/purchase-orders/${data.poId}?x-resource-token=${token}`);
-
     return `${currentClientHost}/purchase-orders/${data.poId}?x-resource-token=${token}`;
   }
 

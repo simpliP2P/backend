@@ -35,12 +35,7 @@ export class TokenService {
     };
 
     const savedToken = await this.save(tokenData);
-
-    this.logger.log(JSON.stringify(savedToken));
-    this.logger.log(`token: ${token}`);
-    this.logger.log(`token match: ${savedToken.token === token}`);
-
-    return token;
+    return savedToken.token;
   }
 
   async verifyToken(token: string, type: TokenType): Promise<Token> {
