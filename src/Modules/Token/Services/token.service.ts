@@ -1,9 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { LessThan, MoreThanOrEqual, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { Token } from "../Entities/token.entity";
 import { TokenData, TokenType } from "../Enums/token.enum";
-import { InvalidTokenException } from "src/Shared/Exceptions/app.exceptions";
+import {
+  InvalidTokenException,
+  TokenExpiredException,
+} from "src/Shared/Exceptions/app.exceptions";
 import * as crypto from "crypto";
 import { AppLogger } from "src/Logger/logger.service";
 
@@ -31,7 +34,11 @@ export class TokenService {
       meta_data: metaData || null,
     };
 
-    await this.save(tokenData);
+    const savedToken = await this.save(tokenData);
+
+    this.logger.log(JSON.stringify(savedToken));
+    this.logger.log(`token: ${token}`);
+    this.logger.log(`token match: ${savedToken.token === token}`);
 
     return token;
   }
@@ -41,7 +48,6 @@ export class TokenService {
       where: {
         token,
         type,
-        expires_at: MoreThanOrEqual(new Date()),
       },
       relations: ["user"],
     });
@@ -50,12 +56,12 @@ export class TokenService {
       throw new InvalidTokenException();
     }
 
-    // Fire and forget cleanup
-    this.delete({
-      expires_at: LessThan(new Date()),
-    }).catch((err) => {
-      this.logger.error("Token cleanup failed:", err);
-    });
+    const now = new Date();
+    const expiresAt = new Date(storedToken.expires_at);
+
+    if (expiresAt < now) {
+      throw new TokenExpiredException();
+    }
 
     return storedToken;
   }

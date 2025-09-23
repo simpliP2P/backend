@@ -1,5 +1,6 @@
 import { Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { ScheduleModule } from "@nestjs/schedule";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { AuthModule } from "./Modules/User/Modules/auth.module";
@@ -19,6 +20,7 @@ import { PurchaseItemModule } from "./Modules/PurchaseItem/Modules/purchase-item
 import { FileManagerModule } from "./Modules/FileManager/Modules/file-manager.module";
 import { ExportModule } from "./Modules/ExportData/Modules/export.module";
 import { PurchaseOrderModule } from "./Modules/PurchaseOrder/Modules/purchase-order.module";
+import { TokenModule } from "./Modules/Token/token.module";
 import { SharedModule } from "./Shared/shared.module";
 // import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 
@@ -29,6 +31,7 @@ import { SharedModule } from "./Shared/shared.module";
       load: [configuration],
       cache: true,
     }),
+    ScheduleModule.forRoot(),
     // ThrottlerModule.forRoot({
     //   throttlers: [
     //     {
@@ -48,6 +51,7 @@ import { SharedModule } from "./Shared/shared.module";
     FileManagerModule,
     ExportModule,
     PurchaseOrderModule,
+    TokenModule,
   ],
   controllers: [AppController],
   providers: [
