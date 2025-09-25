@@ -33,6 +33,9 @@ export class TokenService {
     };
 
     const savedToken = await this.save(tokenData);
+
+    console.log(JSON.stringify(tokenData, null, 2));
+    console.log(`Created token: ${savedToken.token} for user: ${userId}`);
     return savedToken.token;
   }
 

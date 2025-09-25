@@ -567,7 +567,10 @@ export class PurchaseOrderService {
       { organisationId: data.organisationId, poId: data.poId },
     );
 
-    return `${currentClientHost}/purchase-orders/${data.poId}?x-resource-token=${token}`;
+    const url = `${currentClientHost}/purchase-orders/${data.poId}?x-resource-token=${token}`;
+    console.log(`po url: ${url}`);
+
+    return url;
   }
 
   private async notifySupplier(
