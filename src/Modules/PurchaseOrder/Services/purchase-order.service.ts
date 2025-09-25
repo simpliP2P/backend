@@ -173,6 +173,7 @@ export class PurchaseOrderService {
       const purchaseOrder = this.purchaseOrderRepository.create({
         ...purchaseOrderData,
         po_number,
+        sub_total: purchaseOrderData.total_amount,
         purchase_requisition: { id: data.request_id } as PurchaseRequisition,
         organisation: { id: organisationId } as Organisation,
         supplier: foundSupplier,
