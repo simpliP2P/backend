@@ -378,6 +378,8 @@ export class PurchaseOrderService {
         },
         created_by: {
           id: true,
+          first_name: true,
+          last_name: true,
         },
       },
     });
@@ -390,9 +392,36 @@ export class PurchaseOrderService {
       throw new BadRequestException("Supplier details not found");
     }
 
-    // update the product stock quantity
+    // Enhanced validation for approval
     if (status === PurchaseOrderStatus.APPROVED) {
+      this.logger.log(`Starting approval process for PO ${orderId}`);
+
+      // Validate all required data before proceeding
+      if (!order.created_by?.id) {
+        this.logger.error(`Critical: Missing created_by.id for PO ${orderId}`, {
+          order: {
+            id: orderId,
+            created_by: order.created_by,
+          },
+        });
+        throw new BadRequestException(
+          "Purchase order is missing creator information. Cannot generate supplier access token.",
+        );
+      }
+
+      if (!order.organisation?.id) {
+        throw new BadRequestException(
+          "Purchase order is missing organisation information",
+        );
+      }
+
+      this.logger.log(
+        `PO ${orderId} validation passed. Creator: ${order.created_by.id}, Org: ${order.organisation.id}`,
+      );
+
+      // Process approval with proper error handling
       await this.consumeBudgetAndNotifySupplier({ order });
+      this.logger.log(`PO ${orderId} approval process completed successfully`);
     }
 
     order.status = status;
@@ -401,6 +430,7 @@ export class PurchaseOrderService {
     const { purchase_requisition, ...updatedOrder } =
       await this.purchaseOrderRepository.save(order);
 
+    this.logger.log(`PO ${orderId} status updated to ${status}`);
     return updatedOrder;
   }
 
@@ -473,9 +503,20 @@ export class PurchaseOrderService {
       total_amount,
       supplier,
       organisation,
-      created_by: { id: creatorId },
+      created_by,
     } = order;
 
+    // Validate created_by exists and has an ID
+    if (!created_by?.id) {
+      this.logger.error(`Missing created_by data for PO ${poId}:`, {
+        order: { id: poId, created_by },
+      });
+      throw new BadRequestException(
+        "Creator information is missing from purchase order",
+      );
+    }
+
+    const creatorId = created_by.id;
     const budgetId = purchase_requisition.budget?.id;
     const organisationId = organisation.id;
 
@@ -485,30 +526,50 @@ export class PurchaseOrderService {
       );
     }
 
-    this.budgetService.consumeReservedAmount(
-      organisationId,
-      budgetId,
-      total_amount,
-    );
+    try {
+      // Execute budget consumption first
+      await this.budgetService.consumeReservedAmount(
+        organisationId,
+        budgetId,
+        total_amount,
+      );
+      this.logger.log(`Budget consumed successfully for PO ${poId}`);
 
-    const poUrl = await this.genPurchaseOrderUrl({
-      creatorId,
-      organisationId,
-      poId,
-    });
+      // Generate PO URL with token - this is critical for supplier access
+      const poUrl = await this.genPurchaseOrderUrl({
+        creatorId,
+        organisationId,
+        poId,
+      });
 
-    const notificationData: INotificationData = {
-      organisationName: organisation.name,
-      supplier: {
-        name: supplier.full_name,
-        email: supplier.email,
-        phone: supplier.phone,
-      },
-      poUrl,
-    };
+      const notificationData: INotificationData = {
+        organisationName: organisation.name,
+        supplier: {
+          name: supplier.full_name,
+          email: supplier.email,
+          phone: supplier.phone,
+        },
+        poUrl,
+      };
 
-    // notify supplier
-    this.notifySupplier(supplier.notification_channel, notificationData);
+      // Notify supplier - make this fire-and-forget since URL generation succeeded
+      this.notifySupplier(
+        supplier.notification_channel,
+        notificationData,
+      ).catch((notificationError) => {
+        this.logger.error(
+          `Failed to notify supplier for PO ${poId}:`,
+          notificationError,
+        );
+        // Don't throw here - URL generation succeeded, notification failure shouldn't break the flow
+      });
+    } catch (error) {
+      this.logger.error(
+        `Critical error in PO approval process for ${poId}:`,
+        error,
+      );
+      throw error; // Re-throw to ensure PO approval fails if token generation fails
+    }
   }
 
   private async generatePoNumber(organisationId: string): Promise<string> {
@@ -555,22 +616,49 @@ export class PurchaseOrderService {
     organisationId: string;
     poId: string;
   }): Promise<string> {
-    const currentClientHost = this.clientHelper.getCurrentClient().landingPage;
+    try {
+      // Validate required data
+      if (!data.creatorId) {
+        throw new Error("Creator ID is required for token generation");
+      }
+      if (!data.organisationId) {
+        throw new Error("Organisation ID is required for token generation");
+      }
+      if (!data.poId) {
+        throw new Error("PO ID is required for token generation");
+      }
 
-    const validFor = 30 * 24 * 60; // 30 days in minutes
+      const currentClientHost =
+        this.clientHelper.getCurrentClient().landingPage;
+      const validFor = 30 * 24 * 60; // 30 days in minutes
 
-    // generate resource token
-    const token = await this.tokenService.createToken(
-      data.creatorId, // use creatorId as userId
-      TokenType.RESOURCE_TOKEN,
-      validFor,
-      { organisationId: data.organisationId, poId: data.poId },
-    );
+      this.logger.log(
+        `Creating token for PO ${data.poId}, Creator: ${data.creatorId}, Org: ${data.organisationId}`,
+      );
 
-    const url = `${currentClientHost}/purchase-orders/${data.poId}?x-resource-token=${token}`;
-    console.log(`po url: ${url}`);
+      // Generate resource token with proper error handling
+      const token = await this.tokenService.createToken(
+        data.creatorId,
+        TokenType.RESOURCE_TOKEN,
+        validFor,
+        { organisationId: data.organisationId, poId: data.poId },
+      );
 
-    return url;
+      if (!token) {
+        throw new Error("Token creation returned empty result");
+      }
+
+      const url = `${currentClientHost}/purchase-orders/${data.poId}?x-resource-token=${token}`;
+      this.logger.log(`Generated PO URL successfully: ${url}`);
+
+      return url;
+    } catch (error) {
+      this.logger.error(
+        `Failed to generate PO URL for PO ${data.poId}:`,
+        error,
+      );
+      throw new Error(`Token generation failed: ${error.message}`);
+    }
   }
 
   private async notifySupplier(

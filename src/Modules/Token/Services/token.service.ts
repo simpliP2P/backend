@@ -8,9 +8,12 @@ import {
   TokenExpiredException,
 } from "src/Shared/Exceptions/app.exceptions";
 import * as crypto from "crypto";
+import { Logger } from "@nestjs/common";
 
 @Injectable()
 export class TokenService {
+  private readonly logger = new Logger(TokenService.name);
+
   constructor(
     @InjectRepository(Token)
     private tokenRepository: Repository<Token>,
@@ -22,21 +25,45 @@ export class TokenService {
     mins?: number,
     metaData?: any,
   ): Promise<string> {
-    const token = crypto.randomBytes(40).toString("hex");
+    try {
+      // Validate input
+      if (!userId) {
+        throw new Error("User ID is required for token creation");
+      }
+      if (!type) {
+        throw new Error("Token type is required");
+      }
 
-    const tokenData = {
-      token,
-      type,
-      expires_at: new Date(Date.now() + (mins || 15) * 60 * 1000), // 15 minutes
-      user_id: userId,
-      meta_data: metaData || null,
-    };
+      const token = crypto.randomBytes(40).toString("hex");
+      const expirationMinutes = mins || 15;
 
-    const savedToken = await this.save(tokenData);
+      const tokenData = {
+        token,
+        type,
+        expires_at: new Date(Date.now() + expirationMinutes * 60 * 1000),
+        user_id: userId,
+        meta_data: metaData || null,
+      };
 
-    console.log(JSON.stringify(tokenData, null, 2));
-    console.log(`Created token: ${savedToken.token} for user: ${userId}`);
-    return savedToken.token;
+      this.logger.log(
+        `Creating token for user ${userId}, type: ${type}, expires in ${expirationMinutes} minutes`,
+      );
+      this.logger.debug("Token data:", JSON.stringify(tokenData, null, 2));
+
+      const savedToken = await this.save(tokenData);
+
+      if (!savedToken || !savedToken.token) {
+        throw new Error("Token save operation returned invalid result");
+      }
+
+      this.logger.log(
+        `✅ Token created successfully: ${savedToken.token} for user: ${userId}`,
+      );
+      return savedToken.token;
+    } catch (error) {
+      this.logger.error(`❌ Token creation failed for user ${userId}:`, error);
+      throw new Error(`Token creation failed: ${error.message}`);
+    }
   }
 
   async verifyToken(token: string, type: TokenType): Promise<Token> {
