@@ -18,6 +18,9 @@ export class PurchaseOrder extends BaseEntity {
   total_items: number;
 
   @Column("decimal", { precision: 10, scale: 2 })
+  sub_total: number;
+
+  @Column("decimal", { precision: 10, scale: 2 })
   total_amount: number;
 
   @Column({ default: "NGN" })
