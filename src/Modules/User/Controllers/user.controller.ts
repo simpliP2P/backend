@@ -51,7 +51,7 @@ export class UserController {
     FileInterceptor("file", {
       limits: { fileSize: 0.1 * 1024 * 1024 }, // max: approx. 100KB
       fileFilter: (_, file, callback) => {
-        if (!file.mimetype.match(/image\/(jpeg|png|jpg)$/)) {
+        if (!file.mimetype.match(/image\/(jpeg|png|jpg|webp|heic)$/)) {
           return callback(new BadRequestException("Invalid file type"), false);
         }
         callback(null, true);
