@@ -17,7 +17,7 @@ export class Comment extends BaseEntity {
   @Column("text")
   text: string;
 
-  @ManyToOne(() => Organisation)
+  @ManyToOne(() => Organisation, { onDelete: "CASCADE" })
   organisation: Organisation;
 
   @ManyToOne(() => User)

@@ -14,7 +14,9 @@ export class AuditLog {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Organisation, (org) => org.userOrganisations)
+  @ManyToOne(() => Organisation, (org) => org.userOrganisations, {
+    onDelete: "CASCADE",
+  })
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
 

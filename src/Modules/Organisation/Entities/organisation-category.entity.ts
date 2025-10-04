@@ -10,7 +10,9 @@ export class OrganisationCategory extends BaseEntity {
   @Column({ type: "timestamp", nullable: true, default: null })
   deactivated_at: Date | null;
 
-  @ManyToOne(() => Organisation, (org) => org.categories)
+  @ManyToOne(() => Organisation, (org) => org.categories, {
+    onDelete: "CASCADE",
+  })
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
 }

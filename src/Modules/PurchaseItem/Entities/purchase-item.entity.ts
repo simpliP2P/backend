@@ -11,6 +11,7 @@ import { Supplier } from "src/Modules/Supplier/Entities/supplier.entity";
 @Entity("purchase_items")
 @Unique("unique_item_per_org_pr", [
   "item_name",
+  "description",
   "organisation",
   "purchase_requisition",
 ])
@@ -32,6 +33,9 @@ export class PurchaseItem extends BaseEntity {
   @Column({ type: "varchar" }) // For items not in inventory
   item_name: string;
 
+  @Column({ type: "text", default: "" }) // For items not in inventory
+  description: string;
+
   @Column({ type: "decimal", precision: 10, scale: 2 }) // For items not in inventory
   unit_price: number;
 
@@ -51,7 +55,9 @@ export class PurchaseItem extends BaseEntity {
   @Column({ type: "varchar", default: PurchaseItemStatus.PENDING })
   status: PurchaseItemStatus;
 
-  @ManyToOne(() => Organisation, (org) => org.purchaseRequisitions)
+  @ManyToOne(() => Organisation, (org) => org.purchaseRequisitions, {
+    onDelete: "CASCADE",
+  })
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
 

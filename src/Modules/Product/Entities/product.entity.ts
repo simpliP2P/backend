@@ -50,7 +50,7 @@ export class Product extends BaseEntity {
   @Column({ nullable: true })
   image_url: string;
 
-  @ManyToOne(() => Organisation, (org) => org.products)
+  @ManyToOne(() => Organisation, (org) => org.products, { onDelete: "CASCADE" })
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
 

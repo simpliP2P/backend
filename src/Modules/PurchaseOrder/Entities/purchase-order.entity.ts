@@ -51,7 +51,9 @@ export class PurchaseOrder extends BaseEntity {
   })
   vat: number;
 
-  @ManyToOne(() => Organisation, (org) => org.purchaseOrders)
+  @ManyToOne(() => Organisation, (org) => org.purchaseOrders, {
+    onDelete: "CASCADE",
+  })
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
 

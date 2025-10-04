@@ -40,7 +40,7 @@ export class Budget extends BaseEntity {
   @Column({ default: true })
   active: boolean;
 
-  @ManyToOne(() => Organisation, { nullable: true })
+  @ManyToOne(() => Organisation, { nullable: true, onDelete: "CASCADE" })
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
 

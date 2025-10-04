@@ -74,7 +74,9 @@ export class PurchaseRequisition extends BaseEntity {
   @JoinColumn({ name: "supplier_id" })
   supplier: Supplier;
 
-  @ManyToOne(() => Organisation, (org) => org.purchaseRequisitions)
+  @ManyToOne(() => Organisation, (org) => org.purchaseRequisitions, {
+    onDelete: "CASCADE",
+  })
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
 

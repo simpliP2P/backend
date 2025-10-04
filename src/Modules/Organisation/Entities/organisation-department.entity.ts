@@ -32,7 +32,9 @@ export class OrganisationDepartment extends BaseEntity {
   @Column({ nullable: true })
   description: string;
 
-  @ManyToOne(() => Organisation, (org) => org.departments)
+  @ManyToOne(() => Organisation, (org) => org.departments, {
+    onDelete: "CASCADE",
+  })
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
 

@@ -11,7 +11,7 @@ export class OrganisationBranch extends BaseEntity {
   @Column({ type: "varchar" })
   address: string;
 
-  @ManyToOne(() => Organisation, (org) => org.branches)
+  @ManyToOne(() => Organisation, (org) => org.branches, { onDelete: "CASCADE" })
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
 
