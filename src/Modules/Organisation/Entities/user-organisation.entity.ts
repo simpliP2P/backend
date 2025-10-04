@@ -7,7 +7,9 @@ import { OrganisationDepartment } from "./organisation-department.entity";
 
 @Entity("user_organisations")
 export class UserOrganisation extends BaseEntity {
-  @ManyToOne(() => User, (user) => user.userOrganisations)
+  @ManyToOne(() => User, (user) => user.userOrganisations, {
+    onDelete: "CASCADE",
+  })
   @JoinColumn({ name: "user_id" })
   user: User;
 
@@ -23,13 +25,16 @@ export class UserOrganisation extends BaseEntity {
   @Column({ type: "text", array: true, nullable: true })
   permissions: string[];
 
-  @ManyToOne(() => OrganisationBranch, (branch) => branch.userOrganisations)
+  @ManyToOne(() => OrganisationBranch, (branch) => branch.userOrganisations, {
+    onDelete: "SET NULL",
+  })
   @JoinColumn({ name: "branch_id" })
   branch: OrganisationBranch;
 
   @ManyToOne(
     () => OrganisationDepartment,
     (department) => department.userOrganisations,
+    { onDelete: "SET NULL" },
   )
   @JoinColumn({ name: "department_id" })
   department: OrganisationDepartment;

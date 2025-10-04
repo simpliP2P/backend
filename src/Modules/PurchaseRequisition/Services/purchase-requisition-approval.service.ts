@@ -66,7 +66,6 @@ export class PurchaseRequisitionApprovalService {
     const isActionApproveAndCreatePO =
       approvalData.action_type === PRApprovalActionType.APPROVE_AND_CREATE_PO;
     if (isActionApproveAndCreatePO) {
-      console.log(`Creating POs for requisition ${requisitionId}`);
       this.createPurchaseOrdersFromRequisition(organisationId, requisitionId);
     }
 

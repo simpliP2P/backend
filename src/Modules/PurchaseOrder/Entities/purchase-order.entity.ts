@@ -57,7 +57,9 @@ export class PurchaseOrder extends BaseEntity {
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
 
-  @ManyToOne(() => Supplier, (supplier) => supplier.purchaseOrders)
+  @ManyToOne(() => Supplier, (supplier) => supplier.purchaseOrders, {
+    onDelete: "SET NULL",
+  })
   @JoinColumn({ name: "supplier_id" })
   supplier: Supplier;
 
@@ -67,11 +69,13 @@ export class PurchaseOrder extends BaseEntity {
   @OneToMany(() => Comment, (comment) => comment.entity_id)
   comments: Comment[];
 
-  @ManyToOne(() => User, (user) => user.purchaseRequisitions)
+  @ManyToOne(() => User, (user) => user.purchaseRequisitions, {
+    onDelete: "SET NULL",
+  })
   @JoinColumn({ name: "created_by" })
   created_by: User;
 
-  @ManyToOne(() => PurchaseRequisition, { nullable: true })
+  @ManyToOne(() => PurchaseRequisition, { nullable: true, onDelete: "CASCADE" })
   @JoinColumn({ name: "pr_id" })
   purchase_requisition: PurchaseRequisition;
 }

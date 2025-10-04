@@ -24,7 +24,7 @@ export class OrganisationDepartment extends BaseEntity {
   @Column({ nullable: true })
   department_code: string;
 
-  @OneToOne(() => User, { nullable: true })
+  @OneToOne(() => User, { nullable: true, onDelete: "SET NULL" })
   @JoinColumn({ name: "head_of_department_id" })
   head_of_department: User | null;
 
@@ -38,7 +38,7 @@ export class OrganisationDepartment extends BaseEntity {
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
 
-  @ManyToOne(() => OrganisationBranch)
+  @ManyToOne(() => OrganisationBranch, { onDelete: "SET NULL" })
   @JoinColumn({ name: "branch_id" })
   branch: OrganisationBranch;
 

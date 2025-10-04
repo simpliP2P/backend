@@ -20,7 +20,9 @@ export class AuditLog {
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
 
-  @ManyToOne(() => User, (user) => user.userOrganisations)
+  @ManyToOne(() => User, (user) => user.userOrganisations, {
+    onDelete: "SET NULL",
+  })
   @JoinColumn({ name: "user_id" })
   user: User;
 

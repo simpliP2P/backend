@@ -26,7 +26,7 @@ export class Supplier extends BaseEntity {
   @Column({ type: "jsonb", nullable: true })
   address: Address;
 
-  @ManyToOne(() => OrganisationCategory)
+  @ManyToOne(() => OrganisationCategory, { onDelete: "SET NULL" })
   @JoinColumn({ name: "category_id" })
   category: OrganisationCategory;
 

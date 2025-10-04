@@ -17,12 +17,15 @@ import { Supplier } from "src/Modules/Supplier/Entities/supplier.entity";
 ])
 export class PurchaseItem extends BaseEntity {
   @ManyToOne(() => PurchaseRequisition, (pr) => pr.items, {
-    onDelete: "RESTRICT",
+    onDelete: "CASCADE",
   })
   @JoinColumn({ name: "purchase_requisition_id" })
   purchase_requisition: PurchaseRequisition;
 
-  @ManyToOne(() => PurchaseOrder, (po) => po.items, { nullable: true })
+  @ManyToOne(() => PurchaseOrder, (po) => po.items, {
+    nullable: true,
+    onDelete: "SET NULL",
+  })
   @JoinColumn({ name: "purchase_order_id" })
   purchase_order: PurchaseOrder;
 
@@ -61,7 +64,7 @@ export class PurchaseItem extends BaseEntity {
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
 
-  @ManyToOne(() => Supplier, { nullable: true })
+  @ManyToOne(() => Supplier, { nullable: true, onDelete: "SET NULL" })
   @JoinColumn({ name: "supplier_id" })
   supplier: Supplier;
 }

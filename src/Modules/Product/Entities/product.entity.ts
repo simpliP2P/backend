@@ -39,7 +39,7 @@ export class Product extends BaseEntity {
   @Column({ name: "unit_of_measure", nullable: true })
   unitOfMeasure: string;
 
-  @ManyToOne(() => OrganisationCategory)
+  @ManyToOne(() => OrganisationCategory, { onDelete: "SET NULL" })
   @JoinColumn({ name: "category_id" })
   category: OrganisationCategory;
 

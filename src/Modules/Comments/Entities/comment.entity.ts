@@ -20,7 +20,7 @@ export class Comment extends BaseEntity {
   @ManyToOne(() => Organisation, { onDelete: "CASCADE" })
   organisation: Organisation;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: "SET NULL" })
   @JoinColumn({ name: "created_by" })
   created_by: User;
 }

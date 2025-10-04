@@ -15,7 +15,7 @@ export class PurchaseRequisition extends BaseEntity {
   @Column()
   pr_number: string;
 
-  @ManyToOne(() => OrganisationDepartment)
+  @ManyToOne(() => OrganisationDepartment, { onDelete: "SET NULL" })
   @JoinColumn({ name: "department_id" })
   department: OrganisationDepartment;
 
@@ -50,7 +50,7 @@ export class PurchaseRequisition extends BaseEntity {
   })
   status: PurchaseRequisitionStatus;
 
-  @ManyToOne(() => User, { nullable: true })
+  @ManyToOne(() => User, { nullable: true, onDelete: "SET NULL" })
   @JoinColumn({ name: "approved_by" })
   approved_by: User;
 
@@ -66,11 +66,13 @@ export class PurchaseRequisition extends BaseEntity {
   @Column({ default: "NGN" })
   currency: string;
 
-  @ManyToOne(() => Budget, { nullable: true })
+  @ManyToOne(() => Budget, { nullable: true, onDelete: "SET NULL" })
   @JoinColumn({ name: "budget_id" })
   budget: Budget;
 
-  @ManyToOne(() => Supplier, (supplier) => supplier.purchaseOrders)
+  @ManyToOne(() => Supplier, (supplier) => supplier.purchaseOrders, {
+    onDelete: "SET NULL",
+  })
   @JoinColumn({ name: "supplier_id" })
   supplier: Supplier;
 
@@ -80,11 +82,13 @@ export class PurchaseRequisition extends BaseEntity {
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
 
-  @ManyToOne(() => OrganisationBranch)
+  @ManyToOne(() => OrganisationBranch, { onDelete: "SET NULL" })
   @JoinColumn({ name: "branch_id" })
   branch: OrganisationBranch;
 
-  @ManyToOne(() => User, (user) => user.purchaseRequisitions)
+  @ManyToOne(() => User, (user) => user.purchaseRequisitions, {
+    onDelete: "SET NULL",
+  })
   @JoinColumn({ name: "created_by" })
   created_by: User;
 

@@ -44,15 +44,21 @@ export class Budget extends BaseEntity {
   @JoinColumn({ name: "organisation_id" })
   organisation: Organisation;
 
-  @ManyToOne(() => OrganisationCategory, { nullable: true })
+  @ManyToOne(() => OrganisationCategory, {
+    nullable: true,
+    onDelete: "SET NULL",
+  })
   @JoinColumn({ name: "category_id" })
   category: OrganisationCategory;
 
-  @ManyToOne(() => OrganisationBranch, { nullable: true })
+  @ManyToOne(() => OrganisationBranch, { nullable: true, onDelete: "SET NULL" })
   @JoinColumn({ name: "branch_id" })
   branch: OrganisationBranch;
 
-  @ManyToOne(() => OrganisationDepartment, { nullable: true })
+  @ManyToOne(() => OrganisationDepartment, {
+    nullable: true,
+    onDelete: "SET NULL",
+  })
   @JoinColumn({ name: "department_id" })
   department: OrganisationDepartment;
 

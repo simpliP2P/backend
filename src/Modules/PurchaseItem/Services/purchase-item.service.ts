@@ -48,6 +48,7 @@ export class PurchaseItemService {
         `
         INSERT INTO purchase_items (
           item_name,
+          description,
           unit_price,
           pr_quantity,
           currency,
@@ -56,11 +57,12 @@ export class PurchaseItemService {
           product_id,
           purchase_order_id,
           organisation_id
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-        RETURNING id, item_name, unit_price, pr_quantity;
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        RETURNING id, item_name, description, unit_price, pr_quantity;
         `,
         [
           data.item_name,
+          data.description,
           data.unit_price,
           data.pr_quantity,
           data.currency || "NGN",
