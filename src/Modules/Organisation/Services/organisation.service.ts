@@ -570,7 +570,7 @@ export class OrganisationService {
     const token = await this.tokenService.createToken(
       userId,
       TokenType.ORG_INVITATION,
-      60, // 1 hour
+      7 * 24 * 60, // 7 days
     );
     const currentClientHost = this.clientHelper.getCurrentClient().landingPage;
     const invitationLink = `${currentClientHost}/organisation/${orgId}?invite=${token}`;
