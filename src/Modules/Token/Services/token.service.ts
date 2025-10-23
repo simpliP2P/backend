@@ -82,7 +82,8 @@ export class TokenService {
     const now = new Date();
     const expiresAt = new Date(storedToken.expires_at);
 
-    if (expiresAt < now) {
+    const IsResourceToken = type === TokenType.RESOURCE_TOKEN;
+    if (!IsResourceToken && expiresAt < now) {
       throw new TokenExpiredException();
     }
 
