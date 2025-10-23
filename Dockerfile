@@ -1,23 +1,36 @@
-# Use the official Node.js image as a base
-FROM node:23
+# Use Alpine for smaller image size
+FROM node:23-alpine AS builder
 
-# Set the working directory
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json
+# Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies (including devDependencies for build)
+RUN npm ci
 
-# Copy the rest of the application code
+# Copy source code
 COPY . .
 
-# Build the NestJS application
+# Build the application
 RUN npm run build
 
-# Expose the port your app runs on
+# Production stage
+FROM node:23-alpine
+
+WORKDIR /usr/src/app
+
+# Copy package files
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy built application from builder
+COPY --from=builder /usr/src/app/dist ./dist
+
+# Expose port
 EXPOSE 8080
 
-# Start the application
-CMD ["npm", "run", "start:prod"]
+# Use node directly instead of npm (faster, better signal handling)
+CMD ["node", "dist/main"]
