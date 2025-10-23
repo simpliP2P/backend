@@ -71,9 +71,18 @@ async function bootstrap() {
     }),
   );
 
+  // Enable graceful shutdown
+  app.enableShutdownHooks();
+
   const port = configService.getOrThrow<number>("port") || 3000;
   await app.listen(port);
   logger.log(`Application is running on PORT: ${port}`);
+
+  // Handle SIGTERM
+  process.on("SIGTERM", async () => {
+    console.log("SIGTERM received, closing server gracefully...");
+    await app.close();
+  });
 }
 
 bootstrap();
