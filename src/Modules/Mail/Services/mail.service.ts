@@ -162,7 +162,7 @@ export class EmailServices {
     templateName: string,
     data: object,
   ) {
-    const templatesDir = join(process.cwd(), "templates");
+    const templatesDir = join(__dirname, "..", "..", "..", "templates");
     const filePath = join(templatesDir, `${templateName}.html`);
 
     if (!existsSync(filePath)) {
