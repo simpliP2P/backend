@@ -162,10 +162,8 @@ export class EmailServices {
     templateName: string,
     data: object,
   ) {
-    const templatesDir = join(process.cwd(), "src", "templates");
+    const templatesDir = join(process.cwd(), "templates");
     const filePath = join(templatesDir, `${templateName}.html`);
-
-    console.log("template dir:", templatesDir);
 
     if (!existsSync(filePath)) {
       throw new Error(

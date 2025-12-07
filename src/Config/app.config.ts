@@ -10,6 +10,7 @@ export default () => ({
     username: process.env.PG_USERNAME,
     password: process.env.PG_PASSWORD,
     name: process.env.PG_DBNAME,
+    // ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : false,
   },
   tokenSecrets: {
     accessToken: {
