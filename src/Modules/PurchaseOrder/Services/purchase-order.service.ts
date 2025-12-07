@@ -631,7 +631,7 @@ export class PurchaseOrderService {
 
       const currentClientHost =
         this.clientHelper.getCurrentClient().landingPage;
-      const validFor = 30 * 24 * 60; // 30 days in minutes
+      const validFor = 183 * 24 * 60; // 6-months
 
       this.logger.log(
         `Creating token for PO ${data.poId}, Creator: ${data.creatorId}, Org: ${data.organisationId}`,

@@ -39,23 +39,28 @@ export class UserService {
   public async createLocalAccount(
     data: CreateLocalAccountInput,
   ): Promise<User> {
-    const existingUser = await this.findAccount({
-      where: { email: data.email },
-    });
+    try {
+      const existingUser = await this.findAccount({
+        where: { email: data.email },
+      });
 
-    if (existingUser) {
-      throw new EmailExistsException();
+      if (existingUser) {
+        throw new EmailExistsException();
+      }
+
+      const hashedPassword = await hash(data.password, 10);
+
+      const user = this.userRepository.create({
+        ...data,
+        password_hash: hashedPassword,
+      });
+
+      const createdAccount = await this.userRepository.save(user);
+      return createdAccount;
+    } catch (error) {
+      console.log(error)
+      throw error;
     }
-
-    const hashedPassword = await hash(data.password, 10);
-
-    const user = this.userRepository.create({
-      ...data,
-      password_hash: hashedPassword,
-    });
-
-    const createdAccount = await this.userRepository.save(user);
-    return createdAccount;
   }
 
   public async createGoogleAccount(
