@@ -36,7 +36,7 @@ export class PurchaseItem extends BaseEntity {
   @Column({ type: "varchar" }) // For items not in inventory
   item_name: string;
 
-  @Column({ type: "text", default: "" }) // For items not in inventory
+  @Column({ type: "text", default: "N/A" }) // For items not in inventory
   description: string;
 
   @Column({ type: "decimal", precision: 10, scale: 2 }) // For items not in inventory
