@@ -26,8 +26,8 @@ export class PurchaseItemDto {
   item_name: string;
 
   @IsString()
-  @IsOptional()
-  description?: string;
+  // @IsOptional()
+  description: string;
 
   @IsInt()
   @Min(1)
